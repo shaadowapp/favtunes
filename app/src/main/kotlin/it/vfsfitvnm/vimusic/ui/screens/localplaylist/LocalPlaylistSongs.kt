@@ -1,12 +1,17 @@
 package it.vfsfitvnm.vimusic.ui.screens.localplaylist
 
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -15,15 +20,22 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.PlaylistPlay
 import androidx.compose.material.icons.outlined.DragHandle
+import androidx.compose.material.icons.outlined.PlaylistRemove
 import androidx.compose.material.icons.outlined.Shuffle
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SmallFloatingActionButton
+import androidx.compose.material3.SwipeToDismissBox
+import androidx.compose.material3.SwipeToDismissBoxValue
+import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import it.vfsfitvnm.compose.reordering.draggedItem
@@ -35,7 +47,9 @@ import it.vfsfitvnm.vimusic.R
 import it.vfsfitvnm.vimusic.models.LocalMenuState
 import it.vfsfitvnm.vimusic.models.PlaylistWithSongs
 import it.vfsfitvnm.vimusic.models.Song
+import it.vfsfitvnm.vimusic.models.SongPlaylistMap
 import it.vfsfitvnm.vimusic.query
+import it.vfsfitvnm.vimusic.transaction
 import it.vfsfitvnm.vimusic.ui.components.PlaylistThumbnail
 import it.vfsfitvnm.vimusic.ui.components.themed.InPlaylistMediaItemMenu
 import it.vfsfitvnm.vimusic.ui.items.LocalSongItem
@@ -44,6 +58,7 @@ import it.vfsfitvnm.vimusic.utils.enqueue
 import it.vfsfitvnm.vimusic.utils.forcePlayAtIndex
 import it.vfsfitvnm.vimusic.utils.forcePlayFromBeginning
 
+@OptIn(ExperimentalMaterial3Api::class)
 @ExperimentalAnimationApi
 @ExperimentalFoundationApi
 @Composable
@@ -56,9 +71,8 @@ fun LocalPlaylistSongs(
     val binder = LocalPlayerServiceBinder.current
     val menuState = LocalMenuState.current
 
-    val lazyListState = rememberLazyListState()
     val reorderingState = rememberReorderingState(
-        lazyListState = lazyListState,
+        lazyListState = rememberLazyListState(),
         key = playlistWithSongs?.songs ?: emptyList<Any>(),
         onDragEnd = { fromIndex, toIndex ->
             query {
@@ -129,52 +143,91 @@ fun LocalPlaylistSongs(
             key = { _, song -> song.id },
             contentType = { _, song -> song },
         ) { index, song ->
-            LocalSongItem(
-                modifier = Modifier
-                    .draggedItem(
-                        reorderingState = reorderingState,
-                        index = index
-                    ),
-                song = song,
-                onClick = {
-                    playlistWithSongs?.songs
-                        ?.map(Song::asMediaItem)
-                        ?.let { mediaItems ->
-                            binder?.stopRadio()
-                            binder?.player?.forcePlayAtIndex(
-                                mediaItems,
-                                index
-                            )
-                        }
-                },
-                onLongClick = {
-                    menuState.display {
-                        InPlaylistMediaItemMenu(
-                            playlistId = playlistId,
-                            positionInPlaylist = index,
-                            song = song,
-                            onDismiss = menuState::hide,
-                            onGoToAlbum = onGoToAlbum,
-                            onGoToArtist = onGoToArtist
-                        )
+            val dismissState = rememberSwipeToDismissBoxState(
+                confirmValueChange = { value ->
+                    if (value == SwipeToDismissBoxValue.EndToStart) transaction {
+                        Database.move(playlistId, index, Int.MAX_VALUE)
+                        Database.delete(SongPlaylistMap(song.id, playlistId, Int.MAX_VALUE))
                     }
-                },
-                trailingContent = {
-                    IconButton(
-                        onClick = {},
-                        modifier = Modifier
-                            .reorder(
-                                reorderingState = reorderingState,
-                                index = index
-                            )
-                    ) {
-                        Icon(
-                            imageVector = Icons.Outlined.DragHandle,
-                            contentDescription = null,
-                        )
-                    }
+
+                    return@rememberSwipeToDismissBoxState false
                 }
             )
+
+            SwipeToDismissBox(
+                state = dismissState,
+                backgroundContent = {
+                    val color by animateColorAsState(
+                        targetValue = if (dismissState.targetValue == SwipeToDismissBoxValue.EndToStart) MaterialTheme.colorScheme.errorContainer else Color.Transparent,
+                        label = "background"
+                    )
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(color)
+                            .padding(horizontal = 16.dp),
+                        horizontalArrangement = Arrangement.End,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        if (dismissState.targetValue == SwipeToDismissBoxValue.EndToStart) {
+                            Icon(
+                                imageVector = Icons.Outlined.PlaylistRemove,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onErrorContainer
+                            )
+                        }
+                    }
+                },
+                enableDismissFromStartToEnd = false
+            ) {
+                LocalSongItem(
+                    modifier = Modifier
+                        .draggedItem(
+                            reorderingState = reorderingState,
+                            index = index
+                        ),
+                    song = song,
+                    onClick = {
+                        playlistWithSongs?.songs
+                            ?.map(Song::asMediaItem)
+                            ?.let { mediaItems ->
+                                binder?.stopRadio()
+                                binder?.player?.forcePlayAtIndex(
+                                    mediaItems,
+                                    index
+                                )
+                            }
+                    },
+                    onLongClick = {
+                        menuState.display {
+                            InPlaylistMediaItemMenu(
+                                playlistId = playlistId,
+                                positionInPlaylist = index,
+                                song = song,
+                                onDismiss = menuState::hide,
+                                onGoToAlbum = onGoToAlbum,
+                                onGoToArtist = onGoToArtist
+                            )
+                        }
+                    },
+                    trailingContent = {
+                        IconButton(
+                            onClick = {},
+                            modifier = Modifier
+                                .reorder(
+                                    reorderingState = reorderingState,
+                                    index = index
+                                )
+                        ) {
+                            Icon(
+                                imageVector = Icons.Outlined.DragHandle,
+                                contentDescription = null,
+                            )
+                        }
+                    }
+                )
+            }
         }
     }
 }
