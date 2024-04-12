@@ -55,10 +55,10 @@ fun Navigation(
     NavHost(
         navController = navController,
         startDestination = "home",
-        enterTransition = { slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Up) + fadeIn() },
+        enterTransition = { slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Left) + fadeIn() },
         exitTransition = { fadeOut() },
-        popEnterTransition = { fadeIn() },
-        popExitTransition = { slideOutOfContainer(AnimatedContentTransitionScope.SlideDirection.Down) + fadeOut() }
+        popEnterTransition = { slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Right) + fadeIn() },
+        popExitTransition = { fadeOut() }
     ) {
         val navigateToAlbum =
             { browseId: String -> navController.navigate(route = "album/$browseId") }
