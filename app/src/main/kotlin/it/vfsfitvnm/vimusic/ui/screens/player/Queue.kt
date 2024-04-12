@@ -169,14 +169,14 @@ fun Queue(
                             }
                         }
                     },
+                    modifier = Modifier.draggedItem(
+                        reorderingState = reorderingState,
+                        index = window.firstPeriodIndex
+                    ),
                     enableDismissFromStartToEnd = false,
                     enableDismissFromEndToStart = !isPlayingThisMediaItem
                 ) {
                     MediaSongItem(
-                        modifier = Modifier.draggedItem(
-                            reorderingState = reorderingState,
-                            index = window.firstPeriodIndex
-                        ),
                         song = window.mediaItem,
                         onClick = {
                             if (isPlayingThisMediaItem) {

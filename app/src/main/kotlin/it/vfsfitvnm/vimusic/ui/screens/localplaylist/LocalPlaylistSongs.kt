@@ -179,14 +179,14 @@ fun LocalPlaylistSongs(
                         }
                     }
                 },
+                modifier = Modifier
+                    .draggedItem(
+                        reorderingState = reorderingState,
+                        index = index
+                    ),
                 enableDismissFromStartToEnd = false
             ) {
                 LocalSongItem(
-                    modifier = Modifier
-                        .draggedItem(
-                            reorderingState = reorderingState,
-                            index = index
-                        ),
                     song = song,
                     onClick = {
                         playlistWithSongs?.songs
