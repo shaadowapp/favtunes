@@ -3,6 +3,7 @@ package it.vfsfitvnm.vimusic.ui.screens.album
 import android.content.Intent
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.filled.Bookmark
@@ -15,10 +16,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
@@ -55,12 +54,17 @@ fun AlbumScreen(
     val saveableStateHolder = rememberSaveableStateHolder()
     var album: Album? by remember { mutableStateOf(null) }
     var albumPage: Innertube.PlaylistOrAlbumPage? by remember { mutableStateOf(null) }
-    var tabIndex by rememberSaveable { mutableIntStateOf(0) }
+
+    val tabs = listOf(
+        Section(stringResource(id = R.string.songs), Icons.Outlined.MusicNote),
+        Section(stringResource(id = R.string.other_versions), Icons.Outlined.Album)
+    )
+    val pagerState = rememberPagerState(pageCount = { tabs.size })
 
     LaunchedEffect(Unit) {
         Database
             .album(browseId)
-            .combine(snapshotFlow { tabIndex }) { album, tabIndex -> album to tabIndex }
+            .combine(snapshotFlow { pagerState.pageCount }) { album, tabIndex -> album to tabIndex }
             .collect { (currentAlbum, tabIndex) ->
                 album = currentAlbum
 
@@ -107,6 +111,7 @@ fun AlbumScreen(
         adaptiveThumbnailContent(album?.timestamp == null, album?.thumbnailUrl)
 
     TabScaffold(
+        pagerState = pagerState,
         topIconButtonId = Icons.AutoMirrored.Outlined.ArrowBack,
         onTopIconButtonClick = pop,
         sectionTitle = album?.title ?: "",
@@ -157,12 +162,7 @@ fun AlbumScreen(
                 )
             }
         },
-        tabIndex = tabIndex,
-        onTabChanged = { tabIndex = it },
-        tabColumnContent = listOf(
-            Section(stringResource(id = R.string.songs), Icons.Outlined.MusicNote),
-            Section(stringResource(id = R.string.other_versions), Icons.Outlined.Album)
-        )
+        tabColumnContent = tabs
     ) { index ->
         saveableStateHolder.SaveableStateProvider(index) {
             when (index) {

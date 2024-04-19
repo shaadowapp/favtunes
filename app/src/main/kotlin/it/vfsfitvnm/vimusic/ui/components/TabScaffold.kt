@@ -1,20 +1,18 @@
 package it.vfsfitvnm.vimusic.ui.components
 
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.AnimatedContentTransitionScope
-import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MediumTopAppBar
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -24,18 +22,17 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.style.TextOverflow
 import it.vfsfitvnm.vimusic.models.Section
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @ExperimentalAnimationApi
 @Composable
 fun TabScaffold(
+    pagerState: PagerState,
     topIconButtonId: ImageVector,
     onTopIconButtonClick: () -> Unit,
-    sectionTitle: String? = null,
+    sectionTitle: String,
     appBarActions: @Composable (() -> Unit)? = null,
-    tabIndex: Int,
-    onTabChanged: (Int) -> Unit,
     tabColumnContent: List<Section>,
-    content: @Composable (AnimatedVisibilityScope.(Int) -> Unit)
+    content: @Composable (Int) -> Unit
 ) {
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
 
@@ -48,7 +45,7 @@ fun TabScaffold(
                 MediumTopAppBar(
                     title = {
                         Text(
-                            text = sectionTitle ?: tabColumnContent[tabIndex].title,
+                            text = sectionTitle,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
@@ -68,34 +65,20 @@ fun TabScaffold(
 
                 if (tabColumnContent.size > 1) {
                     TabGroup(
-                        tabIndex = tabIndex,
-                        onTabIndexChanged = onTabChanged,
+                        pagerState = pagerState,
                         content = tabColumnContent
                     )
                 }
             }
         }
     ) { paddingValues ->
-        Surface(
+        HorizontalPager(
+            state = pagerState,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            AnimatedContent(
-                targetState = tabIndex,
-                transitionSpec = {
-                    val slideDirection = when (targetState > initialState) {
-                        true -> AnimatedContentTransitionScope.SlideDirection.Left
-                        false -> AnimatedContentTransitionScope.SlideDirection.Right
-                    }
-
-                    slideIntoContainer(slideDirection) togetherWith slideOutOfContainer(
-                        slideDirection
-                    )
-                },
-                content = content,
-                label = "tabs"
-            )
+            content(it)
         }
     }
 }

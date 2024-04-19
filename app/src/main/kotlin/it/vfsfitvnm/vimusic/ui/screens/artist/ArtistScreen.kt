@@ -3,6 +3,7 @@ package it.vfsfitvnm.vimusic.ui.screens.artist
 import android.content.Intent
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.filled.Bookmark
@@ -17,7 +18,9 @@ import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -45,6 +48,7 @@ import it.vfsfitvnm.vimusic.utils.artistScreenTabIndexKey
 import it.vfsfitvnm.vimusic.utils.asMediaItem
 import it.vfsfitvnm.vimusic.utils.forcePlay
 import it.vfsfitvnm.vimusic.utils.rememberPreference
+import kotlinx.coroutines.launch
 
 @ExperimentalFoundationApi
 @ExperimentalAnimationApi
@@ -54,14 +58,33 @@ fun ArtistScreen(
     pop: () -> Unit,
     onAlbumClick: (String) -> Unit
 ) {
-    var tabIndex by rememberPreference(artistScreenTabIndexKey, defaultValue = 0)
     val viewModel: ArtistViewModel = viewModel()
+    val scope = rememberCoroutineScope()
+
+    val tabs = listOf(
+        Section(stringResource(id = R.string.overview), Icons.Outlined.Person),
+        Section(stringResource(id = R.string.songs), Icons.Outlined.MusicNote),
+        Section(stringResource(id = R.string.albums), Icons.Outlined.Album),
+        Section(stringResource(id = R.string.singles), Icons.Outlined.Album),
+        Section(stringResource(id = R.string.library), Icons.Outlined.LibraryMusic)
+    )
+    var tabIndex by rememberPreference(artistScreenTabIndexKey, defaultValue = 0)
+    val pagerState = rememberPagerState(
+        initialPage = tabIndex,
+        pageCount = { tabs.size }
+    )
 
     LaunchedEffect(Unit) {
         viewModel.loadArtist(
             browseId = browseId,
-            tabIndex = tabIndex
+            tabIndex = pagerState.currentPage
         )
+    }
+
+    LaunchedEffect(pagerState) {
+        snapshotFlow { pagerState.currentPage }.collect { index ->
+            tabIndex = index
+        }
     }
 
     val thumbnailContent = adaptiveThumbnailContent(
@@ -70,6 +93,7 @@ fun ArtistScreen(
     )
 
     TabScaffold(
+        pagerState = pagerState,
         topIconButtonId = Icons.AutoMirrored.Outlined.ArrowBack,
         onTopIconButtonClick = pop,
         sectionTitle = viewModel.artist?.name ?: "",
@@ -114,24 +138,28 @@ fun ArtistScreen(
                 )
             }
         },
-        tabIndex = tabIndex,
-        onTabChanged = { tabIndex = it },
-        tabColumnContent = listOf(
-            Section(stringResource(id = R.string.overview), Icons.Outlined.Person),
-            Section(stringResource(id = R.string.songs), Icons.Outlined.MusicNote),
-            Section(stringResource(id = R.string.albums), Icons.Outlined.Album),
-            Section(stringResource(id = R.string.singles), Icons.Outlined.Album),
-            Section(stringResource(id = R.string.library), Icons.Outlined.LibraryMusic)
-        )
+        tabColumnContent = tabs
     ) { index ->
         when (index) {
             0 -> ArtistOverview(
                 youtubeArtistPage = viewModel.artistPage,
                 thumbnailContent = thumbnailContent,
                 onAlbumClick = { id -> onAlbumClick(id) },
-                onViewAllSongsClick = { tabIndex = 1 },
-                onViewAllAlbumsClick = { tabIndex = 2 },
-                onViewAllSinglesClick = { tabIndex = 3 },
+                onViewAllSongsClick = {
+                    scope.launch {
+                        pagerState.animateScrollToPage(1)
+                    }
+                },
+                onViewAllAlbumsClick = {
+                    scope.launch {
+                        pagerState.animateScrollToPage(2)
+                    }
+                },
+                onViewAllSinglesClick = {
+                    scope.launch {
+                        pagerState.animateScrollToPage(3)
+                    }
+                },
             )
 
             1 -> {
