@@ -15,6 +15,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Clear
 import androidx.compose.material.icons.outlined.Pause
 import androidx.compose.material.icons.outlined.PlayArrow
+import androidx.compose.material.icons.outlined.Replay
 import androidx.compose.material.icons.outlined.SkipNext
 import androidx.compose.material.icons.outlined.SkipPrevious
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -192,13 +193,18 @@ fun MiniPlayer(openPlayer: () -> Unit) {
                                     } else {
                                         if (binder.player.playbackState == Player.STATE_IDLE) {
                                             binder.player.prepare()
+                                        } else if (binder.player.playbackState == Player.STATE_ENDED) {
+                                            binder.player.seekToDefaultPosition(0)
                                         }
                                         binder.player.play()
                                     }
                                 }
                             ) {
                                 Icon(
-                                    imageVector = if (shouldBePlaying) Icons.Outlined.Pause else Icons.Outlined.PlayArrow,
+                                    imageVector =
+                                    if (shouldBePlaying) Icons.Outlined.Pause
+                                    else if (binder.player.playbackState == Player.STATE_ENDED) Icons.Outlined.Replay
+                                    else Icons.Outlined.PlayArrow,
                                     contentDescription = null,
                                 )
                             }
