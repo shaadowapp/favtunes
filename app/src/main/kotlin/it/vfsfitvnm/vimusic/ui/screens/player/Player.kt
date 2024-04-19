@@ -35,6 +35,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -55,6 +56,7 @@ import androidx.compose.ui.unit.dp
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import it.vfsfitvnm.innertube.models.NavigationEndpoint
+import it.vfsfitvnm.vimusic.Database
 import it.vfsfitvnm.vimusic.LocalPlayerServiceBinder
 import it.vfsfitvnm.vimusic.R
 import it.vfsfitvnm.vimusic.models.LocalMenuState
@@ -65,7 +67,9 @@ import it.vfsfitvnm.vimusic.utils.isLandscape
 import it.vfsfitvnm.vimusic.utils.positionAndDurationState
 import it.vfsfitvnm.vimusic.utils.seamlessPlay
 import it.vfsfitvnm.vimusic.utils.shouldBePlaying
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.withContext
 
 @OptIn(
     ExperimentalAnimationApi::class,
@@ -110,7 +114,7 @@ fun Player(
         if (binder.player.hasNextMediaItem()) binder.player.getMediaItemAt(binder.player.nextMediaItemIndex).mediaMetadata.title.toString()
         else stringResource(id = R.string.open_queue)
 
-    val artistId: String? by remember(mediaItem) {
+    var artistId: String? by remember(mediaItem) {
         mutableStateOf(
             mediaItem.mediaMetadata.extras?.getStringArrayList("artistIds")?.let { artists ->
                 if (artists.size == 1) artists.first()
@@ -126,6 +130,15 @@ fun Player(
     val sleepTimerMillisLeft by (binder.sleepTimerMillisLeft
         ?: flowOf(null))
         .collectAsState(initial = null)
+
+    LaunchedEffect(Unit) {
+        withContext(Dispatchers.IO) {
+            if (artistId == null) {
+                val artistsInfo = Database.songArtistInfo(mediaItem.mediaId)
+                if (artistsInfo.size == 1) artistId = artistsInfo.first().id
+            }
+        }
+    }
 
     val thumbnailContent: @Composable (modifier: Modifier) -> Unit = { modifier ->
         var drag by remember { mutableFloatStateOf(0F) }
