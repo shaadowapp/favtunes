@@ -131,7 +131,7 @@ fun Player(
         ?: flowOf(null))
         .collectAsState(initial = null)
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(mediaItem) {
         withContext(Dispatchers.IO) {
             if (artistId == null) {
                 val artistsInfo = Database.songArtistInfo(mediaItem.mediaId)
