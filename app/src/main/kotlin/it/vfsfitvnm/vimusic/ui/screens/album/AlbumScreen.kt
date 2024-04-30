@@ -18,7 +18,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.platform.LocalContext
@@ -51,7 +50,6 @@ fun AlbumScreen(
     onAlbumClick: (String) -> Unit,
     onGoToArtist: (String) -> Unit
 ) {
-    val saveableStateHolder = rememberSaveableStateHolder()
     var album: Album? by remember { mutableStateOf(null) }
     var albumPage: Innertube.PlaylistOrAlbumPage? by remember { mutableStateOf(null) }
 
@@ -64,7 +62,7 @@ fun AlbumScreen(
     LaunchedEffect(Unit) {
         Database
             .album(browseId)
-            .combine(snapshotFlow { pagerState.pageCount }) { album, tabIndex -> album to tabIndex }
+            .combine(snapshotFlow { pagerState.currentPage }) { album, tabIndex -> album to tabIndex }
             .collect { (currentAlbum, tabIndex) ->
                 album = currentAlbum
 
@@ -164,41 +162,39 @@ fun AlbumScreen(
         },
         tabColumnContent = tabs
     ) { index ->
-        saveableStateHolder.SaveableStateProvider(index) {
-            when (index) {
-                0 -> AlbumSongs(
-                    browseId = browseId,
-                    thumbnailContent = thumbnailContent,
-                    onGoToArtist = onGoToArtist
-                )
+        when (index) {
+            0 -> AlbumSongs(
+                browseId = browseId,
+                thumbnailContent = thumbnailContent,
+                onGoToArtist = onGoToArtist
+            )
 
-                1 -> {
-                    ItemsPage(
-                        tag = "album/$browseId/alternatives",
-                        initialPlaceholderCount = 1,
-                        continuationPlaceholderCount = 1,
-                        emptyItemsText = stringResource(id = R.string.no_alternative_versions),
-                        itemsPageProvider = albumPage?.let {
-                            ({
-                                Result.success(
-                                    Innertube.ItemsPage(
-                                        items = albumPage?.otherVersions,
-                                        continuation = null
-                                    )
+            1 -> {
+                ItemsPage(
+                    tag = "album/$browseId/alternatives",
+                    initialPlaceholderCount = 1,
+                    continuationPlaceholderCount = 1,
+                    emptyItemsText = stringResource(id = R.string.no_alternative_versions),
+                    itemsPageProvider = albumPage?.let {
+                        {
+                            Result.success(
+                                Innertube.ItemsPage(
+                                    items = albumPage?.otherVersions,
+                                    continuation = null
                                 )
-                            })
-                        },
-                        itemContent = { album ->
-                            AlbumItem(
-                                album = album,
-                                onClick = { onAlbumClick(album.key) }
                             )
-                        },
-                        itemPlaceholderContent = {
-                            ItemPlaceholder()
                         }
-                    )
-                }
+                    },
+                    itemContent = { album ->
+                        AlbumItem(
+                            album = album,
+                            onClick = { onAlbumClick(album.key) }
+                        )
+                    },
+                    itemPlaceholderContent = {
+                        ItemPlaceholder()
+                    }
+                )
             }
         }
     }
