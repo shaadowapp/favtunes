@@ -88,6 +88,8 @@ fun GeneralSettings() {
                         context.startActivity(intent)
                     } catch (e: ActivityNotFoundException) {
                         context.toast("Couldn't find supported links settings, please configure them manually")
+                    } catch (e: NullPointerException) {
+                        context.toast("NullPointerException detected")
                     }
                 }
             )
