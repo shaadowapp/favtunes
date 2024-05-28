@@ -39,6 +39,7 @@ import it.vfsfitvnm.vimusic.models.Playlist
 import it.vfsfitvnm.vimusic.models.SongPlaylistMap
 import it.vfsfitvnm.vimusic.query
 import it.vfsfitvnm.vimusic.transaction
+import it.vfsfitvnm.vimusic.ui.components.TooltipIconButton
 import it.vfsfitvnm.vimusic.ui.components.themed.TextFieldDialog
 import it.vfsfitvnm.vimusic.utils.asMediaItem
 import it.vfsfitvnm.vimusic.utils.completed
@@ -90,16 +91,14 @@ fun PlaylistScreen(
                 actions = {
                     val context = LocalContext.current
 
-                    IconButton(
-                        onClick = { isImportingPlaylist = true }
-                    ) {
-                        Icon(
-                            imageVector = Icons.Outlined.LibraryAdd,
-                            contentDescription = null,
-                        )
-                    }
+                    TooltipIconButton(
+                        description = R.string.import_playlist,
+                        onClick = { isImportingPlaylist = true },
+                        icon = Icons.Outlined.LibraryAdd
+                    )
 
-                    IconButton(
+                    TooltipIconButton(
+                        description = R.string.share,
                         onClick = {
                             (playlistPage?.url
                                 ?: "https://music.youtube.com/playlist?list=${
@@ -120,13 +119,9 @@ fun PlaylistScreen(
                                     )
                                 )
                             }
-                        }
-                    ) {
-                        Icon(
-                            imageVector = Icons.Outlined.Share,
-                            contentDescription = null,
-                        )
-                    }
+                        },
+                        icon = Icons.Outlined.Share
+                    )
                 },
                 colors = TopAppBarDefaults.mediumTopAppBarColors(scrolledContainerColor = MaterialTheme.colorScheme.surface),
                 scrollBehavior = scrollBehavior

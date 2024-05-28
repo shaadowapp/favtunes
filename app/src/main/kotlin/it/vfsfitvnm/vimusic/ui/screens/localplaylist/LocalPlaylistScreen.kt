@@ -37,6 +37,7 @@ import it.vfsfitvnm.vimusic.models.PlaylistWithSongs
 import it.vfsfitvnm.vimusic.models.SongPlaylistMap
 import it.vfsfitvnm.vimusic.query
 import it.vfsfitvnm.vimusic.transaction
+import it.vfsfitvnm.vimusic.ui.components.TooltipIconButton
 import it.vfsfitvnm.vimusic.ui.components.themed.ConfirmationDialog
 import it.vfsfitvnm.vimusic.ui.components.themed.TextFieldDialog
 import it.vfsfitvnm.vimusic.utils.asMediaItem
@@ -86,7 +87,8 @@ fun LocalPlaylistScreen(
                 },
                 actions = {
                     if (!playlistWithSongs?.playlist?.browseId.isNullOrEmpty()) {
-                        IconButton(
+                        TooltipIconButton(
+                            description = R.string.sync_playlist,
                             onClick = {
                                 playlistWithSongs?.playlist?.browseId?.let { browseId ->
                                     transaction {
@@ -114,28 +116,22 @@ fun LocalPlaylistScreen(
                                         }
                                     }
                                 }
-                            }
-                        ) {
-                            Icon(
-                                imageVector = Icons.Outlined.Sync,
-                                contentDescription = null
-                            )
-                        }
-                    }
-
-                    IconButton(onClick = { isRenaming = true }) {
-                        Icon(
-                            imageVector = Icons.Outlined.Edit,
-                            contentDescription = null
+                            },
+                            icon = Icons.Outlined.Sync
                         )
                     }
 
-                    IconButton(onClick = { isDeleting = true }) {
-                        Icon(
-                            imageVector = Icons.Outlined.Delete,
-                            contentDescription = null
-                        )
-                    }
+                    TooltipIconButton(
+                        description = R.string.rename_playlist,
+                        onClick = { isRenaming = true },
+                        icon = Icons.Outlined.Edit
+                    )
+
+                    TooltipIconButton(
+                        description = R.string.delete_playlist,
+                        onClick = { isDeleting = true },
+                        icon = Icons.Outlined.Delete
+                    )
                 },
                 scrollBehavior = scrollBehavior
             )

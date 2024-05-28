@@ -11,7 +11,6 @@ import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
@@ -27,6 +26,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.navigation.NavController
 import it.vfsfitvnm.vimusic.R
 import it.vfsfitvnm.vimusic.models.Screen
+import it.vfsfitvnm.vimusic.ui.components.TooltipIconButton
 import it.vfsfitvnm.vimusic.utils.homeScreenTabIndexKey
 import it.vfsfitvnm.vimusic.utils.rememberPreference
 
@@ -58,19 +58,17 @@ fun HomeScreen(
                     Text(text = stringResource(id = screens[screenIndex].resourceId))
                 },
                 actions = {
-                    IconButton(onClick = { navController.navigate(route = "search") }) {
-                        Icon(
-                            imageVector = Icons.Outlined.Search,
-                            contentDescription = stringResource(id = R.string.search)
-                        )
-                    }
+                    TooltipIconButton(
+                        description = R.string.search,
+                        onClick = { navController.navigate(route = "search") },
+                        icon = Icons.Outlined.Search
+                    )
 
-                    IconButton(onClick = { navController.navigate(route = "settings") }) {
-                        Icon(
-                            imageVector = Icons.Outlined.Settings,
-                            contentDescription = stringResource(id = R.string.settings)
-                        )
-                    }
+                    TooltipIconButton(
+                        description = R.string.settings,
+                        onClick = { navController.navigate(route = "settings") },
+                        icon = Icons.Outlined.Settings
+                    )
                 },
                 scrollBehavior = scrollBehavior
             )

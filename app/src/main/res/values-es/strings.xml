@@ -135,4 +135,9 @@
     <string name="history">Historial</string>
     <string name="quick_picks_source">Fuente de las selecciones rápidas</string>
     <string name="stop">Detener</string>
+    <string name="share">Compartir</string>
+    <string name="add_bookmark">Añadir marcador</string>
+    <string name="remove_bookmark">Eliminar marcador</string>
+    <string name="sync_playlist">Sincronizar lista</string>
+    <string name="delete_playlist">Eliminar lista</string>
 </resources>

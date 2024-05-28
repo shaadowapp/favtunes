@@ -135,4 +135,9 @@
     <string name="history">Verlauf</string>
     <string name="quick_picks_source">Empfehlungen auf der Startseite</string>
     <string name="stop">Stop</string>
+    <string name="share">Share</string>
+    <string name="add_bookmark">Add bookmark</string>
+    <string name="remove_bookmark">Remove bookmark</string>
+    <string name="sync_playlist">Sync playlist</string>
+    <string name="delete_playlist">Delete playlist</string>
 </resources>

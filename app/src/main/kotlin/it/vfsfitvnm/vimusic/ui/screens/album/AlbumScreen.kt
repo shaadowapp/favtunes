@@ -11,8 +11,6 @@ import androidx.compose.material.icons.outlined.Album
 import androidx.compose.material.icons.outlined.BookmarkAdd
 import androidx.compose.material.icons.outlined.MusicNote
 import androidx.compose.material.icons.outlined.Share
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -32,6 +30,7 @@ import it.vfsfitvnm.vimusic.models.Section
 import it.vfsfitvnm.vimusic.models.SongAlbumMap
 import it.vfsfitvnm.vimusic.query
 import it.vfsfitvnm.vimusic.ui.components.TabScaffold
+import it.vfsfitvnm.vimusic.ui.components.TooltipIconButton
 import it.vfsfitvnm.vimusic.ui.components.themed.adaptiveThumbnailContent
 import it.vfsfitvnm.vimusic.ui.items.AlbumItem
 import it.vfsfitvnm.vimusic.ui.items.ItemPlaceholder
@@ -116,7 +115,8 @@ fun AlbumScreen(
         appBarActions = {
             val context = LocalContext.current
 
-            IconButton(
+            TooltipIconButton(
+                description = if (album?.bookmarkedAt == null) R.string.add_bookmark else R.string.remove_bookmark,
                 onClick = {
                     val bookmarkedAt =
                         if (album?.bookmarkedAt == null) System.currentTimeMillis() else null
@@ -126,17 +126,12 @@ fun AlbumScreen(
                             ?.copy(bookmarkedAt = bookmarkedAt)
                             ?.let(Database::update)
                     }
-                }
-            ) {
-                Icon(
-                    imageVector =
-                    if (album?.bookmarkedAt == null) Icons.Outlined.BookmarkAdd
-                    else Icons.Filled.Bookmark,
-                    contentDescription = null
-                )
-            }
+                },
+                icon = if (album?.bookmarkedAt == null) Icons.Outlined.BookmarkAdd else Icons.Filled.Bookmark
+            )
 
-            IconButton(
+            TooltipIconButton(
+                description = R.string.share,
                 onClick = {
                     album?.shareUrl?.let { url ->
                         val sendIntent = Intent().apply {
@@ -152,13 +147,9 @@ fun AlbumScreen(
                             )
                         )
                     }
-                }
-            ) {
-                Icon(
-                    imageVector = Icons.Outlined.Share,
-                    contentDescription = null
-                )
-            }
+                },
+                icon = Icons.Outlined.Share
+            )
         },
         tabColumnContent = tabs
     ) { index ->

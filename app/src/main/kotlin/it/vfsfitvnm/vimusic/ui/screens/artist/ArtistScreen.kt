@@ -13,8 +13,6 @@ import androidx.compose.material.icons.outlined.LibraryMusic
 import androidx.compose.material.icons.outlined.MusicNote
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Share
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -37,6 +35,7 @@ import it.vfsfitvnm.vimusic.models.LocalMenuState
 import it.vfsfitvnm.vimusic.models.Section
 import it.vfsfitvnm.vimusic.query
 import it.vfsfitvnm.vimusic.ui.components.TabScaffold
+import it.vfsfitvnm.vimusic.ui.components.TooltipIconButton
 import it.vfsfitvnm.vimusic.ui.components.themed.NonQueuedMediaItemMenu
 import it.vfsfitvnm.vimusic.ui.components.themed.adaptiveThumbnailContent
 import it.vfsfitvnm.vimusic.ui.items.AlbumItem
@@ -100,7 +99,8 @@ fun ArtistScreen(
         appBarActions = {
             val context = LocalContext.current
 
-            IconButton(
+            TooltipIconButton(
+                description = if (viewModel.artist?.bookmarkedAt == null) R.string.add_bookmark else R.string.remove_bookmark,
                 onClick = {
                     val bookmarkedAt =
                         if (viewModel.artist?.bookmarkedAt == null) System.currentTimeMillis() else null
@@ -110,15 +110,12 @@ fun ArtistScreen(
                             ?.copy(bookmarkedAt = bookmarkedAt)
                             ?.let(Database::update)
                     }
-                }
-            ) {
-                Icon(
-                    imageVector = if (viewModel.artist?.bookmarkedAt == null) Icons.Outlined.BookmarkAdd else Icons.Filled.Bookmark,
-                    contentDescription = null
-                )
-            }
+                },
+                icon = if (viewModel.artist?.bookmarkedAt == null) Icons.Outlined.BookmarkAdd else Icons.Filled.Bookmark
+            )
 
-            IconButton(
+            TooltipIconButton(
+                description = R.string.share,
                 onClick = {
                     val sendIntent = Intent().apply {
                         action = Intent.ACTION_SEND
@@ -130,13 +127,9 @@ fun ArtistScreen(
                     }
 
                     context.startActivity(Intent.createChooser(sendIntent, null))
-                }
-            ) {
-                Icon(
-                    imageVector = Icons.Outlined.Share,
-                    contentDescription = null
-                )
-            }
+                },
+                icon = Icons.Outlined.Share
+            )
         },
         tabColumnContent = tabs
     ) { index ->
