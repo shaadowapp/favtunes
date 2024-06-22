@@ -5,29 +5,24 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.PlaylistPlay
 import androidx.compose.material.icons.outlined.DragHandle
 import androidx.compose.material.icons.outlined.PlaylistRemove
 import androidx.compose.material.icons.outlined.Shuffle
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.rememberSwipeToDismissBoxState
@@ -36,7 +31,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import it.vfsfitvnm.compose.reordering.draggedItem
 import it.vfsfitvnm.compose.reordering.rememberReorderingState
@@ -44,12 +38,14 @@ import it.vfsfitvnm.compose.reordering.reorder
 import it.vfsfitvnm.vimusic.Database
 import it.vfsfitvnm.vimusic.LocalPlayerServiceBinder
 import it.vfsfitvnm.vimusic.R
+import it.vfsfitvnm.vimusic.models.IconButtonInfo
 import it.vfsfitvnm.vimusic.models.LocalMenuState
 import it.vfsfitvnm.vimusic.models.PlaylistWithSongs
 import it.vfsfitvnm.vimusic.models.Song
 import it.vfsfitvnm.vimusic.models.SongPlaylistMap
 import it.vfsfitvnm.vimusic.query
 import it.vfsfitvnm.vimusic.transaction
+import it.vfsfitvnm.vimusic.ui.components.CoverScaffold
 import it.vfsfitvnm.vimusic.ui.components.PlaylistThumbnail
 import it.vfsfitvnm.vimusic.ui.components.themed.InPlaylistMediaItemMenu
 import it.vfsfitvnm.vimusic.ui.items.LocalSongItem
@@ -89,49 +85,36 @@ fun LocalPlaylistSongs(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         item(key = "thumbnail") {
-            Box(modifier = Modifier.widthIn(max = 400.dp)) {
-                PlaylistThumbnail(playlistId = playlistId)
-
-                if (playlistWithSongs?.songs?.isNotEmpty() == true) {
-                    FloatingActionButton(
-                        onClick = {
-                            playlistWithSongs.songs.let { songs ->
-                                if (songs.isNotEmpty()) {
-                                    binder?.stopRadio()
-                                    binder?.player?.forcePlayFromBeginning(
-                                        songs.shuffled().map(Song::asMediaItem)
-                                    )
-                                }
+            CoverScaffold(
+                primaryButton = IconButtonInfo(
+                    enabled = playlistWithSongs?.songs?.isNotEmpty() == true,
+                    onClick = {
+                        playlistWithSongs?.songs?.let { songs ->
+                            if (songs.isNotEmpty()) {
+                                binder?.stopRadio()
+                                binder?.player?.forcePlayFromBeginning(
+                                    songs.shuffled().map(Song::asMediaItem)
+                                )
                             }
-                        },
-                        modifier = Modifier.align(Alignment.BottomStart)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Outlined.Shuffle,
-                            contentDescription = stringResource(id = R.string.shuffle)
-                        )
-                    }
-
-                    SmallFloatingActionButton(
-                        onClick = {
-                            playlistWithSongs.songs
-                                .map(Song::asMediaItem)
-                                .let { mediaItems ->
-                                    binder?.player?.enqueue(mediaItems)
-                                }
-                        },
-                        modifier = Modifier.align(Alignment.TopEnd),
-                        shape = CircleShape,
-                        containerColor = MaterialTheme.colorScheme.tertiaryContainer,
-                        contentColor = MaterialTheme.colorScheme.onTertiaryContainer
-                    ) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Outlined.PlaylistPlay,
-                            contentDescription = stringResource(id = R.string.enqueue)
-                        )
-                    }
+                        }
+                    },
+                    icon = Icons.Outlined.Shuffle,
+                    description = R.string.shuffle
+                ),
+                secondaryButton = IconButtonInfo(
+                    enabled = playlistWithSongs?.songs?.isNotEmpty() == true,
+                    onClick = {
+                        playlistWithSongs?.songs?.map(Song::asMediaItem)?.let { mediaItems ->
+                            binder?.player?.enqueue(mediaItems)
+                        }
+                    },
+                    icon = Icons.AutoMirrored.Outlined.PlaylistPlay,
+                    description = R.string.enqueue
+                ),
+                content = {
+                    PlaylistThumbnail(playlistId = playlistId)
                 }
-            }
+            )
         }
 
         item(key = "spacer") {

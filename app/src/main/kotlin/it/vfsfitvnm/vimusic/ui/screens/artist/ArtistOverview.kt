@@ -3,7 +3,6 @@ package it.vfsfitvnm.vimusic.ui.screens.artist
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -16,15 +15,11 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Podcasts
 import androidx.compose.material.icons.outlined.Shuffle
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -37,7 +32,9 @@ import it.vfsfitvnm.innertube.Innertube
 import it.vfsfitvnm.innertube.models.NavigationEndpoint
 import it.vfsfitvnm.vimusic.LocalPlayerServiceBinder
 import it.vfsfitvnm.vimusic.R
+import it.vfsfitvnm.vimusic.models.IconButtonInfo
 import it.vfsfitvnm.vimusic.models.LocalMenuState
+import it.vfsfitvnm.vimusic.ui.components.CoverScaffold
 import it.vfsfitvnm.vimusic.ui.components.ShimmerHost
 import it.vfsfitvnm.vimusic.ui.components.themed.NonQueuedMediaItemMenu
 import it.vfsfitvnm.vimusic.ui.components.themed.TextPlaceholder
@@ -68,51 +65,33 @@ fun ArtistOverview(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .padding(vertical = 16.dp)
+            .padding(vertical = 16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Box(
-            modifier = Modifier
-                .align(Alignment.CenterHorizontally)
-                .widthIn(max = 400.dp)
-        ) {
-            thumbnailContent()
+        val radioEndpoint = youtubeArtistPage?.radioEndpoint
+        val shuffleEndpoint = youtubeArtistPage?.shuffleEndpoint
 
-            val radioEndpoint = youtubeArtistPage?.radioEndpoint
-            val shuffleEndpoint = youtubeArtistPage?.shuffleEndpoint
-
-            if (radioEndpoint != null) {
-                FloatingActionButton(
-                    onClick = {
-                        binder?.stopRadio()
-                        binder?.playRadio(radioEndpoint)
-                    },
-                    modifier = Modifier.align(Alignment.BottomStart)
-                ) {
-                    Icon(
-                        imageVector = Icons.Outlined.Podcasts,
-                        contentDescription = null
-                    )
-                }
-            }
-
-            if (shuffleEndpoint != null) {
-                SmallFloatingActionButton(
-                    onClick = {
-                        binder?.stopRadio()
-                        binder?.playRadio(shuffleEndpoint)
-                    },
-                    modifier = Modifier.align(Alignment.TopEnd),
-                    shape = CircleShape,
-                    containerColor = MaterialTheme.colorScheme.tertiaryContainer,
-                    contentColor = MaterialTheme.colorScheme.onTertiaryContainer
-                ) {
-                    Icon(
-                        imageVector = Icons.Outlined.Shuffle,
-                        contentDescription = stringResource(id = R.string.shuffle)
-                    )
-                }
-            }
-        }
+        CoverScaffold(
+            primaryButton = IconButtonInfo(
+                enabled = radioEndpoint != null,
+                onClick = {
+                    binder?.stopRadio()
+                    binder?.playRadio(radioEndpoint)
+                },
+                icon = Icons.Outlined.Podcasts,
+                description = R.string.start_radio
+            ),
+            secondaryButton = IconButtonInfo(
+                enabled = shuffleEndpoint != null,
+                onClick = {
+                    binder?.stopRadio()
+                    binder?.playRadio(shuffleEndpoint)
+                },
+                icon = Icons.Outlined.Shuffle,
+                description = R.string.shuffle
+            ),
+            content = thumbnailContent
+        )
 
         if (youtubeArtistPage != null) {
             Spacer(modifier = Modifier.height(Dimensions.spacer))
