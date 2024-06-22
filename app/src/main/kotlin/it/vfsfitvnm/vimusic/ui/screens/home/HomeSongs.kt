@@ -1,7 +1,12 @@
 package it.vfsfitvnm.vimusic.ui.screens.home
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.PaddingValues
@@ -17,12 +22,15 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowDownward
+import androidx.compose.material.icons.outlined.Shuffle
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -54,6 +62,7 @@ import it.vfsfitvnm.vimusic.ui.styling.onOverlay
 import it.vfsfitvnm.vimusic.ui.styling.overlay
 import it.vfsfitvnm.vimusic.utils.asMediaItem
 import it.vfsfitvnm.vimusic.utils.forcePlayAtIndex
+import it.vfsfitvnm.vimusic.utils.forcePlayFromBeginning
 import it.vfsfitvnm.vimusic.utils.rememberPreference
 import it.vfsfitvnm.vimusic.utils.songSortByKey
 import it.vfsfitvnm.vimusic.utils.songSortOrderKey
@@ -81,137 +90,163 @@ fun HomeSongs(
         Database.songs(sortBy, sortOrder).collect { items = it }
     }
 
-    LazyVerticalGrid(
-        columns = GridCells.Adaptive(minSize = 400.dp),
-        contentPadding = PaddingValues(bottom = 16.dp),
-        modifier = Modifier.fillMaxSize()
-    ) {
-        item(
-            key = "header",
-            span = { GridItemSpan(maxLineSpan) }
-        ) {
-            Row(
-                modifier = Modifier.padding(horizontal = 16.dp),
-                verticalAlignment = Alignment.CenterVertically
+    Scaffold(
+        floatingActionButton = {
+            AnimatedVisibility(
+                visible = items.isNotEmpty(),
+                enter = fadeIn() + scaleIn(),
+                exit = scaleOut() + fadeOut()
             ) {
-                TextButton(
-                    onClick = { isSorting = true }
-                ) {
-                    Text(
-                        text = when (sortBy) {
-                            SongSortBy.PlayTime -> stringResource(id = R.string.play_time)
-                            SongSortBy.Title -> stringResource(id = R.string.title)
-                            SongSortBy.DateAdded -> stringResource(id = R.string.date_added)
-                        }
-                    )
-                }
-
-                IconButton(
-                    onClick = { sortOrder = !sortOrder },
-                    modifier = Modifier.graphicsLayer { rotationZ = sortOrderIconRotation }
-                ) {
-                    Icon(
-                        imageVector = Icons.Outlined.ArrowDownward,
-                        contentDescription = null,
-                        modifier = Modifier.size(16.dp),
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                }
-
-                Spacer(modifier = Modifier.weight(1F))
-
-                Text(
-                    text =
-                    if (items.size == 1) "1 ${stringResource(id = R.string.song).lowercase()}"
-                    else "${items.size} ${stringResource(id = R.string.songs).lowercase()}",
-                    style = MaterialTheme.typography.labelLarge
-                )
-
-                DropdownMenu(
-                    expanded = isSorting,
-                    onDismissRequest = { isSorting = false }
-                ) {
-                    SongSortBy.entries.forEach { entry ->
-                        DropdownMenuItem(
-                            text = {
-                                Text(
-                                    text = when (entry) {
-                                        SongSortBy.PlayTime -> stringResource(id = R.string.play_time)
-                                        SongSortBy.Title -> stringResource(id = R.string.title)
-                                        SongSortBy.DateAdded -> stringResource(id = R.string.date_added)
-                                    }
-                                )
-                            },
-                            onClick = {
-                                isSorting = false
-                                sortBy = entry
-                            },
-                            leadingIcon = {
-                                Icon(
-                                    imageVector = entry.icon,
-                                    contentDescription = entry.name
-                                )
-                            },
-                            trailingIcon = {
-                                RadioButton(
-                                    selected = sortBy == entry,
-                                    onClick = { sortBy = entry }
-                                )
-                            }
+                FloatingActionButton(
+                    onClick = {
+                        binder?.stopRadio()
+                        binder?.player?.forcePlayFromBeginning(
+                            items.shuffled().map(Song::asMediaItem)
                         )
                     }
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.Shuffle,
+                        contentDescription = stringResource(id = R.string.shuffle)
+                    )
                 }
             }
         }
-
-        itemsIndexed(
-            items = items,
-            key = { _, song -> song.id }
-        ) { index, song ->
-            LocalSongItem(
-                modifier = Modifier.animateItemPlacement(),
-                song = song,
-                onClick = {
-                    binder?.stopRadio()
-                    binder?.player?.forcePlayAtIndex(
-                        items.map(Song::asMediaItem),
-                        index
-                    )
-                },
-                onLongClick = {
-                    menuState.display {
-                        InHistoryMediaItemMenu(
-                            song = song,
-                            onDismiss = menuState::hide,
-                            onGoToAlbum = onGoToAlbum,
-                            onGoToArtist = onGoToArtist
+    ) { paddingValues ->
+        LazyVerticalGrid(
+            columns = GridCells.Adaptive(minSize = 400.dp),
+            contentPadding = PaddingValues(bottom = if (items.isNotEmpty()) 16.dp + 72.dp else 16.dp),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+        ) {
+            item(
+                key = "header",
+                span = { GridItemSpan(maxLineSpan) }
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    TextButton(
+                        onClick = { isSorting = true }
+                    ) {
+                        Text(
+                            text = when (sortBy) {
+                                SongSortBy.PlayTime -> stringResource(id = R.string.play_time)
+                                SongSortBy.Title -> stringResource(id = R.string.title)
+                                SongSortBy.DateAdded -> stringResource(id = R.string.date_added)
+                            }
                         )
                     }
-                },
-                onThumbnailContent = if (sortBy == SongSortBy.PlayTime) ({
+
+                    IconButton(
+                        onClick = { sortOrder = !sortOrder },
+                        modifier = Modifier.graphicsLayer { rotationZ = sortOrderIconRotation }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.ArrowDownward,
+                            contentDescription = null,
+                            modifier = Modifier.size(16.dp),
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.weight(1F))
+
                     Text(
-                        text = song.formattedTotalPlayTime,
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onOverlay,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .background(
-                                brush = Brush.verticalGradient(
-                                    colors = listOf(
-                                        Color.Transparent,
-                                        MaterialTheme.colorScheme.overlay
-                                    )
-                                ),
-                                shape = MaterialTheme.shapes.medium
-                            )
-                            .padding(horizontal = 8.dp, vertical = 4.dp)
-                            .align(Alignment.BottomCenter)
+                        text =
+                        if (items.size == 1) "1 ${stringResource(id = R.string.song).lowercase()}"
+                        else "${items.size} ${stringResource(id = R.string.songs).lowercase()}",
+                        style = MaterialTheme.typography.labelLarge
                     )
-                }) else null
-            )
+
+                    DropdownMenu(
+                        expanded = isSorting,
+                        onDismissRequest = { isSorting = false }
+                    ) {
+                        SongSortBy.entries.forEach { entry ->
+                            DropdownMenuItem(
+                                text = {
+                                    Text(
+                                        text = when (entry) {
+                                            SongSortBy.PlayTime -> stringResource(id = R.string.play_time)
+                                            SongSortBy.Title -> stringResource(id = R.string.title)
+                                            SongSortBy.DateAdded -> stringResource(id = R.string.date_added)
+                                        }
+                                    )
+                                },
+                                onClick = {
+                                    isSorting = false
+                                    sortBy = entry
+                                },
+                                leadingIcon = {
+                                    Icon(
+                                        imageVector = entry.icon,
+                                        contentDescription = entry.name
+                                    )
+                                },
+                                trailingIcon = {
+                                    RadioButton(
+                                        selected = sortBy == entry,
+                                        onClick = { sortBy = entry }
+                                    )
+                                }
+                            )
+                        }
+                    }
+                }
+            }
+
+            itemsIndexed(
+                items = items,
+                key = { _, song -> song.id }
+            ) { index, song ->
+                LocalSongItem(
+                    modifier = Modifier.animateItemPlacement(),
+                    song = song,
+                    onClick = {
+                        binder?.stopRadio()
+                        binder?.player?.forcePlayAtIndex(
+                            items.map(Song::asMediaItem),
+                            index
+                        )
+                    },
+                    onLongClick = {
+                        menuState.display {
+                            InHistoryMediaItemMenu(
+                                song = song,
+                                onDismiss = menuState::hide,
+                                onGoToAlbum = onGoToAlbum,
+                                onGoToArtist = onGoToArtist
+                            )
+                        }
+                    },
+                    onThumbnailContent = if (sortBy == SongSortBy.PlayTime) ({
+                        Text(
+                            text = song.formattedTotalPlayTime,
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onOverlay,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(
+                                    brush = Brush.verticalGradient(
+                                        colors = listOf(
+                                            Color.Transparent,
+                                            MaterialTheme.colorScheme.overlay
+                                        )
+                                    ),
+                                    shape = MaterialTheme.shapes.medium
+                                )
+                                .padding(horizontal = 8.dp, vertical = 4.dp)
+                                .align(Alignment.BottomCenter)
+                        )
+                    }) else null
+                )
+            }
         }
     }
 }
