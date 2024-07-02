@@ -83,6 +83,11 @@ fun Thumbnail(
 
             override fun onPlayerError(playbackException: PlaybackException) {
                 error = playbackException
+
+                when (error?.cause?.cause) {
+                    is PlayableFormatNotFoundException, is UnplayableException, is LoginRequiredException, is VideoIdMismatchException -> player.seekToNext()
+                    else -> player.prepare()
+                }
             }
         }
     }
