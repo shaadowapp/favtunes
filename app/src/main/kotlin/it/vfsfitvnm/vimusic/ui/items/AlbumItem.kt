@@ -22,11 +22,8 @@ fun AlbumItem(
     ItemContainer(
         modifier = modifier,
         title = album.info?.name ?: "",
-        subtitle = if (album.authors.isNullOrEmpty()) {
-            album.year
-        } else {
-            "${album.authors?.joinToString(separator = "") { it.name ?: "" }} • ${album.year}"
-        },
+        subtitle = if (album.authors.isNullOrEmpty()) album.year
+        else "${album.authors?.joinToString(separator = "") { it.name ?: "" }} • ${album.year}",
         onClick = onClick
     ) {
         BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
@@ -49,7 +46,8 @@ fun LocalAlbumItem(
     ItemContainer(
         modifier = modifier,
         title = album.title ?: "",
-        subtitle = "${album.authorsText} • ${album.year}",
+        subtitle = if (album.authorsText.isNullOrEmpty()) album.year
+        else "${album.authorsText} • ${album.year}",
         onClick = onClick
     ) {
         BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {

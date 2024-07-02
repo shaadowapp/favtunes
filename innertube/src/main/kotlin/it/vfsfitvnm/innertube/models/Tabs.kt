@@ -14,12 +14,18 @@ data class Tabs(
         data class TabRenderer(
             val content: Content?,
             val title: String?,
-            val tabIdentifier: String?,
+            val tabIdentifier: String?
         ) {
             @Serializable
             data class Content(
-                val sectionListRenderer: SectionListRenderer?,
+                val sectionListRenderer: SectionListRenderer?
             )
         }
     }
 }
+
+@Serializable
+data class TwoColumnBrowseResultsRenderer(
+    val tabs: List<Tabs.Tab>?,
+    val secondaryContents: Tabs.Tab.TabRenderer.Content?
+)

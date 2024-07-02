@@ -16,50 +16,51 @@ import it.vfsfitvnm.innertube.utils.runCatchingNonCancellable
 suspend fun Innertube.playlistPage(body: BrowseBody) = runCatchingNonCancellable {
     val response = client.post(browse) {
         setBody(body)
-        mask("contents.singleColumnBrowseResultsRenderer.tabs.tabRenderer.content.sectionListRenderer.contents(musicPlaylistShelfRenderer(continuations,contents.$musicResponsiveListItemRendererMask),musicCarouselShelfRenderer.contents.$musicTwoRowItemRendererMask),header.musicDetailHeaderRenderer(title,subtitle,thumbnail),microformat")
+        mask("contents.twoColumnBrowseResultsRenderer(tabs.tabRenderer.content.sectionListRenderer.contents.musicResponsiveHeaderRenderer(title,subtitle,thumbnail),secondaryContents.sectionListRenderer.contents(musicPlaylistShelfRenderer(continuations,contents.$musicResponsiveListItemRendererMask),musicCarouselShelfRenderer.contents.$musicTwoRowItemRendererMask)),microformat")
     }.body<BrowseResponse>()
 
-    val musicDetailHeaderRenderer = response
-        .header
-        ?.musicDetailHeaderRenderer
-
-    val sectionListRendererContents = response
+    val header = response
         .contents
-        ?.singleColumnBrowseResultsRenderer
+        ?.twoColumnBrowseResultsRenderer
         ?.tabs
         ?.firstOrNull()
         ?.tabRenderer
         ?.content
         ?.sectionListRenderer
         ?.contents
+        ?.firstOrNull()
+        ?.musicResponsiveHeaderRenderer
 
-    val musicShelfRenderer = sectionListRendererContents
+    val contents = response
+        .contents
+        ?.twoColumnBrowseResultsRenderer
+        ?.secondaryContents
+        ?.sectionListRenderer
+        ?.contents
+
+    val musicShelfRenderer = contents
         ?.firstOrNull()
         ?.musicShelfRenderer
 
-    val musicCarouselShelfRenderer = sectionListRendererContents
+    val musicCarouselShelfRenderer = contents
         ?.getOrNull(1)
         ?.musicCarouselShelfRenderer
 
     Innertube.PlaylistOrAlbumPage(
-        title = musicDetailHeaderRenderer
+        title = header
             ?.title
             ?.text,
-        thumbnail = musicDetailHeaderRenderer
+        thumbnail = header
             ?.thumbnail
             ?.musicThumbnailRenderer
             ?.thumbnail
             ?.thumbnails
             ?.firstOrNull(),
-        authors = musicDetailHeaderRenderer
+        authors = null, // TODO: Fix with strapline information
+        year = header
             ?.subtitle
             ?.splitBySeparator()
             ?.getOrNull(1)
-            ?.map(Innertube::Info),
-        year = musicDetailHeaderRenderer
-            ?.subtitle
-            ?.splitBySeparator()
-            ?.getOrNull(2)
             ?.firstOrNull()
             ?.text,
         url = response
