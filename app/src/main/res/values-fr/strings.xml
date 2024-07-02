@@ -140,4 +140,5 @@
     <string name="remove_bookmark">Remove bookmark</string>
     <string name="sync_playlist">Sync playlist</string>
     <string name="delete_playlist">Delete playlist</string>
+    <string name="random">Random</string>
 </resources>

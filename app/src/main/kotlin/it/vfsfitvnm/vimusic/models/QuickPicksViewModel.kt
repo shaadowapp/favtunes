@@ -19,13 +19,17 @@ class QuickPicksViewModel : ViewModel() {
         val flow = when (quickPicksSource) {
             QuickPicksSource.Trending -> Database.trending()
             QuickPicksSource.LastPlayed -> Database.lastPlayed()
+            QuickPicksSource.Random -> Database.randomSong()
         }
 
         flow.distinctUntilChanged().collect { song ->
+            if (quickPicksSource == QuickPicksSource.Random && song != null && trending != null) return@collect
+
             if ((song == null && relatedPageResult == null) || trending?.id != song?.id) {
                 relatedPageResult =
                     Innertube.relatedPage(NextBody(videoId = (song?.id ?: "fJ9rUzIMcZQ")))
             }
+
             trending = song
         }
     }
