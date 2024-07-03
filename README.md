@@ -1,6 +1,8 @@
-![Repository preview](./screenshots/repository_preview.jpg)
+<h1 style="text-align: center">Music You</h1>
 
-**Music You** is an Android application for streaming music from YouTube Music.
+<p style="text-align: center">An Android application for streaming music from YouTube Music.</p>
+
+![Repository preview](./screenshots/repository_preview.jpg)
 
 ## ✨ Features
 
@@ -32,12 +34,12 @@
 ## 📸 Screenshots
 
 <div style="text-align: center">
-    <img src="./screenshots/screenshot_player.png" alt="Player" style="width: 30%">
-    <img src="./screenshots/screenshot_home.png" alt="Home" style="width: 30%">
-    <img src="./screenshots/screenshot_artist.png" alt="Artist" style="width: 30%">
-    <img src="./screenshots/screenshot_songs.png" alt="Songs" style="width: 30%">
-    <img src="./screenshots/screenshot_artists.png" alt="Artists" style="width: 30%">
-    <img src="./screenshots/screenshot_albums.png" alt="Albums" style="width: 30%">
+    <img src="./screenshots/screenshot_player.png" alt="Player" style="width: 30%; border-radius: 10px">
+    <img src="./screenshots/screenshot_home.png" alt="Home" style="width: 30%; border-radius: 10px">
+    <img src="./screenshots/screenshot_artist.png" alt="Artist" style="width: 30%; border-radius: 10px">
+    <img src="./screenshots/screenshot_songs.png" alt="Songs" style="width: 30%; border-radius: 10px">
+    <img src="./screenshots/screenshot_artists.png" alt="Artists" style="width: 30%; border-radius: 10px">
+    <img src="./screenshots/screenshot_albums.png" alt="Albums" style="width: 30%; border-radius: 10px">
 </div>
 
 ## 📲 Installation
