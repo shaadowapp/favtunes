@@ -230,7 +230,9 @@ fun ArtistOverview(
                 Text(
                     text = stringResource(id = R.string.about),
                     style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
                 )
 
                 Text(
