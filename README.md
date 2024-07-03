@@ -1,11 +1,11 @@
-# Music You
+![Repository preview](./screenshots/repository_preview.jpg)
 
 **Music You** is an Android application for streaming music from YouTube Music.
 
 ## ✨ Features
 
 - Background playback
-- Cache audio chunks for offline playback
+- Cache songs for offline playback
 - Search for songs, albums, artists, videos and playlists
 - Bookmark artists and albums
 - Import playlists and manage local playlists
@@ -17,12 +17,10 @@
 
 ### 🗒️ New features
 
-- [x] Material You
-- [x] Multilingual support
-- [x] Quick picks selection customization
-- [x] Settings redesign
-- [ ] Download songs for offline play
-- [ ] New built-in playlists
+- Material You
+- Multilingual support
+- Quick picks selection customization
+- Settings redesign
 
 ## 🌐 Available languages
 
