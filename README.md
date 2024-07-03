@@ -1,6 +1,6 @@
-<h1 style="text-align: center">Music You</h1>
+# Music You
 
-<p style="text-align: center">An Android application for streaming music from YouTube Music.</p>
+An Android application for streaming music from YouTube Music.
 
 ![Repository preview](./screenshots/repository_preview.jpg)
 
