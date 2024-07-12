@@ -141,4 +141,5 @@
     <string name="sync_playlist">Sincronizar lista</string>
     <string name="delete_playlist">Eliminar lista</string>
     <string name="random">Aleatorio</string>
+    <string name="queue_loop">Repetir la cola</string>
 </resources>
