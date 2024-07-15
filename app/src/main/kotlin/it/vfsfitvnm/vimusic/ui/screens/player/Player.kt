@@ -4,7 +4,6 @@ import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
-import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -229,65 +228,63 @@ fun Player(
             }
         }
 
-        Row(
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
-                .clickable { isQueueOpen = true }
-                .background(MaterialTheme.colorScheme.surfaceColorAtElevation(5.dp))
-                .padding(horizontal = 8.dp, vertical = 4.dp)
-                .pointerInput(Unit) {
-                    detectVerticalDragGestures(
-                        onVerticalDrag = { _, dragAmount ->
-                            if (dragAmount < 0) isQueueOpen = true
-                        }
-                    )
-                },
-            verticalAlignment = Alignment.CenterVertically
+        SwipeToOpenBox(
+            modifier = Modifier.align(Alignment.BottomCenter),
+            openAction = { isQueueOpen = true },
+            anchorValue = 150F
         ) {
-            IconButton(onClick = { isQueueOpen = true }) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Outlined.PlaylistPlay,
-                    contentDescription = null
-                )
-            }
-
-            Text(
-                text = nextSongTitle,
-                style = MaterialTheme.typography.labelLarge,
-                modifier = Modifier.weight(1F),
-                overflow = TextOverflow.Ellipsis,
-                maxLines = 1
-            )
-
-            TooltipIconButton(
-                description = R.string.sleep_timer,
-                onClick = { isShowingSleepTimerDialog = true },
-                icon = if (sleepTimerMillisLeft == null) Icons.Outlined.Timer else Icons.Filled.Timer
-            )
-
-            IconButton(
-                onClick = {
-                    menuState.display {
-                        BaseMediaItemMenu(
-                            onDismiss = menuState::hide,
-                            mediaItem = mediaItem,
-                            onStartRadio = {
-                                binder.stopRadio()
-                                binder.player.seamlessPlay(mediaItem)
-                                binder.setupRadio(NavigationEndpoint.Endpoint.Watch(videoId = mediaItem.mediaId))
-                            },
-                            onGoToAlbum = onGoToAlbum,
-                            onGoToArtist = onGoToArtist
-                        )
-                    }
-                }
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
+                    .clickable { isQueueOpen = true }
+                    .background(MaterialTheme.colorScheme.surfaceColorAtElevation(5.dp))
+                    .padding(horizontal = 8.dp, vertical = 4.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(
-                    imageVector = Icons.Outlined.MoreHoriz,
-                    contentDescription = null,
+                IconButton(onClick = { isQueueOpen = true }) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Outlined.PlaylistPlay,
+                        contentDescription = null
+                    )
+                }
+
+                Text(
+                    text = nextSongTitle,
+                    style = MaterialTheme.typography.labelLarge,
+                    modifier = Modifier.weight(1F),
+                    overflow = TextOverflow.Ellipsis,
+                    maxLines = 1
                 )
+
+                TooltipIconButton(
+                    description = R.string.sleep_timer,
+                    onClick = { isShowingSleepTimerDialog = true },
+                    icon = if (sleepTimerMillisLeft == null) Icons.Outlined.Timer else Icons.Filled.Timer
+                )
+
+                IconButton(
+                    onClick = {
+                        menuState.display {
+                            BaseMediaItemMenu(
+                                onDismiss = menuState::hide,
+                                mediaItem = mediaItem,
+                                onStartRadio = {
+                                    binder.stopRadio()
+                                    binder.player.seamlessPlay(mediaItem)
+                                    binder.setupRadio(NavigationEndpoint.Endpoint.Watch(videoId = mediaItem.mediaId))
+                                },
+                                onGoToAlbum = onGoToAlbum,
+                                onGoToArtist = onGoToArtist
+                            )
+                        }
+                    }
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.MoreHoriz,
+                        contentDescription = null,
+                    )
+                }
             }
         }
 
