@@ -12,6 +12,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.PlaylistPlay
 import androidx.compose.material.icons.automirrored.outlined.QueueMusic
 import androidx.compose.material.icons.outlined.Album
 import androidx.compose.material.icons.outlined.LibraryMusic
@@ -40,10 +41,12 @@ import it.vfsfitvnm.vimusic.LocalPlayerServiceBinder
 import it.vfsfitvnm.vimusic.R
 import it.vfsfitvnm.vimusic.enums.SongSortBy
 import it.vfsfitvnm.vimusic.enums.SortOrder
+import it.vfsfitvnm.vimusic.models.ActionInfo
 import it.vfsfitvnm.vimusic.models.LocalMenuState
 import it.vfsfitvnm.vimusic.models.Section
 import it.vfsfitvnm.vimusic.models.Song
 import it.vfsfitvnm.vimusic.ui.components.ChipScaffold
+import it.vfsfitvnm.vimusic.ui.components.SwipeToActionBox
 import it.vfsfitvnm.vimusic.ui.components.themed.InHistoryMediaItemMenu
 import it.vfsfitvnm.vimusic.ui.components.themed.NonQueuedMediaItemMenu
 import it.vfsfitvnm.vimusic.ui.items.AlbumItem
@@ -56,6 +59,7 @@ import it.vfsfitvnm.vimusic.ui.items.SongItem
 import it.vfsfitvnm.vimusic.ui.items.VideoItem
 import it.vfsfitvnm.vimusic.ui.styling.Dimensions
 import it.vfsfitvnm.vimusic.utils.asMediaItem
+import it.vfsfitvnm.vimusic.utils.enqueue
 import it.vfsfitvnm.vimusic.utils.forcePlay
 import it.vfsfitvnm.vimusic.utils.forcePlayAtIndex
 import it.vfsfitvnm.vimusic.utils.rememberPreference
@@ -112,24 +116,33 @@ fun SearchResults(
                     },
                     emptyItemsText = emptyItemsText,
                     itemContent = { song ->
-                        SongItem(
-                            song = song,
-                            onClick = {
-                                binder?.stopRadio()
-                                binder?.player?.forcePlay(song.asMediaItem)
-                                binder?.setupRadio(song.info?.endpoint)
-                            },
-                            onLongClick = {
-                                menuState.display {
-                                    NonQueuedMediaItemMenu(
-                                        onDismiss = menuState::hide,
-                                        mediaItem = song.asMediaItem,
-                                        onGoToAlbum = onAlbumClick,
-                                        onGoToArtist = onArtistClick
-                                    )
+                        SwipeToActionBox(
+                            modifier = Modifier.animateItemPlacement(),
+                            primaryAction = ActionInfo(
+                                onClick = { binder?.player?.enqueue(song.asMediaItem) },
+                                icon = Icons.AutoMirrored.Outlined.PlaylistPlay,
+                                description = R.string.enqueue
+                            )
+                        ) {
+                            SongItem(
+                                song = song,
+                                onClick = {
+                                    binder?.stopRadio()
+                                    binder?.player?.forcePlay(song.asMediaItem)
+                                    binder?.setupRadio(song.info?.endpoint)
+                                },
+                                onLongClick = {
+                                    menuState.display {
+                                        NonQueuedMediaItemMenu(
+                                            onDismiss = menuState::hide,
+                                            mediaItem = song.asMediaItem,
+                                            onGoToAlbum = onAlbumClick,
+                                            onGoToArtist = onArtistClick
+                                        )
+                                    }
                                 }
-                            }
-                        )
+                            )
+                        }
                     },
                     itemPlaceholderContent = {
                         ListItemPlaceholder()
