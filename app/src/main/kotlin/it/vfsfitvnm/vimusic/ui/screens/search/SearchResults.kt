@@ -18,7 +18,6 @@ import androidx.compose.material.icons.outlined.LibraryMusic
 import androidx.compose.material.icons.outlined.Movie
 import androidx.compose.material.icons.outlined.MusicNote
 import androidx.compose.material.icons.outlined.Person
-import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -65,9 +64,8 @@ import it.vfsfitvnm.vimusic.utils.searchResultScreenTabIndexKey
 @ExperimentalFoundationApi
 @ExperimentalAnimationApi
 @Composable
-fun SearchResultScreen(
+fun SearchResults(
     query: String,
-    pop: () -> Unit,
     onAlbumClick: (String) -> Unit,
     onArtistClick: (String) -> Unit,
     onPlaylistClick: (String) -> Unit
@@ -85,9 +83,6 @@ fun SearchResultScreen(
     )
 
     ChipScaffold(
-        topIconButtonId = Icons.Outlined.Search,
-        onTopIconButtonClick = pop,
-        sectionTitle = query,
         tabIndex = tabIndex,
         onTabChanged = onTabIndexChanges,
         tabColumnContent = sections
