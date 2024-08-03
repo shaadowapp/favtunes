@@ -10,14 +10,17 @@ import android.os.IBinder
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Surface
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.CompositionLocalProvider
@@ -97,6 +100,14 @@ class MainActivity : ComponentActivity() {
                             rememberModalBottomSheetState(skipPartiallyExpanded = true)
                         val scope = rememberCoroutineScope()
 
+                        val cornerRadius by animateDpAsState(
+                            targetValue = when (playerState.targetValue) {
+                                SheetValue.Expanded -> 0.dp
+                                else -> 28.dp
+                            },
+                            label = "radius"
+                        )
+
                         fun closePlayer() {
                             scope.launch { playerState.hide() }.invokeOnCompletion {
                                 if (!playerState.isVisible) isPlayerOpen = false
@@ -120,6 +131,7 @@ class MainActivity : ComponentActivity() {
                                 onDismissRequest = { closePlayer() },
                                 modifier = Modifier.fillMaxWidth(),
                                 sheetState = playerState,
+                                shape = RoundedCornerShape(cornerRadius),
                                 dragHandle = {
                                     Surface(
                                         modifier = Modifier.padding(vertical = 12.dp),
