@@ -1,6 +1,7 @@
 package it.vfsfitvnm.vimusic.ui.screens.player
 
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -31,6 +32,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -131,6 +133,15 @@ fun Player(
     val sleepTimerMillisLeft by (binder.sleepTimerMillisLeft
         ?: flowOf(null))
         .collectAsState(initial = null)
+
+    val queueState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val cornerRadius by animateDpAsState(
+        targetValue = when (queueState.targetValue) {
+            SheetValue.Expanded -> 0.dp
+            else -> 28.dp
+        },
+        label = "radius"
+    )
 
     LaunchedEffect(mediaItem) {
         withContext(Dispatchers.IO) {
@@ -418,7 +429,8 @@ fun Player(
             ModalBottomSheet(
                 onDismissRequest = { isQueueOpen = false },
                 modifier = Modifier.fillMaxWidth(),
-                sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+                sheetState = queueState,
+                shape = RoundedCornerShape(cornerRadius),
                 dragHandle = {
                     Surface(
                         modifier = Modifier.padding(vertical = 12.dp),
