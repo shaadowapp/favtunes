@@ -9,6 +9,7 @@ import android.os.Bundle
 import android.os.IBinder
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -79,6 +80,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
 
         val launchedFromNotification = intent?.extras?.getBoolean("expandPlayerBottomSheet") == true
         data = intent?.data ?: intent?.getStringExtra(Intent.EXTRA_TEXT)?.toUri()
@@ -104,8 +106,11 @@ class MainActivity : ComponentActivity() {
                         Surface(color = MaterialTheme.colorScheme.background) {
                             Navigation(
                                 navController = navController,
-                                player = {
-                                    MiniPlayer(openPlayer = { isPlayerOpen = true })
+                                player = { applyPadding ->
+                                    MiniPlayer(
+                                        openPlayer = { isPlayerOpen = true },
+                                        applyPadding = applyPadding
+                                    )
                                 }
                             )
                         }
