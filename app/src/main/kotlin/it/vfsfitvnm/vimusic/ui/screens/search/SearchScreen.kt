@@ -1,6 +1,7 @@
 package it.vfsfitvnm.vimusic.ui.screens.search
 
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -8,6 +9,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -21,8 +23,10 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SearchBar
+import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -40,6 +44,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import it.vfsfitvnm.innertube.Innertube
 import it.vfsfitvnm.innertube.models.bodies.SearchSuggestionsBody
 import it.vfsfitvnm.innertube.requests.searchSuggestions
@@ -71,6 +76,11 @@ fun SearchScreen(
     var active by rememberSaveable { mutableStateOf(true) }
     var searchText: String? by rememberSaveable { mutableStateOf(null) }
     val focusRequester = remember { FocusRequester() }
+
+    val searchBarPadding = animateDpAsState(
+        targetValue = if (active) 0.dp else 16.dp,
+        label = "padding"
+    )
 
     fun onSearch(searchQuery: String) {
         query = searchQuery
@@ -117,7 +127,9 @@ fun SearchScreen(
                 if (searchText.isNullOrEmpty() && !activeState) pop()
                 else active = activeState
             },
-            modifier = Modifier.focusRequester(focusRequester),
+            modifier = Modifier
+                .focusRequester(focusRequester)
+                .padding(horizontal = searchBarPadding.value),
             placeholder = {
                 Text(text = stringResource(id = R.string.search))
             },
@@ -181,7 +193,10 @@ fun SearchScreen(
                                     )
                                 }
                             }
-                        }
+                        },
+                        colors = ListItemDefaults.colors(
+                            containerColor = SearchBarDefaults.colors().containerColor
+                        )
                     )
                 }
 
@@ -208,7 +223,10 @@ fun SearchScreen(
                                         contentDescription = null
                                     )
                                 }
-                            }
+                            },
+                            colors = ListItemDefaults.colors(
+                                containerColor = SearchBarDefaults.colors().containerColor
+                            )
                         )
                     }
                 } ?: suggestionsResult?.exceptionOrNull()?.let {

@@ -1,14 +1,16 @@
 package it.vfsfitvnm.vimusic.ui.screens
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.layout.Column
-import androidx.compose.material3.Surface
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.SheetState
+import androidx.compose.material3.SheetValue
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.lifecycle.Lifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -26,22 +28,24 @@ import it.vfsfitvnm.vimusic.ui.screens.playlist.PlaylistScreen
 import it.vfsfitvnm.vimusic.ui.screens.search.SearchScreen
 import it.vfsfitvnm.vimusic.ui.screens.settings.SettingsPage
 import it.vfsfitvnm.vimusic.ui.screens.settings.SettingsScreen
+import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalFoundationApi::class, ExperimentalAnimationApi::class)
+@OptIn(
+    ExperimentalFoundationApi::class,
+    ExperimentalAnimationApi::class,
+    ExperimentalMaterial3Api::class
+)
 @Composable
 fun Navigation(
     navController: NavHostController,
-    player: @Composable (Boolean) -> Unit = {}
+    sheetState: SheetState
 ) {
-    @Composable
-    fun PlayerScaffold(content: @Composable () -> Unit) {
-        Column {
-            Surface(
-                modifier = Modifier.weight(1F),
-                content = content
-            )
+    val scope = rememberCoroutineScope()
 
-            player(true)
+    @Composable
+    fun SheetBackHandler() {
+        BackHandler(enabled = sheetState.currentValue == SheetValue.Expanded) {
+            scope.launch { sheetState.partialExpand() }
         }
     }
 
@@ -63,8 +67,46 @@ fun Navigation(
         composable(route = "home") {
             HomeScreen(
                 navController = navController,
-                player = { player(false) }
+                screenIndex = 0
             )
+
+            SheetBackHandler()
+        }
+
+        composable(route = "songs") {
+            HomeScreen(
+                navController = navController,
+                screenIndex = 1
+            )
+
+            SheetBackHandler()
+        }
+
+        composable(route = "artists") {
+            HomeScreen(
+                navController = navController,
+                screenIndex = 2
+            )
+
+            SheetBackHandler()
+        }
+
+        composable(route = "albums") {
+            HomeScreen(
+                navController = navController,
+                screenIndex = 3
+            )
+
+            SheetBackHandler()
+        }
+
+        composable(route = "playlists") {
+            HomeScreen(
+                navController = navController,
+                screenIndex = 4
+            )
+
+            SheetBackHandler()
         }
 
         composable(
@@ -78,13 +120,13 @@ fun Navigation(
         ) { navBackStackEntry ->
             val id = navBackStackEntry.arguments?.getString("id") ?: ""
 
-            PlayerScaffold {
-                ArtistScreen(
-                    browseId = id,
-                    pop = popDestination,
-                    onAlbumClick = navigateToAlbum
-                )
-            }
+            ArtistScreen(
+                browseId = id,
+                pop = popDestination,
+                onAlbumClick = navigateToAlbum
+            )
+
+            SheetBackHandler()
         }
 
         composable(
@@ -98,14 +140,14 @@ fun Navigation(
         ) { navBackStackEntry ->
             val id = navBackStackEntry.arguments?.getString("id") ?: ""
 
-            PlayerScaffold {
-                AlbumScreen(
-                    browseId = id,
-                    pop = popDestination,
-                    onAlbumClick = navigateToAlbum,
-                    onGoToArtist = navigateToArtist
-                )
-            }
+            AlbumScreen(
+                browseId = id,
+                pop = popDestination,
+                onAlbumClick = navigateToAlbum,
+                onGoToArtist = navigateToArtist
+            )
+
+            SheetBackHandler()
         }
 
         composable(
@@ -119,23 +161,23 @@ fun Navigation(
         ) { navBackStackEntry ->
             val id = navBackStackEntry.arguments?.getString("id") ?: ""
 
-            PlayerScaffold {
-                PlaylistScreen(
-                    browseId = id,
-                    pop = popDestination,
-                    onGoToAlbum = navigateToAlbum,
-                    onGoToArtist = navigateToArtist
-                )
-            }
+            PlaylistScreen(
+                browseId = id,
+                pop = popDestination,
+                onGoToAlbum = navigateToAlbum,
+                onGoToArtist = navigateToArtist
+            )
+
+            SheetBackHandler()
         }
 
         composable(route = "settings") {
-            PlayerScaffold {
-                SettingsScreen(
-                    pop = popDestination,
-                    onGoToSettingsPage = { index -> navController.navigate("settingsPage/$index") }
-                )
-            }
+            SettingsScreen(
+                pop = popDestination,
+                onGoToSettingsPage = { index -> navController.navigate("settingsPage/$index") }
+            )
+
+            SheetBackHandler()
         }
 
         composable(
@@ -149,23 +191,23 @@ fun Navigation(
         ) { navBackStackEntry ->
             val index = navBackStackEntry.arguments?.getInt("index") ?: 0
 
-            PlayerScaffold {
-                SettingsPage(
-                    section = SettingsSection.entries[index],
-                    pop = popDestination
-                )
-            }
+            SettingsPage(
+                section = SettingsSection.entries[index],
+                pop = popDestination
+            )
+
+            SheetBackHandler()
         }
 
         composable(route = "search") {
-            PlayerScaffold {
-                SearchScreen(
-                    pop = popDestination,
-                    onAlbumClick = navigateToAlbum,
-                    onArtistClick = navigateToArtist,
-                    onPlaylistClick = { browseId -> navController.navigate("playlist/$browseId") }
-                )
-            }
+            SearchScreen(
+                pop = popDestination,
+                onAlbumClick = navigateToAlbum,
+                onArtistClick = navigateToArtist,
+                onPlaylistClick = { browseId -> navController.navigate("playlist/$browseId") }
+            )
+
+            SheetBackHandler()
         }
 
         composable(
@@ -179,14 +221,14 @@ fun Navigation(
         ) { navBackStackEntry ->
             val index = navBackStackEntry.arguments?.getInt("index") ?: 0
 
-            PlayerScaffold {
-                BuiltInPlaylistScreen(
-                    builtInPlaylist = BuiltInPlaylist.entries[index],
-                    pop = popDestination,
-                    onGoToAlbum = navigateToAlbum,
-                    onGoToArtist = navigateToArtist
-                )
-            }
+            BuiltInPlaylistScreen(
+                builtInPlaylist = BuiltInPlaylist.entries[index],
+                pop = popDestination,
+                onGoToAlbum = navigateToAlbum,
+                onGoToArtist = navigateToArtist
+            )
+
+            SheetBackHandler()
         }
 
         composable(
@@ -200,14 +242,14 @@ fun Navigation(
         ) { navBackStackEntry ->
             val id = navBackStackEntry.arguments?.getLong("id") ?: 0L
 
-            PlayerScaffold {
-                LocalPlaylistScreen(
-                    playlistId = id,
-                    pop = popDestination,
-                    onGoToAlbum = navigateToAlbum,
-                    onGoToArtist = navigateToArtist
-                )
-            }
+            LocalPlaylistScreen(
+                playlistId = id,
+                pop = popDestination,
+                onGoToAlbum = navigateToAlbum,
+                onGoToArtist = navigateToArtist
+            )
+
+            SheetBackHandler()
         }
     }
 }
