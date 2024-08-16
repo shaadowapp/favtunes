@@ -19,6 +19,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import it.vfsfitvnm.vimusic.enums.BuiltInPlaylist
 import it.vfsfitvnm.vimusic.enums.SettingsSection
+import it.vfsfitvnm.vimusic.models.Screen
 import it.vfsfitvnm.vimusic.ui.screens.album.AlbumScreen
 import it.vfsfitvnm.vimusic.ui.screens.artist.ArtistScreen
 import it.vfsfitvnm.vimusic.ui.screens.builtinplaylist.BuiltInPlaylistScreen
@@ -54,8 +55,7 @@ fun Navigation(
         startDestination = "home",
         enterTransition = { slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Left) + fadeIn() },
         exitTransition = { fadeOut() },
-        popEnterTransition = { slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Right) + fadeIn() },
-        popExitTransition = { fadeOut() }
+        popEnterTransition = { slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Right) + fadeIn() }
     ) {
         val navigateToAlbum =
             { browseId: String -> navController.navigate(route = "album/$browseId") }
@@ -64,7 +64,29 @@ fun Navigation(
             if (navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) navController.popBackStack()
         }
 
-        composable(route = "home") {
+        val homeRoutes = listOf(
+            Screen.Home,
+            Screen.Songs,
+            Screen.Artists,
+            Screen.Albums,
+            Screen.Playlists
+        ).map { it.route }
+
+        composable(
+            route = "home",
+            enterTransition = {
+                if (homeRoutes.contains(initialState.destination.route)) slideIntoContainer(
+                    AnimatedContentTransitionScope.SlideDirection.Up
+                ) + fadeIn()
+                else slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Left) + fadeIn()
+            },
+            popEnterTransition = {
+                if (homeRoutes.contains(initialState.destination.route)) slideIntoContainer(
+                    AnimatedContentTransitionScope.SlideDirection.Up
+                ) + fadeIn()
+                else slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Right) + fadeIn()
+            }
+        ) {
             HomeScreen(
                 navController = navController,
                 screenIndex = 0
@@ -73,7 +95,21 @@ fun Navigation(
             SheetBackHandler()
         }
 
-        composable(route = "songs") {
+        composable(
+            route = "songs",
+            enterTransition = {
+                if (homeRoutes.contains(initialState.destination.route)) slideIntoContainer(
+                    AnimatedContentTransitionScope.SlideDirection.Up
+                ) + fadeIn()
+                else slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Left) + fadeIn()
+            },
+            popEnterTransition = {
+                if (homeRoutes.contains(initialState.destination.route)) slideIntoContainer(
+                    AnimatedContentTransitionScope.SlideDirection.Up
+                ) + fadeIn()
+                else slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Right) + fadeIn()
+            }
+        ) {
             HomeScreen(
                 navController = navController,
                 screenIndex = 1
@@ -82,7 +118,21 @@ fun Navigation(
             SheetBackHandler()
         }
 
-        composable(route = "artists") {
+        composable(
+            route = "artists",
+            enterTransition = {
+                if (homeRoutes.contains(initialState.destination.route)) slideIntoContainer(
+                    AnimatedContentTransitionScope.SlideDirection.Up
+                ) + fadeIn()
+                else slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Left) + fadeIn()
+            },
+            popEnterTransition = {
+                if (homeRoutes.contains(initialState.destination.route)) slideIntoContainer(
+                    AnimatedContentTransitionScope.SlideDirection.Up
+                ) + fadeIn()
+                else slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Right) + fadeIn()
+            }
+        ) {
             HomeScreen(
                 navController = navController,
                 screenIndex = 2
@@ -91,7 +141,21 @@ fun Navigation(
             SheetBackHandler()
         }
 
-        composable(route = "albums") {
+        composable(
+            route = "albums",
+            enterTransition = {
+                if (homeRoutes.contains(initialState.destination.route)) slideIntoContainer(
+                    AnimatedContentTransitionScope.SlideDirection.Up
+                ) + fadeIn()
+                else slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Left) + fadeIn()
+            },
+            popEnterTransition = {
+                if (homeRoutes.contains(initialState.destination.route)) slideIntoContainer(
+                    AnimatedContentTransitionScope.SlideDirection.Up
+                ) + fadeIn()
+                else slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Right) + fadeIn()
+            }
+        ) {
             HomeScreen(
                 navController = navController,
                 screenIndex = 3
@@ -100,7 +164,21 @@ fun Navigation(
             SheetBackHandler()
         }
 
-        composable(route = "playlists") {
+        composable(
+            route = "playlists",
+            enterTransition = {
+                if (homeRoutes.contains(initialState.destination.route)) slideIntoContainer(
+                    AnimatedContentTransitionScope.SlideDirection.Up
+                ) + fadeIn()
+                else slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Left) + fadeIn()
+            },
+            popEnterTransition = {
+                if (homeRoutes.contains(initialState.destination.route)) slideIntoContainer(
+                    AnimatedContentTransitionScope.SlideDirection.Up
+                ) + fadeIn()
+                else slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Right) + fadeIn()
+            }
+        ) {
             HomeScreen(
                 navController = navController,
                 screenIndex = 4
