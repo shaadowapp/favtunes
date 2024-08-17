@@ -1,7 +1,6 @@
 package it.vfsfitvnm.vimusic.ui.screens.search
 
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -9,7 +8,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -44,7 +42,6 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
 import it.vfsfitvnm.innertube.Innertube
 import it.vfsfitvnm.innertube.models.bodies.SearchSuggestionsBody
 import it.vfsfitvnm.innertube.requests.searchSuggestions
@@ -73,19 +70,14 @@ fun SearchScreen(
     var suggestionsResult: Result<List<String>?>? by remember { mutableStateOf(null) }
 
     var query by rememberSaveable { mutableStateOf("") }
-    var active by rememberSaveable { mutableStateOf(true) }
+    var expanded by rememberSaveable { mutableStateOf(true) }
     var searchText: String? by rememberSaveable { mutableStateOf(null) }
     val focusRequester = remember { FocusRequester() }
-
-    val searchBarPadding = animateDpAsState(
-        targetValue = if (active) 0.dp else 16.dp,
-        label = "padding"
-    )
 
     fun onSearch(searchQuery: String) {
         query = searchQuery
         searchText = searchQuery
-        active = false
+        expanded = false
 
         if (!context.preferences.getBoolean(pauseSearchHistoryKey, false)) {
             query {
@@ -113,44 +105,50 @@ fun SearchScreen(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        val onExpandedChange: (Boolean) -> Unit = { expandedState ->
+            if (searchText.isNullOrEmpty() && !expandedState) pop()
+            else expanded = expandedState
+        }
+
         SearchBar(
-            query = query,
-            onQueryChange = { query = it },
-            onSearch = {
-                if (query.isNotBlank()) {
-                    searchText = query
-                    active = false
-                }
-            },
-            active = active,
-            onActiveChange = { activeState ->
-                if (searchText.isNullOrEmpty() && !activeState) pop()
-                else active = activeState
-            },
-            modifier = Modifier
-                .focusRequester(focusRequester)
-                .padding(horizontal = searchBarPadding.value),
-            placeholder = {
-                Text(text = stringResource(id = R.string.search))
-            },
-            leadingIcon = {
-                IconButton(onClick = pop) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
-                        contentDescription = null
-                    )
-                }
-            },
-            trailingIcon = {
-                if (query.isNotBlank() && active) {
-                    IconButton(onClick = { query = "" }) {
-                        Icon(
-                            imageVector = Icons.Outlined.Close,
-                            contentDescription = null
-                        )
+            inputField = {
+                SearchBarDefaults.InputField(
+                    query = query,
+                    onQueryChange = { query = it },
+                    onSearch = {
+                        if (query.isNotBlank()) {
+                            searchText = query
+                            expanded = false
+                        }
+                    },
+                    expanded = expanded,
+                    onExpandedChange = onExpandedChange,
+                    placeholder = {
+                        Text(text = stringResource(id = R.string.search))
+                    },
+                    leadingIcon = {
+                        IconButton(onClick = pop) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
+                                contentDescription = null
+                            )
+                        }
+                    },
+                    trailingIcon = {
+                        if (query.isNotBlank() && expanded) {
+                            IconButton(onClick = { query = "" }) {
+                                Icon(
+                                    imageVector = Icons.Outlined.Close,
+                                    contentDescription = null
+                                )
+                            }
+                        }
                     }
-                }
-            }
+                )
+            },
+            expanded = expanded,
+            onExpandedChange = onExpandedChange,
+            modifier = Modifier.focusRequester(focusRequester)
         ) {
             LazyColumn {
                 items(
