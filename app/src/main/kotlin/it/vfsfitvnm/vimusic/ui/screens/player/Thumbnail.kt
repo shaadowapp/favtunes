@@ -45,6 +45,7 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.ParserException
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
+import androidx.media3.common.util.UnstableApi
 import coil3.compose.AsyncImage
 import it.vfsfitvnm.vimusic.Database
 import it.vfsfitvnm.vimusic.LocalPlayerServiceBinder
@@ -98,6 +99,7 @@ fun Thumbnail(
                 error = player.playerError
             }
 
+            @androidx.annotation.OptIn(UnstableApi::class)
             override fun onPlayerError(playbackException: PlaybackException) {
                 error = playbackException
 
