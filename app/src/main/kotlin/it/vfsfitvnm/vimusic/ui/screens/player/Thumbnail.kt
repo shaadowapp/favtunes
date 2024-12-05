@@ -42,6 +42,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.media3.common.MediaItem
+import androidx.media3.common.ParserException
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import coil3.compose.AsyncImage
@@ -102,7 +103,12 @@ fun Thumbnail(
 
                 when (error?.cause?.cause) {
                     is PlayableFormatNotFoundException, is UnplayableException, is LoginRequiredException, is VideoIdMismatchException -> player.seekToNext()
-                    else -> player.prepare()
+                    else -> {
+                        if (error?.cause is ParserException) player.currentMediaItem?.let {
+                            binder.cache.removeResource(it.mediaId)
+                        }
+                        player.prepare()
+                    }
                 }
             }
         }
