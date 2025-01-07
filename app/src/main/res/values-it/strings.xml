@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name" translatable="false">Music You</string>
     <string name="home">Home</string>
     <string name="songs">Canzoni</string>
     <string name="playlists">Playlist</string>
@@ -21,7 +20,7 @@
     <string name="play_next">Riproduci successivo</string>
     <string name="enqueue">Aggiungi alla coda</string>
     <string name="add_to_playlist">Aggiungi alla playlist</string>
-    <string name="go_to_album">Vai all'album</string>
+    <string name="go_to_album">Vai all\'album</string>
     <string name="overview">Panoramica</string>
     <string name="other_versions">Altre versioni</string>
     <string name="videos">Video</string>
@@ -38,7 +37,7 @@
     <string name="loudness_normalization">Normalizzazione del volume</string>
     <string name="loudness_normalization_description">Regola il volume a un livello fisso</string>
     <string name="equalizer">Equalizzatore</string>
-    <string name="equalizer_description">Interagisci con l'equalizzatore del sistema</string>
+    <string name="equalizer_description">Interagisci con l\'equalizzatore del sistema</string>
     <string name="show_song_cover">Mostra la copertura della canzone</string>
     <string name="show_song_cover_description">Usa la copertura della canzone in riproduzione come sfondo della schermata di blocco</string>
     <string name="settings">Impostazioni</string>
@@ -49,10 +48,9 @@
     <string name="backup">Backup</string>
     <string name="restore">Ripristina</string>
     <string name="reset_quick_picks">Ripristina le scelte rapide</string>
-    <string name="restore_information">L'app si chiuderà automaticamente dopo il ripristino del database e i dati esistenti verranno sovrascritti.</string>
+    <string name="restore_information">L\'app si chiuderà automaticamente dopo il ripristino del database e i dati esistenti verranno sovrascritti.</string>
     <string name="backup_description">Esporta il database nella memoria esterna</string>
     <string name="restore_description">Importa il database dalla memoria esterna</string>
-    <string name="android_auto" translatable="false">Android Auto</string>
     <string name="service_lifetime">Durata del servizio</string>
     <string name="pause_search_history">Pausa cronologia ricerche</string>
     <string name="pause_search_history_description">Non salvare nuove ricerche né mostrare la cronologia</string>
@@ -62,7 +60,7 @@
     <string name="ignore_battery_optimizations">Ignora le ottimizzazioni della batteria</string>
     <string name="service_lifetime_description">Quando disattivare le ottimizzazioni della batteria non è sufficiente</string>
     <string name="service_lifetime_information">Se le ottimizzazioni della batteria sono attive, la notifica di riproduzione potrebbe scomparire improvvisamente quando la riproduzione è in pausa.</string>
-    <string name="service_lifetime_information_plus">Dal sistema Android 12, disabilitare le ottimizzazioni della batteria è necessario affinché l'opzione "Servizio invincibile" abbia effetto.</string>
+    <string name="service_lifetime_information_plus">Dal sistema Android 12, disabilitare le ottimizzazioni della batteria è necessario affinché l\'opzione "Servizio invincibile" abbia effetto.</string>
     <string name="about">Informazioni</string>
     <string name="search">Cerca</string>
     <string name="featured">In evidenza</string>
@@ -73,7 +71,6 @@
     <string name="hide">Nascondi</string>
     <string name="remove_from_queue">Rimuovi dalla coda</string>
     <string name="remove_from_playlist">Rimuovi dalla playlist</string>
-    <string name="github" translatable="false">GitHub</string>
     <string name="shuffle">Mescola</string>
     <string name="quick_picks">Scelte rapide</string>
     <string name="view_all">Vedi tutto</string>
@@ -91,18 +88,22 @@
     <string name="search_lyrics_online">Cerca il testo online</string>
     <plurals name="number_of_songs">
         <item quantity="one">%d canzone</item>
+        <item quantity="many">%d canzoni</item>
         <item quantity="other">%d canzoni</item>
     </plurals>
     <plurals name="number_of_artists">
         <item quantity="one">%d artista</item>
+        <item quantity="many">%d artisti</item>
         <item quantity="other">%d artisti</item>
     </plurals>
     <plurals name="number_of_albums">
         <item quantity="one">%d album</item>
+        <item quantity="many">%d album</item>
         <item quantity="other">%d album</item>
     </plurals>
     <plurals name="number_of_playlists">
         <item quantity="one">%d playlist</item>
+        <item quantity="many">%d playlist</item>
         <item quantity="other">%d playlist</item>
     </plurals>
     <string name="hide_from_quick_picks">Nascondi dalle scelte rapide</string>
@@ -123,7 +124,7 @@
     <string name="playable_format_not_found_error">Formato audio riproducibile non trovato</string>
     <string name="video_source_deleted_error">La fonte video originale di questa canzone è stata eliminata</string>
     <string name="server_restrictions_error">Questa canzone non può essere riprodotta a causa di restrizioni del server</string>
-    <string name="id_mismatch_error">L'id video restituito non corrisponde a quello richiesto</string>
+    <string name="id_mismatch_error">L\'id video restituito non corrisponde a quello richiesto</string>
     <string name="unknown_playback_error">Si è verificato un errore sconosciuto di riproduzione</string>
     <string name="no_alternative_versions">Questo album non ha versioni alternative</string>
     <string name="fetch_lyrics_again">Riprova a recuperare il testo</string>
@@ -143,8 +144,8 @@
     <string name="no_singles_artist">Questo artista non ha rilasciato alcun singolo</string>
     <string name="open_supported_links_by_default">Apri i link supportati di default</string>
     <string name="configure_supported_links">Configura i link supportati</string>
-    <string name="app_language">Lingua dell'app</string>
-    <string name="configure_app_language">Configura la lingua dell'app</string>
+    <string name="app_language">Lingua dell\'app</string>
+    <string name="configure_app_language">Configura la lingua dell\'app</string>
     <string name="most_played">Più riprodotti</string>
     <string name="last_played">Ultima riproduzione</string>
     <string name="general">Generale</string>
@@ -168,8 +169,6 @@
     <string name="retry">Riprova</string>
     <string name="information">Informazioni</string>
     <string name="close">Chiudi</string>
-    <string name="id" translatable="false">Id</string>
-    <string name="itag" translatable="false">Itag</string>
     <string name="bitrate">Bitrate</string>
     <string name="size">Dimensione</string>
     <string name="cached">In cache</string>
