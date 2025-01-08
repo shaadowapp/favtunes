@@ -57,11 +57,20 @@ fun About() {
         )
 
         Text(
-            text = "${stringResource(id = R.string.app_name)} v${packageInfo.versionName}",
-            style = MaterialTheme.typography.titleLarge,
+            text = stringResource(id = R.string.app_name),
+            style = MaterialTheme.typography.headlineLarge,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 8.dp),
+            textAlign = TextAlign.Center
+        )
+
+        Text(
+            text = "HyTunes is a powerful music player that lets you stream your favorite songs, and customize your audio experience with an equalizer. Enjoy seamless playback and intuitive controls, all wrapped in a sleek and modern design.",
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 15.dp, top = 10.dp, end = 15.dp),
             textAlign = TextAlign.Center
         )
 
@@ -69,17 +78,26 @@ fun About() {
 
         ListItem(
             headlineContent = {
-                Text(text = stringResource(id = R.string.github))
+                Text(text = stringResource(id = R.string.share))
             },
             leadingContent = {
                 Icon(
-                    painter = painterResource(id = R.drawable.github),
-                    contentDescription = stringResource(id = R.string.github)
+                    painter = painterResource(id = R.drawable.share_icon),
+                    contentDescription = stringResource(id = R.string.share)
                 )
             },
             modifier = Modifier.clickable {
-                uriHandler.openUri("https://github.com/DanielSevillano/music-you")
+                uriHandler.openUri("https://tunes.shaadow.in?utm_source=hytunes-app&utm_from=hytunes#about-screen&utm_pkg=com-shaadow-tunes")
             }
+        )
+
+        Text(
+            text = "v${packageInfo.versionName}",
+            style = MaterialTheme.typography.labelMedium,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 5.dp),
+            textAlign = TextAlign.Center
         )
     }
 }
