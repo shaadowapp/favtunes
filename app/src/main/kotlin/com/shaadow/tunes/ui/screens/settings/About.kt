@@ -2,6 +2,7 @@ package com.shaadow.tunes.ui.screens.settings
 
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
@@ -14,7 +15,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
-import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -25,12 +25,21 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.shaadow.tunes.LocalPlayerPadding
 import com.shaadow.tunes.R
 import com.shaadow.tunes.ui.styling.Dimensions
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.annotation.RequiresApi
+import androidx.compose.foundation.Image
+import androidx.compose.material3.Button
 
+
+@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @ExperimentalAnimationApi
 @Composable
 fun About() {
@@ -44,16 +53,20 @@ fun About() {
             .verticalScroll(rememberScrollState())
             .padding(top = 8.dp, bottom = 16.dp + playerPadding)
     ) {
-        val packageManager = context.packageManager
-        val packageName = context.packageName
-        val packageInfo = packageManager.getPackageInfo(packageName, 0)
+        val packageInfo = context.packageManager.getPackageInfo(
+            context.packageName,
+            PackageManager.PackageInfoFlags.of(0)
+        )
+        val versionCode = packageInfo.versionName
+
 
         Icon(
             painter = painterResource(id = R.drawable.app_icon),
             contentDescription = stringResource(id = R.string.app_name),
             modifier = Modifier
                 .align(Alignment.CenterHorizontally)
-                .width(112.dp)
+                .width(108.dp)
+                .padding(top = 25.dp)
                 .aspectRatio(1F),
             tint = Color.Red
         )
@@ -64,7 +77,8 @@ fun About() {
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 10.dp),
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Center,
+            fontWeight = FontWeight.Medium
         )
 
         Text(
@@ -72,42 +86,94 @@ fun About() {
             style = MaterialTheme.typography.bodyMedium,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = 15.dp, top = 15.dp, end = 15.dp),
-            textAlign = TextAlign.Center
+                .padding(start = 18.dp, top = 18.dp, end = 18.dp),
+            textAlign = TextAlign.Center,
+            color = Color(0xFFE2E2E2),
+            fontSize = 15.sp
         )
 
-        Spacer(modifier = Modifier.height(Dimensions.spacer + 8.dp))
+        Spacer(modifier = Modifier.height(Dimensions.spacer + 20.dp))
 
-        ListItem(
-            headlineContent = {
-                Text(
-                    text = stringResource(id = R.string.share)
-                )
-            },
-            leadingContent = {
-                Icon(
-                    painter = painterResource(id = R.drawable.share_icon),
-                    contentDescription = stringResource(id = R.string.share),
-                    modifier = Modifier
-                        .size(18.dp),
-                    tint = Color.Blue
-                )
-            },
+        Box(
             modifier = Modifier
-                .padding(start = 15.dp) // Add padding from the left
-                .clickable {
-                    uriHandler.openUri("https://tunes.shaadow.in?utm_source=hytunes-app&utm_from=hytunes#about-screen&utm_pkg=com-shaadow-tunes")
-                }
-        )
+                .fillMaxSize() // Fill the entire screen
+                .padding(16.dp),
+            contentAlignment = Alignment.Center // Center content both vertically and horizontally
+        ) {
+            GoToLinkButton(
+                url = "https://tunes.shaadow.in?utm_source=HyTunes_Android&utm_from=setting-about&utm_pkg=com-shaadow-tunes",
+                buttonText = "Our official website"
+            )
+        }
+        
+        Spacer(modifier = Modifier.height(Dimensions.spacer + 25.dp))
+
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(top= 15.dp,start=18.dp) // Add padding around the edges
+        ) {
+            Column(
+                modifier = Modifier
+                    .align(Alignment.BottomStart) // Align text at the bottom-left corner
+                    .padding(bottom = 16.dp), // Add bottom padding if needed
+                horizontalAlignment = Alignment.Start // Ensure left alignment for text
+            ) {
+                // First text: "PROUDLY INDIAN APP" - Big size, faded color
+                Text(
+                    text = "PROUDLY",
+                    fontSize = 50.sp, // Big font size
+                    fontWeight = FontWeight.ExtraBold,
+                    color = Color(0xFFE2E2E2), // Faded color
+                )
+                Text(
+                    text = "INDIAN",
+                    fontSize = 50.sp, // Big font size
+                    fontWeight = FontWeight.ExtraBold,
+                    color = Color(0xFFE2E2E2), // Faded color
+                )
+                Text(
+                    text = "APP",
+                    fontSize = 50.sp, // Big font size
+                    fontWeight = FontWeight.ExtraBold,
+                    color = Color(0xFFE2E2E2), // Faded color
+                )
+
+                // Second text: "MADE WITH ❤️ IN INDIA" - Normal size, faded color
+                Text(
+                    text = "MADE WITH ❤️ IN INDIA",
+                    fontSize = 15.sp, // Normal font size
+                    fontWeight = FontWeight.Medium,
+                    color = Color(0xFFE2E2E2), // Faded color (light grayish-blue)
+                    modifier = Modifier
+                        .padding(top = 5.dp)
+                )
+            }
+        }
+
 
 
         Text(
-            text = "v${packageInfo.versionName}",
+            text = "APP VERSION: $versionCode",
+            fontSize = 15.sp,
+            fontWeight = FontWeight.Normal,
             style = MaterialTheme.typography.labelLarge,
+            color = Color(0xFFE2E2E2),
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 285.dp),
-            textAlign = TextAlign.Center
+                .padding(top = 5.dp, start = 18.dp)
         )
     }
 }
+
+@Composable
+fun GoToLinkButton(url: String, buttonText: String) {
+    val uriHandler = LocalUriHandler.current // Get the UriHandler for opening links
+
+    Button(onClick = {
+        uriHandler.openUri(url) // Open the given URL
+    }) {
+        Text(text = buttonText) // Display the provided button text
+    }
+}
+

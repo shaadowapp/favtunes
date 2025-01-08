@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.shaadow.tunes.R
 
@@ -24,18 +25,21 @@ fun ProfileScreen(onBack: () -> Unit) {
         // Add profile content here
         Text(
             text = stringResource(id = R.string.profile_heading),
-            style = MaterialTheme.typography.titleSmall
+            style = MaterialTheme.typography.titleMedium
         )
 
         Text(
             text = stringResource(id = R.string.profile_desc),
-            style = MaterialTheme.typography.titleSmall
+            style = MaterialTheme.typography.bodyMedium,
+            modifier = Modifier
+                .padding(top = 12.dp, start = 18.dp, end = 18.dp),
+            textAlign = TextAlign.Center,
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(20.dp))
 
         Button(onClick = onBack) {
-            Text(text = "Go Back")
+            Text(text = "Sorry, Go Back")
         }
     }
 }

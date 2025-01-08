@@ -45,7 +45,7 @@ fun BottomNavigation(navController: NavHostController) {
 
     NavigationBar(
         modifier = if (navigationLabelsVisibility == NavigationLabelsVisibility.Hidden) Modifier.heightIn(
-            max = 90.dp
+            max = 95.dp
         ) else Modifier
     ) {
         homeScreens.forEachIndexed { index, screen ->
