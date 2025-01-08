@@ -10,7 +10,7 @@ android {
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.github.musicyou"
+        applicationId = "com.shaadow.tunes"
         minSdk = 21
         targetSdk = 35
         versionCode = 8

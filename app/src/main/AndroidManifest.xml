@@ -26,7 +26,7 @@
     </queries>
 
     <application
-        android:name=".MainApplication"
+        android:name="com.shaadow.tunes.MainApplication"
         android:allowBackup="true"
         android:banner="@mipmap/ic_banner"
         android:enableOnBackInvokedCallback="true"
@@ -39,7 +39,7 @@
         tools:targetApi="35">
 
         <activity
-            android:name=".MainActivity"
+            android:name="com.shaadow.tunes.MainActivity"
             android:exported="true"
             android:launchMode="singleTask"
             android:theme="@style/Theme.App.Starting">
@@ -98,7 +98,7 @@
         </activity>
 
         <service
-            android:name=".service.PlayerService"
+            android:name="com.shaadow.tunes.service.PlayerService"
             android:exported="false"
             android:foregroundServiceType="mediaPlayback">
 
@@ -108,7 +108,7 @@
         </service>
 
         <service
-            android:name=".service.PlayerMediaBrowserService"
+            android:name="com.shaadow.tunes.service.PlayerMediaBrowserService"
             android:enabled="false"
             android:exported="true"
             android:foregroundServiceType="mediaPlayback"
@@ -120,7 +120,7 @@
         </service>
 
         <receiver
-            android:name=".service.PlayerService$NotificationDismissReceiver"
+            android:name="com.shaadow.tunes.service.PlayerService$NotificationDismissReceiver"
             android:exported="false" />
 
         <meta-data
