@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="app_name">HyTunes</string>
     <string name="home">Startseite</string>
     <string name="songs">Songs</string>
     <string name="playlists">Wiedergabelisten</string>
@@ -41,6 +42,9 @@
     <string name="show_song_cover">Song-Cover anzeigen</string>
     <string name="show_song_cover_description">Verwenden Sie das Cover des gespielten Songs als Hintergrundbild für den Sperrbildschirm</string>
     <string name="settings">Einstellungen</string>
+    <string name="profile" translatable="false">Profil</string>
+    <string name="profile_heading">Profilseite in Arbeit</string>
+    <string name="profile_desc">Wir arbeiten an einem automatisierten Login-System, das die Notwendigkeit für persönliche Anmeldeinformationen wie E-Mail oder Telefonnummer eliminieren wird. Freuen Sie sich auf eine nahtlose und mühelose Anmeldung, die bald verfügbar sein wird.</string>
     <string name="image_cache">Bild-Cache</string>
     <string name="song_cache">Song-Cache</string>
     <string name="max_size">Max. Größe</string>
@@ -51,6 +55,7 @@
     <string name="restore_information">Die APP schließt sich nach der Wiederherstellung der Musik-Datenbank automatisch und die vorhandenen Daten werden überschrieben.</string>
     <string name="backup_description">Exportieren Sie die Musik-Datenbank auf den externen Speicher.</string>
     <string name="restore_description">Importieren Sie die Musik-Datenbank vom externen Speicher.</string>
+    <string name="android_auto">Android Auto</string>
     <string name="service_lifetime">Unbezwingbarer Dienst</string>
     <string name="pause_search_history">Suchverlauf anhalten</string>
     <string name="pause_search_history_description">Weder neue Suchanfragen speichern noch Verlauf anzeigen</string>
@@ -71,6 +76,7 @@
     <string name="hide">Löschen</string>
     <string name="remove_from_queue">Aus der Warteschlange entfernen</string>
     <string name="remove_from_playlist">Aus der Wiedergabeliste entfernen</string>
+    <string name="github">Github</string>
     <string name="shuffle">Shuffle</string>
     <string name="quick_picks">Empfehlungen</string>
     <string name="view_all">Alle anzeigen</string>
@@ -165,6 +171,7 @@
     <string name="retry">Retry</string>
     <string name="information">Information</string>
     <string name="close">Close</string>
+    <string name="itag">Itag</string>
     <string name="bitrate">Bitrate</string>
     <string name="size">Size</string>
     <string name="cached">Cached</string>
@@ -175,4 +182,5 @@
     <string name="visible">Visible</string>
     <string name="visible_when_active">Visible when active</string>
     <string name="hidden">Hidden</string>
+    <string name="id">Id</string>
 </resources>

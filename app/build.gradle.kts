@@ -6,15 +6,15 @@ plugins {
 }
 
 android {
-    namespace = "it.vfsfitvnm.vimusic"
+    namespace = "com.shaadow.tunes"
     compileSdk = 35
 
     defaultConfig {
         applicationId = "com.shaadow.tunes"
         minSdk = 21
         targetSdk = 35
-        versionCode = 8
-        versionName = "0.8"
+        versionCode = 9
+        versionName = "9.1.0"
     }
 
     splits {

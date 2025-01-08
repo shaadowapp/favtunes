@@ -28,7 +28,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
-import it.vfsfitvnm.vimusic.R
+import com.shaadow.tunes.R
 import kotlinx.coroutines.delay
 
 @Composable

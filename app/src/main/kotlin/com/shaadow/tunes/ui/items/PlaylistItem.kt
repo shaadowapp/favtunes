@@ -20,7 +20,7 @@ import androidx.compose.ui.res.pluralStringResource
 import coil3.compose.AsyncImage
 import it.vfsfitvnm.innertube.Innertube
 import com.shaadow.tunes.Database
-import it.vfsfitvnm.vimusic.R
+import com.shaadow.tunes.R
 import com.shaadow.tunes.models.PlaylistPreview
 import com.shaadow.tunes.ui.styling.px
 import com.shaadow.tunes.utils.thumbnail

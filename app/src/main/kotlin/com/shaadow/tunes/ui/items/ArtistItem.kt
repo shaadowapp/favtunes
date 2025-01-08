@@ -13,7 +13,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import coil3.compose.AsyncImage
 import it.vfsfitvnm.innertube.Innertube
-import it.vfsfitvnm.vimusic.R
+import com.shaadow.tunes.R
 import com.shaadow.tunes.models.Artist
 import com.shaadow.tunes.ui.styling.px
 import com.shaadow.tunes.utils.thumbnail

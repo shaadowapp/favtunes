@@ -29,7 +29,7 @@ import it.vfsfitvnm.innertube.requests.itemsPage
 import it.vfsfitvnm.innertube.utils.from
 import com.shaadow.tunes.Database
 import com.shaadow.tunes.LocalPlayerServiceBinder
-import it.vfsfitvnm.vimusic.R
+import com.shaadow.tunes.R
 import com.shaadow.tunes.models.LocalMenuState
 import com.shaadow.tunes.models.Section
 import com.shaadow.tunes.query

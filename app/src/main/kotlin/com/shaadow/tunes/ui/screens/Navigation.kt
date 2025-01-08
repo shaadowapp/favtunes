@@ -27,6 +27,7 @@ import com.shaadow.tunes.ui.screens.home.HomeScreen
 import com.shaadow.tunes.ui.screens.localplaylist.LocalPlaylistScreen
 import com.shaadow.tunes.ui.screens.playlist.PlaylistScreen
 import com.shaadow.tunes.ui.screens.search.SearchScreen
+import com.shaadow.tunes.ui.screens.settings.ProfileScreen
 import it.vfsfitvnm.vimusic.ui.screens.settings.SettingsPage
 import com.shaadow.tunes.ui.screens.settings.SettingsScreen
 import com.shaadow.tunes.utils.homeScreenTabIndexKey
@@ -246,6 +247,14 @@ fun Navigation(
                 pop = popDestination,
                 onGoToAlbum = navigateToAlbum,
                 onGoToArtist = navigateToArtist
+            )
+
+            SheetBackHandler()
+        }
+
+        composable(route = "profile") {
+            ProfileScreen(
+                onBack = { navController.popBackStack() } // Handle back navigation
             )
 
             SheetBackHandler()

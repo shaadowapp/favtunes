@@ -65,7 +65,7 @@ import androidx.media3.common.Player
 import it.vfsfitvnm.innertube.models.NavigationEndpoint
 import com.shaadow.tunes.Database
 import com.shaadow.tunes.LocalPlayerServiceBinder
-import it.vfsfitvnm.vimusic.R
+import com.shaadow.tunes.R
 import com.shaadow.tunes.models.LocalMenuState
 import com.shaadow.tunes.ui.components.TooltipIconButton
 import com.shaadow.tunes.ui.components.themed.BaseMediaItemMenu

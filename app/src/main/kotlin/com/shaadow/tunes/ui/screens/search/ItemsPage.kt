@@ -31,7 +31,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import it.vfsfitvnm.innertube.Innertube
 import it.vfsfitvnm.innertube.utils.plus
 import com.shaadow.tunes.LocalPlayerPadding
-import it.vfsfitvnm.vimusic.R
+import com.shaadow.tunes.R
 import com.shaadow.tunes.ui.components.ShimmerHost
 import com.shaadow.tunes.ui.styling.Dimensions
 import com.shaadow.tunes.viewmodels.ItemsPageViewModel

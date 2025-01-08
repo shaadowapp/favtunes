@@ -25,7 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.shaadow.tunes.Database
 import com.shaadow.tunes.LocalPlayerPadding
-import it.vfsfitvnm.vimusic.R
+import com.shaadow.tunes.R
 import com.shaadow.tunes.enums.BuiltInPlaylist
 import com.shaadow.tunes.enums.PlaylistSortBy
 import com.shaadow.tunes.enums.SortOrder

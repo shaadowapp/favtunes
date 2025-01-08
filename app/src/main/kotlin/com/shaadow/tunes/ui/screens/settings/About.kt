@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -19,6 +20,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
@@ -26,7 +28,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.shaadow.tunes.LocalPlayerPadding
-import it.vfsfitvnm.vimusic.R
+import com.shaadow.tunes.R
 import com.shaadow.tunes.ui.styling.Dimensions
 
 @ExperimentalAnimationApi
@@ -51,9 +53,9 @@ fun About() {
             contentDescription = stringResource(id = R.string.app_name),
             modifier = Modifier
                 .align(Alignment.CenterHorizontally)
-                .width(125.dp)
+                .width(112.dp)
                 .aspectRatio(1F),
-            tint = MaterialTheme.colorScheme.primary
+            tint = Color.Red
         )
 
         Text(
@@ -61,16 +63,16 @@ fun About() {
             style = MaterialTheme.typography.headlineLarge,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 8.dp),
+                .padding(top = 10.dp),
             textAlign = TextAlign.Center
         )
 
         Text(
             text = "HyTunes is a powerful music player that lets you stream your favorite songs, and customize your audio experience with an equalizer. Enjoy seamless playback and intuitive controls, all wrapped in a sleek and modern design.",
-            style = MaterialTheme.typography.titleMedium,
+            style = MaterialTheme.typography.bodyMedium,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = 15.dp, top = 10.dp, end = 15.dp),
+                .padding(start = 15.dp, top = 15.dp, end = 15.dp),
             textAlign = TextAlign.Center
         )
 
@@ -78,25 +80,33 @@ fun About() {
 
         ListItem(
             headlineContent = {
-                Text(text = stringResource(id = R.string.share))
+                Text(
+                    text = stringResource(id = R.string.share)
+                )
             },
             leadingContent = {
                 Icon(
                     painter = painterResource(id = R.drawable.share_icon),
-                    contentDescription = stringResource(id = R.string.share)
+                    contentDescription = stringResource(id = R.string.share),
+                    modifier = Modifier
+                        .size(18.dp),
+                    tint = Color.Blue
                 )
             },
-            modifier = Modifier.clickable {
-                uriHandler.openUri("https://tunes.shaadow.in?utm_source=hytunes-app&utm_from=hytunes#about-screen&utm_pkg=com-shaadow-tunes")
-            }
+            modifier = Modifier
+                .padding(start = 15.dp) // Add padding from the left
+                .clickable {
+                    uriHandler.openUri("https://tunes.shaadow.in?utm_source=hytunes-app&utm_from=hytunes#about-screen&utm_pkg=com-shaadow-tunes")
+                }
         )
+
 
         Text(
             text = "v${packageInfo.versionName}",
-            style = MaterialTheme.typography.labelMedium,
+            style = MaterialTheme.typography.labelLarge,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = 5.dp),
+                .padding(top = 285.dp),
             textAlign = TextAlign.Center
         )
     }

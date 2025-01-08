@@ -27,7 +27,7 @@ import coil3.annotation.ExperimentalCoilApi
 import coil3.imageLoader
 import com.shaadow.tunes.LocalPlayerPadding
 import com.shaadow.tunes.LocalPlayerServiceBinder
-import it.vfsfitvnm.vimusic.R
+import com.shaadow.tunes.R
 import com.shaadow.tunes.enums.CoilDiskCacheMaxSize
 import com.shaadow.tunes.enums.ExoPlayerDiskCacheMaxSize
 import com.shaadow.tunes.ui.styling.Dimensions

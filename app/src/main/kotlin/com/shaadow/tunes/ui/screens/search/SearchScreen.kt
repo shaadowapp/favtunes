@@ -52,7 +52,7 @@ import it.vfsfitvnm.innertube.models.bodies.SearchSuggestionsBody
 import it.vfsfitvnm.innertube.requests.searchSuggestions
 import com.shaadow.tunes.Database
 import com.shaadow.tunes.LocalPlayerPadding
-import it.vfsfitvnm.vimusic.R
+import com.shaadow.tunes.R
 import com.shaadow.tunes.models.SearchQuery
 import com.shaadow.tunes.query
 import com.shaadow.tunes.ui.styling.Dimensions

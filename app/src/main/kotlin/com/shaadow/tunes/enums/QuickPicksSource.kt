@@ -1,7 +1,7 @@
 package com.shaadow.tunes.enums
 
 import androidx.annotation.StringRes
-import it.vfsfitvnm.vimusic.R
+import com.shaadow.tunes.R
 
 enum class QuickPicksSource(
     @StringRes val resourceId: Int

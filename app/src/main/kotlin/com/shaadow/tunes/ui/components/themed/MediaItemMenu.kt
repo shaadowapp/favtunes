@@ -53,7 +53,7 @@ import androidx.media3.common.MediaItem
 import it.vfsfitvnm.innertube.models.NavigationEndpoint
 import com.shaadow.tunes.Database
 import com.shaadow.tunes.LocalPlayerServiceBinder
-import it.vfsfitvnm.vimusic.R
+import com.shaadow.tunes.R
 import com.shaadow.tunes.enums.PlaylistSortBy
 import com.shaadow.tunes.enums.SortOrder
 import com.shaadow.tunes.models.Info

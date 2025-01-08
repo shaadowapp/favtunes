@@ -58,7 +58,7 @@ import it.vfsfitvnm.innertube.requests.lyrics
 import it.vfsfitvnm.kugou.KuGou
 import com.shaadow.tunes.Database
 import com.shaadow.tunes.LocalPlayerServiceBinder
-import it.vfsfitvnm.vimusic.R
+import com.shaadow.tunes.R
 import com.shaadow.tunes.models.LocalMenuState
 import com.shaadow.tunes.models.Lyrics
 import com.shaadow.tunes.query

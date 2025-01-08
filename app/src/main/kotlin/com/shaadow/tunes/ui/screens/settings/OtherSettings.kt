@@ -34,7 +34,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.shaadow.tunes.LocalPlayerPadding
-import it.vfsfitvnm.vimusic.R
+import com.shaadow.tunes.R
 import com.shaadow.tunes.service.PlayerMediaBrowserService
 import com.shaadow.tunes.ui.styling.Dimensions
 import com.shaadow.tunes.utils.isAtLeastAndroid12

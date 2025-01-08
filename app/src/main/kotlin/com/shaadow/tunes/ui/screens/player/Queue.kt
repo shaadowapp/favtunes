@@ -59,7 +59,7 @@ import androidx.media3.common.Player
 import androidx.media3.common.Timeline
 import com.valentinilk.shimmer.shimmer
 import com.shaadow.tunes.LocalPlayerServiceBinder
-import it.vfsfitvnm.vimusic.R
+import com.shaadow.tunes.R
 import com.shaadow.tunes.models.ActionInfo
 import com.shaadow.tunes.models.LocalMenuState
 import com.shaadow.tunes.ui.components.MusicBars

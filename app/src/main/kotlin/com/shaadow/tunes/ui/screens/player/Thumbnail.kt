@@ -51,7 +51,7 @@ import androidx.media3.common.util.UnstableApi
 import coil3.compose.AsyncImage
 import com.shaadow.tunes.Database
 import com.shaadow.tunes.LocalPlayerServiceBinder
-import it.vfsfitvnm.vimusic.R
+import com.shaadow.tunes.R
 import com.shaadow.tunes.service.LoginRequiredException
 import com.shaadow.tunes.service.PlayableFormatNotFoundException
 import com.shaadow.tunes.service.UnplayableException

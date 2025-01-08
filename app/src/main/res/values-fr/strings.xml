@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="app_name">HyTunes</string>
     <string name="home">Accueil</string>
     <string name="songs">Titres</string>
     <string name="playlists">Playlists</string>
@@ -41,6 +42,7 @@
     <string name="show_song_cover">Afficher la pochette</string>
     <string name="show_song_cover_description">Utiliser la pochette du titre en cours de lecture comme fond d\'écran de verrouillage</string>
     <string name="settings">Paramètres</string>
+    <string name="profile_desc">Nous travaillons sur un système de connexion automatisé qui éliminera le besoin de données personnelles telles que l\'e-mail ou le numéro de téléphone. Restez à l\'écoute pour une expérience de connexion fluide et sans tracas, à venir bientôt.</string>
     <string name="image_cache">Cache d\'images</string>
     <string name="song_cache">Cache des titres</string>
     <string name="max_size">Taille maximale</string>
@@ -51,6 +53,7 @@
     <string name="restore_information">L\'application se fermera automatiquement après la restauration de la base de données et les données existantes seront écrasées.</string>
     <string name="backup_description">Exporter la base de données vers le stockage externe</string>
     <string name="restore_description">Importer la base de données à partir du stockage externe</string>
+    <string name="android_auto">Android Auto</string>
     <string name="service_lifetime">Durée de Vie du Service</string>
     <string name="pause_search_history">Suspendre l\'historique de recherche</string>
     <string name="pause_search_history_description">Ne pas enregistrer les nouvelles recherches, ni afficher l\'historique</string>
@@ -71,6 +74,7 @@
     <string name="hide">Masquer</string>
     <string name="remove_from_queue">Supprimer de la file d\'attente</string>
     <string name="remove_from_playlist">Supprimer de la file playlist</string>
+    <string name="github">Github</string>
     <string name="shuffle">Aléatoire</string>
     <string name="quick_picks">Sélection Rapide</string>
     <string name="view_all">Tout voir</string>
@@ -169,6 +173,7 @@
     <string name="retry">Réessayer</string>
     <string name="information">Information</string>
     <string name="close">Fermer</string>
+    <string name="itag">Itag</string>
     <string name="bitrate">Débit</string>
     <string name="size">Taille</string>
     <string name="cached">Mis en cache</string>
@@ -179,4 +184,7 @@
     <string name="visible">Visible</string>
     <string name="visible_when_active">Visible lorsqu\'il est actif</string>
     <string name="hidden">Caché</string>
+    <string name="profile">Profil</string>
+    <string name="profile_heading">Page de profil en développement</string>
+    <string name="id">Id</string>
 </resources>

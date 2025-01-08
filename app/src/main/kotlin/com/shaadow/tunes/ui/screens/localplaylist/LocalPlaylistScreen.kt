@@ -31,7 +31,7 @@ import it.vfsfitvnm.innertube.Innertube
 import it.vfsfitvnm.innertube.models.bodies.BrowseBody
 import it.vfsfitvnm.innertube.requests.playlistPage
 import com.shaadow.tunes.Database
-import it.vfsfitvnm.vimusic.R
+import com.shaadow.tunes.R
 import com.shaadow.tunes.models.Playlist
 import com.shaadow.tunes.models.SongPlaylistMap
 import com.shaadow.tunes.query

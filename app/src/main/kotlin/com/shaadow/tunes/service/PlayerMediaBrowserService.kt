@@ -17,7 +17,7 @@ import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.cache.Cache
 import com.shaadow.tunes.Database
-import it.vfsfitvnm.vimusic.R
+import com.shaadow.tunes.R
 import com.shaadow.tunes.models.Album
 import com.shaadow.tunes.models.PlaylistPreview
 import com.shaadow.tunes.models.Song

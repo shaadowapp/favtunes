@@ -5,6 +5,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.PersonOutline
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -18,7 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
-import it.vfsfitvnm.vimusic.R
+import com.shaadow.tunes.R
 import com.shaadow.tunes.models.Screen
 import com.shaadow.tunes.ui.components.TooltipIconButton
 
@@ -60,6 +61,13 @@ fun HomeScreen(
                         description = R.string.settings,
                         onClick = { navController.navigate(route = "settings") },
                         icon = Icons.Outlined.Settings,
+                        inTopBar = true
+                    )
+
+                    TooltipIconButton(
+                        description = R.string.profile,
+                        onClick = { navController.navigate(route = "profile") },
+                        icon = Icons.Outlined.PersonOutline,
                         inTopBar = true
                     )
                 },

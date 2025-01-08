@@ -39,7 +39,7 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.shaadow.tunes.LocalPlayerPadding
-import it.vfsfitvnm.vimusic.R
+import com.shaadow.tunes.R
 import com.shaadow.tunes.enums.SettingsSection
 import com.shaadow.tunes.ui.components.themed.ValueSelectorDialog
 import com.shaadow.tunes.ui.styling.Dimensions

@@ -72,7 +72,7 @@ import it.vfsfitvnm.innertube.models.bodies.PlayerBody
 import it.vfsfitvnm.innertube.requests.player
 import com.shaadow.tunes.Database
 import com.shaadow.tunes.MainActivity
-import it.vfsfitvnm.vimusic.R
+import com.shaadow.tunes.R
 import com.shaadow.tunes.enums.ExoPlayerDiskCacheMaxSize
 import com.shaadow.tunes.models.Event
 import com.shaadow.tunes.models.QueuedMediaItem

@@ -6,7 +6,7 @@ import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material.icons.outlined.SortByAlpha
 import androidx.compose.ui.graphics.vector.ImageVector
-import it.vfsfitvnm.vimusic.R
+import com.shaadow.tunes.R
 import com.shaadow.tunes.models.SortBy
 
 enum class AlbumSortBy(

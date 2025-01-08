@@ -13,7 +13,7 @@ import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.MusicNote
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.ui.graphics.vector.ImageVector
-import it.vfsfitvnm.vimusic.R
+import com.shaadow.tunes.R
 
 sealed class Screen(
     val route: String,
