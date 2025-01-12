@@ -1,4 +1,4 @@
-package it.vfsfitvnm.vimusic.ui.screens.settings
+package com.shaadow.tunes.ui.screens.settings
 
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.material.icons.Icons
@@ -15,14 +15,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
+import com.shaadow.tunes.ui.screens.settings.ProfileScreen
 import com.shaadow.tunes.ui.screens.settings.About
 import com.shaadow.tunes.ui.screens.settings.CacheSettings
 import com.shaadow.tunes.ui.screens.settings.DatabaseSettings
 import com.shaadow.tunes.ui.screens.settings.GeneralSettings
 import com.shaadow.tunes.ui.screens.settings.OtherSettings
 import com.shaadow.tunes.ui.screens.settings.PlayerSettings
+import com.shaadow.tunes.ui.screens.settings.legal.TermsOfUse
 import com.shaadow.tunes.enums.SettingsSection
 import com.shaadow.tunes.ui.components.consumeCustomWindowInsets
+import com.shaadow.tunes.ui.screens.settings.legal.PrivacyPolicy
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
 @Composable
@@ -53,12 +56,15 @@ fun SettingsPage(
     ) { paddingValues ->
         Surface(modifier = Modifier.consumeCustomWindowInsets(paddingValues)) {
             when (section) {
+                SettingsSection.Profile -> ProfileScreen()
+                SettingsSection.About -> About()
                 SettingsSection.General -> GeneralSettings()
                 SettingsSection.Player -> PlayerSettings()
                 SettingsSection.Cache -> CacheSettings()
                 SettingsSection.Database -> DatabaseSettings()
                 SettingsSection.Other -> OtherSettings()
-                SettingsSection.About -> About()
+                SettingsSection.TermsOfUse -> TermsOfUse()
+                SettingsSection.PrivacyPolicy -> PrivacyPolicy()
             }
         }
     }

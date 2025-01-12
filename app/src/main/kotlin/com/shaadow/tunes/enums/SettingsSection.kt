@@ -3,9 +3,12 @@ package com.shaadow.tunes.enums
 import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.More
+import androidx.compose.material.icons.outlined.AttachFile
 import androidx.compose.material.icons.outlined.History
 import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.outlined.PersonOutline
 import androidx.compose.material.icons.outlined.PlayArrow
+import androidx.compose.material.icons.outlined.PrivacyTip
 import androidx.compose.material.icons.outlined.Save
 import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -15,6 +18,10 @@ enum class SettingsSection(
     @StringRes val resourceId: Int,
     val icon: ImageVector
 ) {
+    Profile(
+        resourceId = R.string.profile,
+        Icons.Outlined.PersonOutline
+    ),
     General(
         resourceId = R.string.general,
         Icons.Outlined.Tune
@@ -38,5 +45,13 @@ enum class SettingsSection(
     About(
         resourceId = R.string.about,
         icon = Icons.Outlined.Info
+    ),
+    TermsOfUse(
+        resourceId = R.string.TermsOfUse,
+        icon = Icons.Outlined.AttachFile
+    ),
+    PrivacyPolicy(
+        resourceId = R.string.PrivacyPolicy,
+        icon = Icons.Outlined.PrivacyTip
     )
 }

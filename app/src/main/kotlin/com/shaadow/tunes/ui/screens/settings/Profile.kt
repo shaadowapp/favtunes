@@ -1,8 +1,6 @@
 package com.shaadow.tunes.ui.screens.settings
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -14,7 +12,7 @@ import androidx.compose.ui.unit.dp
 import com.shaadow.tunes.R
 
 @Composable
-fun ProfileScreen(onBack: () -> Unit) {
+fun ProfileScreen() {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -35,11 +33,5 @@ fun ProfileScreen(onBack: () -> Unit) {
                 .padding(top = 12.dp, start = 18.dp, end = 18.dp),
             textAlign = TextAlign.Center,
         )
-
-        Spacer(modifier = Modifier.height(20.dp))
-
-        Button(onClick = onBack) {
-            Text(text = "Sorry, Go Back")
-        }
     }
 }

@@ -8,7 +8,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.PersonOutline
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.Settings
-import androidx.compose.material.icons.rounded.Person3
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -62,13 +61,6 @@ fun HomeScreen(
                         description = R.string.settings,
                         onClick = { navController.navigate(route = "settings") },
                         icon = Icons.Outlined.Settings,
-                        inTopBar = true
-                    )
-
-                    TooltipIconButton(
-                        description = R.string.profile,
-                        onClick = { navController.navigate(route = "profile") },
-                        icon = Icons.Outlined.PersonOutline,
                         inTopBar = true
                     )
                 },

@@ -1,19 +1,11 @@
 package com.shaadow.tunes.ui.screens.settings
 
-import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -31,21 +23,30 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.shaadow.tunes.LocalPlayerPadding
 import com.shaadow.tunes.R
-import com.shaadow.tunes.ui.styling.Dimensions
-import android.content.pm.PackageManager
-import android.os.Build
-import androidx.annotation.RequiresApi
-import androidx.compose.foundation.Image
-import androidx.compose.material3.Button
 
-
-@RequiresApi(Build.VERSION_CODES.TIRAMISU)
-@ExperimentalAnimationApi
 @Composable
 fun About() {
-    val uriHandler = LocalUriHandler.current
     val context = LocalContext.current
+    val uriHandler = LocalUriHandler.current
     val playerPadding = LocalPlayerPadding.current
+
+    // Retrieve the app version based on the current API level
+    val versionName = try {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            context.packageManager.getPackageInfo(
+                context.packageName,
+                PackageManager.PackageInfoFlags.of(0)
+            ).versionName
+        } else {
+            @Suppress("DEPRECATION")
+            context.packageManager.getPackageInfo(
+                context.packageName,
+                0
+            ).versionName
+        }
+    } catch (e: Exception) {
+        "Unknown Version"
+    }
 
     Column(
         modifier = Modifier
@@ -53,13 +54,7 @@ fun About() {
             .verticalScroll(rememberScrollState())
             .padding(top = 8.dp, bottom = 16.dp + playerPadding)
     ) {
-        val packageInfo = context.packageManager.getPackageInfo(
-            context.packageName,
-            PackageManager.PackageInfoFlags.of(0)
-        )
-        val versionCode = packageInfo.versionName
-
-
+        // App Icon
         Icon(
             painter = painterResource(id = R.drawable.app_icon),
             contentDescription = stringResource(id = R.string.app_name),
@@ -67,10 +62,11 @@ fun About() {
                 .align(Alignment.CenterHorizontally)
                 .width(108.dp)
                 .padding(top = 25.dp)
-                .aspectRatio(1F),
+                .aspectRatio(1f),
             tint = Color.Red
         )
 
+        // App Name
         Text(
             text = stringResource(id = R.string.app_name),
             style = MaterialTheme.typography.headlineLarge,
@@ -81,6 +77,7 @@ fun About() {
             fontWeight = FontWeight.Medium
         )
 
+        // Description
         Text(
             text = "HyTunes is a powerful music player that lets you stream your favorite songs, and customize your audio experience with an equalizer. Enjoy seamless playback and intuitive controls, all wrapped in a sleek and modern design.",
             style = MaterialTheme.typography.bodyMedium,
@@ -88,92 +85,75 @@ fun About() {
                 .fillMaxWidth()
                 .padding(start = 18.dp, top = 18.dp, end = 18.dp),
             textAlign = TextAlign.Center,
-            color = Color(0xFFE2E2E2),
             fontSize = 15.sp
         )
 
-        Spacer(modifier = Modifier.height(Dimensions.spacer + 20.dp))
+        Spacer(modifier = Modifier.height(20.dp))
 
-        Box(
-            modifier = Modifier
-                .fillMaxSize() // Fill the entire screen
-                .padding(16.dp),
-            contentAlignment = Alignment.Center // Center content both vertically and horizontally
-        ) {
-            GoToLinkButton(
-                url = "https://tunes.shaadow.in?utm_source=HyTunes_Android&utm_from=setting-about&utm_pkg=com-shaadow-tunes",
-                buttonText = "Our official website"
-            )
-        }
-        
-        Spacer(modifier = Modifier.height(Dimensions.spacer + 25.dp))
-
+        // Website Button
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(top= 15.dp,start=18.dp) // Add padding around the edges
+                .padding(16.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Button(onClick = {
+                uriHandler.openUri("https://tunes.shaadow.in?utm_source=HyTunes_Android&utm_from=setting-about&utm_pkg=com-shaadow-tunes")
+            }) {
+                Text(text = "Our Official Website")
+            }
+        }
+
+        Spacer(modifier = Modifier.height(25.dp))
+
+        // Footer Text
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(top = 15.dp, start = 18.dp)
         ) {
             Column(
-                modifier = Modifier
-                    .align(Alignment.BottomStart) // Align text at the bottom-left corner
-                    .padding(bottom = 16.dp), // Add bottom padding if needed
-                horizontalAlignment = Alignment.Start // Ensure left alignment for text
+                modifier = Modifier.align(Alignment.BottomStart),
+                horizontalAlignment = Alignment.Start
             ) {
-                // First text: "PROUDLY INDIAN APP" - Big size, faded color
                 Text(
                     text = "PROUDLY",
-                    fontSize = 50.sp, // Big font size
+                    fontSize = 50.sp,
                     fontWeight = FontWeight.ExtraBold,
-                    color = Color(0xFFE2E2E2), // Faded color
+                    color = Color(0xFF333333)
                 )
                 Text(
                     text = "INDIAN",
-                    fontSize = 50.sp, // Big font size
+                    fontSize = 50.sp,
                     fontWeight = FontWeight.ExtraBold,
-                    color = Color(0xFFE2E2E2), // Faded color
+                    color = Color(0xFF333333)
                 )
                 Text(
                     text = "APP",
-                    fontSize = 50.sp, // Big font size
+                    fontSize = 50.sp,
                     fontWeight = FontWeight.ExtraBold,
-                    color = Color(0xFFE2E2E2), // Faded color
+                    color = Color(0xFF333333)
                 )
-
-                // Second text: "MADE WITH ❤️ IN INDIA" - Normal size, faded color
                 Text(
                     text = "MADE WITH ❤️ IN INDIA",
-                    fontSize = 15.sp, // Normal font size
+                    fontSize = 15.sp,
                     fontWeight = FontWeight.Medium,
-                    color = Color(0xFFE2E2E2), // Faded color (light grayish-blue)
-                    modifier = Modifier
-                        .padding(top = 5.dp)
+                    color = Color(0xFF333333),
+                    modifier = Modifier.padding(top = 5.dp)
                 )
             }
         }
 
-
-
+        // App Version
         Text(
-            text = "APP VERSION: $versionCode",
+            text = "APP VERSION: $versionName",
             fontSize = 15.sp,
             fontWeight = FontWeight.Normal,
             style = MaterialTheme.typography.labelLarge,
-            color = Color(0xFFE2E2E2),
+            color = Color(0xFF333333),
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 5.dp, start = 18.dp)
         )
     }
 }
-
-@Composable
-fun GoToLinkButton(url: String, buttonText: String) {
-    val uriHandler = LocalUriHandler.current // Get the UriHandler for opening links
-
-    Button(onClick = {
-        uriHandler.openUri(url) // Open the given URL
-    }) {
-        Text(text = buttonText) // Display the provided button text
-    }
-}
-

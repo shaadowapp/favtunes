@@ -13,8 +13,8 @@ android {
         applicationId = "com.shaadow.tunes"
         minSdk = 21
         targetSdk = 35
-        versionCode = 9
-        versionName = "9.0.0.1"
+        versionCode = 1
+        versionName = "1.0.1"
     }
 
     splits {
@@ -80,6 +80,8 @@ dependencies {
     implementation(libs.media3.exoplayer)
     implementation(libs.reorderable)
     implementation(libs.room)
+    implementation(libs.appcompat)
+    implementation(libs.ui.tooling.preview.android)
     ksp(libs.room.compiler)
     implementation(projects.innertube)
     implementation(projects.kugou)

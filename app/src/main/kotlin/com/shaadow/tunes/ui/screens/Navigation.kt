@@ -28,8 +28,10 @@ import com.shaadow.tunes.ui.screens.localplaylist.LocalPlaylistScreen
 import com.shaadow.tunes.ui.screens.playlist.PlaylistScreen
 import com.shaadow.tunes.ui.screens.search.SearchScreen
 import com.shaadow.tunes.ui.screens.settings.ProfileScreen
-import it.vfsfitvnm.vimusic.ui.screens.settings.SettingsPage
+import com.shaadow.tunes.ui.screens.settings.SettingsPage
 import com.shaadow.tunes.ui.screens.settings.SettingsScreen
+import com.shaadow.tunes.ui.screens.settings.legal.PrivacyPolicy
+import com.shaadow.tunes.ui.screens.settings.legal.TermsOfUse
 import com.shaadow.tunes.utils.homeScreenTabIndexKey
 import com.shaadow.tunes.utils.rememberPreference
 import kotlinx.coroutines.launch
@@ -253,9 +255,19 @@ fun Navigation(
         }
 
         composable(route = "profile") {
-            ProfileScreen(
-                onBack = { navController.popBackStack() } // Handle back navigation
-            )
+            ProfileScreen()
+
+            SheetBackHandler()
+        }
+
+        composable(route = "TermsOfUse") {
+            TermsOfUse()
+
+            SheetBackHandler()
+        }
+
+        composable(route = "PrivacyPolicy") {
+            PrivacyPolicy()
 
             SheetBackHandler()
         }
