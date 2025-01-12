@@ -28,8 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import it.vfsfitvnm.innertube.Innertube
-import it.vfsfitvnm.innertube.models.NavigationEndpoint
+import com.shaadow.innertube.Innertube
 import com.shaadow.tunes.LocalPlayerPadding
 import com.shaadow.tunes.LocalPlayerServiceBinder
 import com.shaadow.tunes.R
@@ -128,7 +127,7 @@ fun ArtistOverview(
                             binder?.stopRadio()
                             binder?.player?.forcePlay(mediaItem)
                             binder?.setupRadio(
-                                NavigationEndpoint.Endpoint.Watch(videoId = mediaItem.mediaId)
+                                com.shaadow.innertube.models.NavigationEndpoint.Endpoint.Watch(videoId = mediaItem.mediaId)
                             )
                         },
                         onLongClick = {

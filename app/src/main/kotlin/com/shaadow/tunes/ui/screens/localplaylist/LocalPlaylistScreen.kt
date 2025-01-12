@@ -27,9 +27,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
-import it.vfsfitvnm.innertube.Innertube
-import it.vfsfitvnm.innertube.models.bodies.BrowseBody
-import it.vfsfitvnm.innertube.requests.playlistPage
+import com.shaadow.innertube.Innertube
+import com.shaadow.innertube.models.bodies.BrowseBody
+import com.shaadow.innertube.requests.playlistPage
 import com.shaadow.tunes.Database
 import com.shaadow.tunes.R
 import com.shaadow.tunes.models.Playlist

@@ -35,9 +35,9 @@ import androidx.compose.ui.unit.dp
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.cache.Cache
 import androidx.media3.datasource.cache.CacheSpan
-import it.vfsfitvnm.innertube.Innertube
-import it.vfsfitvnm.innertube.models.bodies.PlayerBody
-import it.vfsfitvnm.innertube.requests.player
+import com.shaadow.innertube.Innertube
+import com.shaadow.innertube.models.bodies.PlayerBody
+import com.shaadow.innertube.requests.player
 import com.shaadow.tunes.Database
 import com.shaadow.tunes.LocalPlayerServiceBinder
 import com.shaadow.tunes.R

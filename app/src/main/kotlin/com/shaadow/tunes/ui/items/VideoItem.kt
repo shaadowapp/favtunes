@@ -14,7 +14,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
-import it.vfsfitvnm.innertube.Innertube
+import com.shaadow.innertube.Innertube
 import com.shaadow.tunes.ui.styling.onOverlay
 import com.shaadow.tunes.ui.styling.overlay
 

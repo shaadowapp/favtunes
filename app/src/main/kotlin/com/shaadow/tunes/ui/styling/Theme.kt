@@ -1,4 +1,4 @@
-package it.vfsfitvnm.vimusic.ui.styling
+package com.shaadow.tunes.ui.styling
 
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme

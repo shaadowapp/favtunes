@@ -52,10 +52,10 @@ import androidx.compose.ui.unit.dp
 import androidx.media3.common.C
 import androidx.media3.common.MediaMetadata
 import com.valentinilk.shimmer.shimmer
-import it.vfsfitvnm.innertube.Innertube
-import it.vfsfitvnm.innertube.models.bodies.NextBody
-import it.vfsfitvnm.innertube.requests.lyrics
-import it.vfsfitvnm.kugou.KuGou
+import com.shaadow.innertube.Innertube
+import com.shaadow.innertube.models.bodies.NextBody
+import com.shaadow.innertube.requests.lyrics
+import com.shaadow.kugou.KuGou
 import com.shaadow.tunes.Database
 import com.shaadow.tunes.LocalPlayerServiceBinder
 import com.shaadow.tunes.R

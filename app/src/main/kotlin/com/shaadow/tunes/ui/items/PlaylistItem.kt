@@ -18,7 +18,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.pluralStringResource
 import coil3.compose.AsyncImage
-import it.vfsfitvnm.innertube.Innertube
+import com.shaadow.innertube.Innertube
 import com.shaadow.tunes.Database
 import com.shaadow.tunes.R
 import com.shaadow.tunes.models.PlaylistPreview

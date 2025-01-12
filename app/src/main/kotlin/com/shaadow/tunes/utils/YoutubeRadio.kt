@@ -1,10 +1,10 @@
 package com.shaadow.tunes.utils
 
 import androidx.media3.common.MediaItem
-import it.vfsfitvnm.innertube.Innertube
-import it.vfsfitvnm.innertube.models.bodies.ContinuationBody
-import it.vfsfitvnm.innertube.models.bodies.NextBody
-import it.vfsfitvnm.innertube.requests.nextPage
+import com.shaadow.innertube.Innertube
+import com.shaadow.innertube.models.bodies.ContinuationBody
+import com.shaadow.innertube.models.bodies.NextBody
+import com.shaadow.innertube.requests.nextPage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 

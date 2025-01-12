@@ -22,11 +22,11 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
-import it.vfsfitvnm.innertube.Innertube
-import it.vfsfitvnm.innertube.models.bodies.BrowseBody
-import it.vfsfitvnm.innertube.models.bodies.ContinuationBody
-import it.vfsfitvnm.innertube.requests.itemsPage
-import it.vfsfitvnm.innertube.utils.from
+import com.shaadow.innertube.Innertube
+import com.shaadow.innertube.models.bodies.BrowseBody
+import com.shaadow.innertube.models.bodies.ContinuationBody
+import com.shaadow.innertube.requests.itemsPage
+import com.shaadow.innertube.utils.from
 import com.shaadow.tunes.Database
 import com.shaadow.tunes.LocalPlayerServiceBinder
 import com.shaadow.tunes.R

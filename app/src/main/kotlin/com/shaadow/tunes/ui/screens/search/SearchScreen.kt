@@ -47,9 +47,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import it.vfsfitvnm.innertube.Innertube
-import it.vfsfitvnm.innertube.models.bodies.SearchSuggestionsBody
-import it.vfsfitvnm.innertube.requests.searchSuggestions
+import com.shaadow.innertube.Innertube
+import com.shaadow.innertube.models.bodies.SearchSuggestionsBody
+import com.shaadow.innertube.requests.searchSuggestions
 import com.shaadow.tunes.Database
 import com.shaadow.tunes.LocalPlayerPadding
 import com.shaadow.tunes.R

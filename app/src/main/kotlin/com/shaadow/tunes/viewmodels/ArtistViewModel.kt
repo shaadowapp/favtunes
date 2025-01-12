@@ -5,9 +5,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.ViewModel
-import it.vfsfitvnm.innertube.Innertube
-import it.vfsfitvnm.innertube.models.bodies.BrowseBody
-import it.vfsfitvnm.innertube.requests.artistPage
+import com.shaadow.innertube.Innertube
+import com.shaadow.innertube.models.bodies.BrowseBody
+import com.shaadow.innertube.requests.artistPage
 import com.shaadow.tunes.Database
 import com.shaadow.tunes.models.Artist
 import kotlinx.coroutines.Dispatchers

@@ -43,16 +43,19 @@ import androidx.lifecycle.lifecycleScope
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.navigation.compose.rememberNavController
-import it.vfsfitvnm.innertube.Innertube
-import it.vfsfitvnm.innertube.models.bodies.BrowseBody
-import it.vfsfitvnm.innertube.requests.playlistPage
-import it.vfsfitvnm.innertube.requests.song
+import com.google.firebase.Firebase
+import com.google.firebase.analytics.FirebaseAnalytics
+import com.google.firebase.analytics.analytics
+import com.shaadow.innertube.Innertube
+import com.shaadow.innertube.models.bodies.BrowseBody
+import com.shaadow.innertube.requests.playlistPage
+import com.shaadow.innertube.requests.song
 import com.shaadow.tunes.models.LocalMenuState
 import com.shaadow.tunes.service.PlayerService
 import com.shaadow.tunes.ui.components.BottomNavigation
 import com.shaadow.tunes.ui.screens.Navigation
 import com.shaadow.tunes.ui.screens.player.PlayerScaffold
-import it.vfsfitvnm.vimusic.ui.styling.AppTheme
+import com.shaadow.tunes.ui.styling.AppTheme
 import com.shaadow.tunes.utils.asMediaItem
 import com.shaadow.tunes.utils.forcePlay
 import com.shaadow.tunes.utils.intent
@@ -63,6 +66,9 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class MainActivity : ComponentActivity() {
+    private lateinit var analytics: FirebaseAnalytics
+
+
     private val serviceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
             if (service is PlayerService.Binder) this@MainActivity.binder = service
@@ -84,8 +90,12 @@ class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
+
+
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        // Obtain the FirebaseAnalytics instance.
+        analytics = Firebase.analytics
 
         val launchedFromNotification = intent?.extras?.getBoolean("expandPlayerBottomSheet") == true
         data = intent?.data ?: intent?.getStringExtra(Intent.EXTRA_TEXT)?.toUri()

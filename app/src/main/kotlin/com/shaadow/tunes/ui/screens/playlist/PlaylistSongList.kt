@@ -15,7 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import it.vfsfitvnm.innertube.Innertube
+import com.shaadow.innertube.Innertube
 import com.shaadow.tunes.LocalPlayerPadding
 import com.shaadow.tunes.LocalPlayerServiceBinder
 import com.shaadow.tunes.R

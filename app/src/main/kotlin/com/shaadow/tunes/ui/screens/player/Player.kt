@@ -62,7 +62,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
-import it.vfsfitvnm.innertube.models.NavigationEndpoint
 import com.shaadow.tunes.Database
 import com.shaadow.tunes.LocalPlayerServiceBinder
 import com.shaadow.tunes.R
@@ -281,7 +280,7 @@ fun Player(
                             onStartRadio = {
                                 binder.stopRadio()
                                 binder.player.seamlessPlay(mediaItem)
-                                binder.setupRadio(NavigationEndpoint.Endpoint.Watch(videoId = mediaItem.mediaId))
+                                binder.setupRadio(com.shaadow.innertube.models.NavigationEndpoint.Endpoint.Watch(videoId = mediaItem.mediaId))
                             },
                             onGoToAlbum = onGoToAlbum,
                             onGoToArtist = onGoToArtist

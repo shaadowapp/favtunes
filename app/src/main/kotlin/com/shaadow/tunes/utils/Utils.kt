@@ -7,10 +7,10 @@ import androidx.core.net.toUri
 import androidx.core.os.bundleOf
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
-import it.vfsfitvnm.innertube.Innertube
-import it.vfsfitvnm.innertube.models.bodies.ContinuationBody
-import it.vfsfitvnm.innertube.requests.playlistPage
-import it.vfsfitvnm.innertube.utils.plus
+import com.shaadow.innertube.Innertube
+import com.shaadow.innertube.models.bodies.ContinuationBody
+import com.shaadow.innertube.requests.playlistPage
+import com.shaadow.innertube.utils.plus
 import com.shaadow.tunes.models.Song
 
 val Innertube.SongItem.asMediaItem: MediaItem

@@ -31,11 +31,11 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import it.vfsfitvnm.innertube.Innertube
-import it.vfsfitvnm.innertube.models.bodies.ContinuationBody
-import it.vfsfitvnm.innertube.models.bodies.SearchBody
-import it.vfsfitvnm.innertube.requests.searchPage
-import it.vfsfitvnm.innertube.utils.from
+import com.shaadow.innertube.Innertube
+import com.shaadow.innertube.models.bodies.ContinuationBody
+import com.shaadow.innertube.models.bodies.SearchBody
+import com.shaadow.innertube.requests.searchPage
+import com.shaadow.innertube.utils.from
 import com.shaadow.tunes.Database
 import com.shaadow.tunes.LocalPlayerPadding
 import com.shaadow.tunes.LocalPlayerServiceBinder

@@ -3,6 +3,9 @@ plugins {
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.kotlin)
     alias(libs.plugins.kotlin.ksp)
+    alias(libs.plugins.google.gms.google.services)
+    alias(libs.plugins.google.firebase.crashlytics)
+    alias(libs.plugins.google.firebase.firebase.perf)
 }
 
 android {
@@ -14,7 +17,7 @@ android {
         minSdk = 21
         targetSdk = 35
         versionCode = 1
-        versionName = "1.0.1"
+        versionName = "1.0.2"
     }
 
     splits {
@@ -82,8 +85,13 @@ dependencies {
     implementation(libs.room)
     implementation(libs.appcompat)
     implementation(libs.ui.tooling.preview.android)
+    implementation(libs.firebase.crashlytics)
+    implementation(libs.firebase.analytics)
+    implementation(libs.play.services.measurement.api)
+    implementation(libs.firebase.perf)
     ksp(libs.room.compiler)
     implementation(projects.innertube)
     implementation(projects.kugou)
     coreLibraryDesugaring(libs.desugaring)
+    implementation(platform(libs.firebase.bom))
 }

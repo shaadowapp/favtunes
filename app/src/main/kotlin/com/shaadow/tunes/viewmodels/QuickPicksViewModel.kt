@@ -4,9 +4,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
-import it.vfsfitvnm.innertube.Innertube
-import it.vfsfitvnm.innertube.models.bodies.NextBody
-import it.vfsfitvnm.innertube.requests.relatedPage
+import com.shaadow.innertube.Innertube
+import com.shaadow.innertube.models.bodies.NextBody
+import com.shaadow.innertube.requests.relatedPage
 import com.shaadow.tunes.Database
 import com.shaadow.tunes.enums.QuickPicksSource
 import com.shaadow.tunes.models.Song

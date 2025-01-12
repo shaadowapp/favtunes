@@ -50,7 +50,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.media3.common.MediaItem
-import it.vfsfitvnm.innertube.models.NavigationEndpoint
 import com.shaadow.tunes.Database
 import com.shaadow.tunes.LocalPlayerServiceBinder
 import com.shaadow.tunes.R
@@ -160,7 +159,7 @@ fun NonQueuedMediaItemMenu(
             binder?.stopRadio()
             binder?.player?.forcePlay(mediaItem)
             binder?.setupRadio(
-                NavigationEndpoint.Endpoint.Watch(
+                com.shaadow.innertube.models.NavigationEndpoint.Endpoint.Watch(
                     videoId = mediaItem.mediaId,
                     playlistId = mediaItem.mediaMetadata.extras?.getString("playlistId")
                 )

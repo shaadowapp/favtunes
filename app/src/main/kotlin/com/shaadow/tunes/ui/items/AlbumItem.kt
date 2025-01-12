@@ -8,7 +8,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import coil3.compose.AsyncImage
-import it.vfsfitvnm.innertube.Innertube
+import com.shaadow.innertube.Innertube
 import com.shaadow.tunes.models.Album
 import com.shaadow.tunes.ui.styling.px
 import com.shaadow.tunes.utils.thumbnail

@@ -48,8 +48,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.times
 import androidx.lifecycle.viewmodel.compose.viewModel
-import it.vfsfitvnm.innertube.Innertube
-import it.vfsfitvnm.innertube.models.NavigationEndpoint
+import com.shaadow.innertube.Innertube
 import com.shaadow.tunes.Database
 import com.shaadow.tunes.LocalPlayerPadding
 import com.shaadow.tunes.LocalPlayerServiceBinder
@@ -158,7 +157,7 @@ fun QuickPicks(
                                     binder?.stopRadio()
                                     binder?.player?.forcePlay(mediaItem)
                                     binder?.setupRadio(
-                                        NavigationEndpoint.Endpoint.Watch(videoId = mediaItem.mediaId)
+                                        com.shaadow.innertube.models.NavigationEndpoint.Endpoint.Watch(videoId = mediaItem.mediaId)
                                     )
                                 },
                                 onLongClick = {
@@ -195,7 +194,7 @@ fun QuickPicks(
                                 binder?.stopRadio()
                                 binder?.player?.forcePlay(mediaItem)
                                 binder?.setupRadio(
-                                    NavigationEndpoint.Endpoint.Watch(videoId = mediaItem.mediaId)
+                                    com.shaadow.innertube.models.NavigationEndpoint.Endpoint.Watch(videoId = mediaItem.mediaId)
                                 )
                             },
                             onLongClick = {

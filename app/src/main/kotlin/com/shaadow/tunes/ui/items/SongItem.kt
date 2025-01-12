@@ -12,7 +12,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.media3.common.MediaItem
 import coil3.compose.AsyncImage
-import it.vfsfitvnm.innertube.Innertube
+import com.shaadow.innertube.Innertube
 import com.shaadow.tunes.models.Song
 import com.shaadow.tunes.ui.styling.px
 import com.shaadow.tunes.utils.thumbnail

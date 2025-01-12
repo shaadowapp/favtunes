@@ -66,10 +66,9 @@ import androidx.media3.exoplayer.mediacodec.MediaCodecSelector
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.media3.exoplayer.source.MediaSource
 import androidx.media3.extractor.DefaultExtractorsFactory
-import it.vfsfitvnm.innertube.Innertube
-import it.vfsfitvnm.innertube.models.NavigationEndpoint
-import it.vfsfitvnm.innertube.models.bodies.PlayerBody
-import it.vfsfitvnm.innertube.requests.player
+import com.shaadow.innertube.Innertube
+import com.shaadow.innertube.models.bodies.PlayerBody
+import com.shaadow.innertube.requests.player
 import com.shaadow.tunes.Database
 import com.shaadow.tunes.MainActivity
 import com.shaadow.tunes.R
@@ -912,13 +911,13 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
             timerJob = null
         }
 
-        fun setupRadio(endpoint: NavigationEndpoint.Endpoint.Watch?) =
+        fun setupRadio(endpoint: com.shaadow.innertube.models.NavigationEndpoint.Endpoint.Watch?) =
             startRadio(endpoint = endpoint, justAdd = true)
 
-        fun playRadio(endpoint: NavigationEndpoint.Endpoint.Watch?) =
+        fun playRadio(endpoint: com.shaadow.innertube.models.NavigationEndpoint.Endpoint.Watch?) =
             startRadio(endpoint = endpoint, justAdd = false)
 
-        private fun startRadio(endpoint: NavigationEndpoint.Endpoint.Watch?, justAdd: Boolean) {
+        private fun startRadio(endpoint: com.shaadow.innertube.models.NavigationEndpoint.Endpoint.Watch?, justAdd: Boolean) {
             radioJob?.cancel()
             radio = null
             YouTubeRadio(
@@ -979,7 +978,7 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
     @JvmInline
     private value class Action(val value: String) {
         context(Context)
-        val pendingIntent: PendingIntent
+        val pendingIntent
             get() = PendingIntent.getBroadcast(
                 this@Context,
                 100,
@@ -988,10 +987,10 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
             )
 
         companion object {
-            val pause = Action("it.vfsfitvnm.vimusic.pause")
-            val play = Action("it.vfsfitvnm.vimusic.play")
-            val next = Action("it.vfsfitvnm.vimusic.next")
-            val previous = Action("it.vfsfitvnm.vimusic.previous")
+            val pause = Action("com.shaadow.tunes.pause")
+            val play = Action("com.shaadow.tunes.play")
+            val next = Action("com.shaadow.tunes.next")
+            val previous = Action("com.shaadow.tunes.previous")
         }
     }
 

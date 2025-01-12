@@ -28,8 +28,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import it.vfsfitvnm.innertube.Innertube
-import it.vfsfitvnm.innertube.utils.plus
+import com.shaadow.innertube.Innertube
+import com.shaadow.innertube.utils.plus
 import com.shaadow.tunes.LocalPlayerPadding
 import com.shaadow.tunes.R
 import com.shaadow.tunes.ui.components.ShimmerHost

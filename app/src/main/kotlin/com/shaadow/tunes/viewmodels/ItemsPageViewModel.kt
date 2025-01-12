@@ -2,8 +2,8 @@ package com.shaadow.tunes.viewmodels
 
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.lifecycle.ViewModel
-import it.vfsfitvnm.innertube.Innertube
-import it.vfsfitvnm.innertube.utils.plus
+import com.shaadow.innertube.Innertube
+import com.shaadow.innertube.utils.plus
 
 class ItemsPageViewModel<T : Innertube.Item> : ViewModel() {
     var itemsMap: MutableMap<String, Innertube.ItemsPage<T>?> = mutableStateMapOf()
