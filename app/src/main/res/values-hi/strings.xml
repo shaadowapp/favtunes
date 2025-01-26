@@ -4,7 +4,9 @@
     <string name="home">Ghar</string>
     <string name="songs">Gaane</string>
     <string name="playlists">Playlists</string>
+    <string name="feedback">Feedback</string>
     <string name="artists">Kalakaar</string>
+    <string name="more">More</string>
     <string name="albums">Albums</string>
     <string name="related_albums">Related albums</string>
     <string name="similar_artists">Milte-julte kalakaar</string>
@@ -68,7 +70,8 @@
     <string name="service_lifetime_information">Agar battery optimizations apply kiye gaye hain, toh playback notification jab pause hota hai tab achanak gayab ho sakti hai</string>
     <string name="service_lifetime_information_plus">Android 12 se, battery optimizations ko disable karna zaroori hai taaki Invincible service option ka effect ho sake</string>
     <string name="about">About</string>
-    <string name="search">Search</string>
+    <string name="search_btn">Search</string>
+    <string name="search">Search HyTunes</string>
     <string name="featured">Featured</string>
     <string name="confirm">Confirm</string>
     <string name="set">Set</string>

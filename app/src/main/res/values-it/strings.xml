@@ -4,7 +4,9 @@
     <string name="home">Home</string>
     <string name="songs">Canzoni</string>
     <string name="playlists">Playlist</string>
+    <string name="feedback">Feedback</string>
     <string name="artists">Artisti</string>
+    <string name="more">More</string>
     <string name="albums">Album</string>
     <string name="related_albums">Album correlati</string>
     <string name="similar_artists">Artisti simili</string>
@@ -53,7 +55,6 @@
     <string name="restore_information">L\'app si chiuderà automaticamente dopo il ripristino del database e i dati esistenti verranno sovrascritti.</string>
     <string name="backup_description">Esporta il database nella memoria esterna</string>
     <string name="restore_description">Importa il database dalla memoria esterna</string>
-    <string name="android_auto">Android Auto</string>
     <string name="service_lifetime">Durata del servizio</string>
     <string name="pause_search_history">Pausa cronologia ricerche</string>
     <string name="pause_search_history_description">Non salvare nuove ricerche né mostrare la cronologia</string>
@@ -63,9 +64,9 @@
     <string name="ignore_battery_optimizations">Ignora le ottimizzazioni della batteria</string>
     <string name="service_lifetime_description">Quando disattivare le ottimizzazioni della batteria non è sufficiente</string>
     <string name="service_lifetime_information">Se le ottimizzazioni della batteria sono attive, la notifica di riproduzione potrebbe scomparire improvvisamente quando la riproduzione è in pausa.</string>
-    <string name="service_lifetime_information_plus">Dal sistema Android 12, disabilitare le ottimizzazioni della batteria è necessario affinché l\'opzione "Servizio invincibile" abbia effetto.</string>
-    <string name="about">Informazioni</string>
-    <string name="search">Cerca</string>
+    <string name="service_lifetime_information_plus">Dal sistema Android 12, disabilitare le ottimizzazioni della batteria è necessario affinché l\'opzione "Servizio invincibile" abbia effetto.</string>    <string name="about">Informazioni</string>
+    <string name="search_btn">Cerca</string>
+    <string name="search">Cerca HyTunes</string>
     <string name="featured">In evidenza</string>
     <string name="confirm">Conferma</string>
     <string name="set">Imposta</string>
@@ -74,7 +75,6 @@
     <string name="hide">Nascondi</string>
     <string name="remove_from_queue">Rimuovi dalla coda</string>
     <string name="remove_from_playlist">Rimuovi dalla playlist</string>
-    <string name="github">Github</string>
     <string name="shuffle">Mescola</string>
     <string name="quick_picks">Scelte rapide</string>
     <string name="view_all">Vedi tutto</string>
@@ -173,7 +173,6 @@
     <string name="retry">Riprova</string>
     <string name="information">Informazioni</string>
     <string name="close">Chiudi</string>
-    <string name="itag">Itag</string>
     <string name="bitrate">Bitrate</string>
     <string name="size">Dimensione</string>
     <string name="cached">In cache</string>
@@ -186,5 +185,4 @@
     <string name="hidden">Nascosto</string>
     <string name="profile">Profile</string>
     <string name="profile_heading">Pagina del profilo in fase di sviluppo</string>
-    <string name="id">Id</string>
 </resources>

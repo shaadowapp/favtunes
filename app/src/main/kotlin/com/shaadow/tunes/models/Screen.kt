@@ -4,14 +4,13 @@ import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.QueueMusic
 import androidx.compose.material.icons.automirrored.outlined.QueueMusic
-import androidx.compose.material.icons.filled.Album
+import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.MusicNote
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.outlined.Album
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.MusicNote
-import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material.icons.outlined.Search
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.shaadow.tunes.R
 
@@ -35,18 +34,11 @@ sealed class Screen(
         selectedIcon = Icons.Filled.MusicNote
     )
 
-    data object Artists : Screen(
-        route = "artists",
-        resourceId = R.string.artists,
-        unselectedIcon = Icons.Outlined.Person,
-        selectedIcon = Icons.Filled.Person
-    )
-
-    data object Albums : Screen(
-        route = "albums",
-        resourceId = R.string.albums,
-        unselectedIcon = Icons.Outlined.Album,
-        selectedIcon = Icons.Filled.Album
+    data object Search : Screen(
+        route = "search",
+        resourceId = R.string.search_btn,
+        unselectedIcon = Icons.Outlined.Search,
+        selectedIcon = Icons.Filled.Search
     )
 
     data object Playlists : Screen(
@@ -54,5 +46,12 @@ sealed class Screen(
         resourceId = R.string.playlists,
         unselectedIcon = Icons.AutoMirrored.Outlined.QueueMusic,
         selectedIcon = Icons.AutoMirrored.Filled.QueueMusic
+    )
+
+    data object More : Screen(
+        route = "more",
+        resourceId = R.string.more,
+        unselectedIcon = Icons.Filled.Bolt,
+        selectedIcon = Icons.Filled.Bolt
     )
 }

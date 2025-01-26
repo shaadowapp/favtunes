@@ -14,10 +14,10 @@ android {
 
     defaultConfig {
         applicationId = "com.shaadow.tunes"
-        minSdk = 21
+        minSdk = 24
         targetSdk = 35
-        versionCode = 1
-        versionName = "1.0.2"
+        versionCode = 5
+        versionName = "1.6"
     }
 
     splits {
@@ -89,6 +89,7 @@ dependencies {
     implementation(libs.firebase.analytics)
     implementation(libs.play.services.measurement.api)
     implementation(libs.firebase.perf)
+    implementation(libs.firebase.messaging)
     ksp(libs.room.compiler)
     implementation(projects.innertube)
     implementation(projects.kugou)

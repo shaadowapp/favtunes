@@ -4,7 +4,9 @@
     <string name="home">Accueil</string>
     <string name="songs">Titres</string>
     <string name="playlists">Playlists</string>
+    <string name="feedback">Feedback</string>
     <string name="artists">Artistes</string>
+    <string name="more">More</string>
     <string name="albums">Albums</string>
     <string name="related_albums">Albums Associés</string>
     <string name="similar_artists">Artistes Similaires</string>
@@ -65,7 +67,8 @@
     <string name="service_lifetime_information">Si des optimisations de batterie sont appliquées, la notification de lecture peut soudainement disparaître lors de la mise en pause.</string>
     <string name="service_lifetime_information_plus">Depuis Android 12, la désactivation des optimisations de la batterie est nécessaire pour que l\'option \"Service invincible\" prenne effet.</string>
     <string name="about">À propos</string>
-    <string name="search">Recherche…</string>
+    <string name="search_btn">Recherche</string>
+    <string name="search">Recherche HyTunes</string>
     <string name="featured">En vedette</string>
     <string name="confirm">Confirmer</string>
     <string name="set">Définir</string>

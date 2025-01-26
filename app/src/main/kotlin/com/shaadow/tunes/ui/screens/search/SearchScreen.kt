@@ -145,6 +145,7 @@ fun SearchScreen(
                             )
                         }
                     },
+
                     trailingIcon = {
                         if (query.isNotBlank() && expanded) {
                             IconButton(onClick = { query = "" }) {

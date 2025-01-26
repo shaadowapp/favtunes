@@ -36,6 +36,7 @@ import com.shaadow.tunes.ui.items.AlbumItem
 import com.shaadow.tunes.ui.items.ItemPlaceholder
 import com.shaadow.tunes.ui.screens.search.ItemsPage
 import com.shaadow.tunes.utils.asMediaItem
+import com.shaadow.tunes.utils.completed
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.withContext
@@ -68,6 +69,7 @@ fun AlbumScreen(
                 if (albumPage == null && (currentAlbum?.timestamp == null || tabIndex == 1)) {
                     withContext(Dispatchers.IO) {
                         Innertube.albumPage(BrowseBody(browseId = browseId))
+                            ?.completed()
                             ?.onSuccess { currentAlbumPage ->
                                 albumPage = currentAlbumPage
 

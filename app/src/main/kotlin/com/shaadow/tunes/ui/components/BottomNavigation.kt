@@ -7,7 +7,6 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -26,7 +25,7 @@ import com.shaadow.tunes.utils.rememberPreference
 fun BottomNavigation(navController: NavHostController) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
-    var navigationLabelsVisibility by rememberPreference(
+    val navigationLabelsVisibility by rememberPreference(
         navigationLabelsVisibilityKey,
         NavigationLabelsVisibility.Visible
     )
@@ -38,9 +37,9 @@ fun BottomNavigation(navController: NavHostController) {
     val homeScreens = listOf(
         Screen.Home,
         Screen.Songs,
-        Screen.Artists,
-        Screen.Albums,
-        Screen.Playlists
+        Screen.Search,
+        Screen.Playlists,
+        Screen.More
     )
 
     NavigationBar(

@@ -1,4 +1,4 @@
-package com.shaadow.tunes.ui.screens.settings
+package com.shaadow.tunes.ui.screens.more
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -15,7 +15,7 @@ import androidx.compose.ui.unit.dp
 import com.shaadow.tunes.R
 
 @Composable
-fun ProfileScreen() {
+fun Messages() {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -25,20 +25,12 @@ fun ProfileScreen() {
     ) {
         // Add profile content here
         Text(
-            text = stringResource(id = R.string.profile_heading),
+            text = "Messages is underwork",
             style = MaterialTheme.typography.titleMedium
         )
 
         Text(
             text = stringResource(id = R.string.profile_desc),
-            style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier
-                .padding(top = 12.dp, start = 18.dp, end = 18.dp),
-            textAlign = TextAlign.Center,
-        )
-
-        Text(
-            text = "hy new",
             style = MaterialTheme.typography.bodyMedium,
             modifier = Modifier
                 .padding(top = 12.dp, start = 18.dp, end = 18.dp),

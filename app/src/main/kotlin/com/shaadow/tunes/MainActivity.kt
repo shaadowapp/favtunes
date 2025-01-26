@@ -158,7 +158,7 @@ class MainActivity : ComponentActivity() {
                                     }
                                 }
                             ) {
-                                menuState.content()
+                                menuState.content
                             }
                         }
                     }

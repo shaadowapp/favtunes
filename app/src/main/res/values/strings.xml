@@ -5,6 +5,8 @@
     <string name="songs">Songs</string>
     <string name="playlists">Playlists</string>
     <string name="artists">Artists</string>
+    <string name="feedback">Feedback</string>
+    <string name="more">More</string>
     <string name="albums">Albums</string>
     <string name="related_albums">Related albums</string>
     <string name="similar_artists">Similar artists</string>
@@ -42,7 +44,7 @@
     <string name="show_song_cover">Show song cover</string>
     <string name="show_song_cover_description">Use the playing song cover as the lockscreen wallpaper</string>
     <string name="settings">Settings</string>
-    <string name="profile" translatable="false">Profile</string>
+    <string name="profile">Profile</string>
     <string name="profile_heading">Profile Page Under Development</string>
     <string name="profile_desc">We\'re working on an automated login system that will eliminate the need for personal credentials like email or phone number. Stay tuned for a seamless and hassle-free login experience, coming soon</string>
     <string name="image_cache">Image cache</string>
@@ -65,7 +67,8 @@
     <string name="service_lifetime_information">If battery optimizations are applied, the playback notification can suddenly disappear when paused.</string>
     <string name="service_lifetime_information_plus">Since Android 12, disabling battery optimizations is required for the "Invincible service" option to take effect.</string>
     <string name="about">About</string>
-    <string name="search">Search</string>
+    <string name="search_btn">Search</string>
+    <string name="search">Search HyTunes</string>
     <string name="featured">Featured</string>
     <string name="confirm">Confirm</string>
     <string name="set">Set</string>

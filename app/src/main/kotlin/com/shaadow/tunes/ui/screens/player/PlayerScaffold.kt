@@ -24,8 +24,6 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.shaadow.tunes.LocalPlayerPadding
-import com.shaadow.tunes.ui.screens.player.MiniPlayer
-import com.shaadow.tunes.ui.screens.player.Player
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -64,6 +62,7 @@ fun PlayerScaffold(
                                 navController.navigate(route = "album/$browseId")
                             },
                             onGoToArtist = { browseId ->
+                                scope.launch { sheetState.partialExpand() }
                                 scope.launch { sheetState.partialExpand() }
                                 navController.navigate(route = "artist/$browseId")
                             }

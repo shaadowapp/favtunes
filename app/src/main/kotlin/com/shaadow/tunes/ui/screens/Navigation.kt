@@ -25,6 +25,9 @@ import com.shaadow.tunes.ui.screens.artist.ArtistScreen
 import com.shaadow.tunes.ui.screens.builtinplaylist.BuiltInPlaylistScreen
 import com.shaadow.tunes.ui.screens.home.HomeScreen
 import com.shaadow.tunes.ui.screens.localplaylist.LocalPlaylistScreen
+import com.shaadow.tunes.ui.screens.more.Feedback
+import com.shaadow.tunes.ui.screens.more.Messages
+import com.shaadow.tunes.ui.screens.more.More
 import com.shaadow.tunes.ui.screens.playlist.PlaylistScreen
 import com.shaadow.tunes.ui.screens.search.SearchScreen
 import com.shaadow.tunes.ui.screens.settings.ProfileScreen
@@ -51,9 +54,9 @@ fun Navigation(
     val homeRoutes = listOf(
         Screen.Home,
         Screen.Songs,
-        Screen.Artists,
-        Screen.Albums,
-        Screen.Playlists
+        Screen.Search,
+        Screen.Playlists,
+        Screen.More
     ).map { it.route }
 
     @Composable
@@ -123,51 +126,51 @@ fun Navigation(
             SheetBackHandler()
         }
 
-        composable(
-            route = "artists",
-            enterTransition = {
-                if (homeRoutes.contains(initialState.destination.route)) slideIntoContainer(
-                    AnimatedContentTransitionScope.SlideDirection.Up
-                ) + fadeIn()
-                else slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Left) + fadeIn()
-            },
-            popEnterTransition = {
-                if (homeRoutes.contains(initialState.destination.route)) slideIntoContainer(
-                    AnimatedContentTransitionScope.SlideDirection.Up
-                ) + fadeIn()
-                else slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Right) + fadeIn()
-            }
-        ) {
-            HomeScreen(
-                navController = navController,
-                screenIndex = 2
-            )
+//        composable(
+//            route = "artists",
+//            enterTransition = {
+//                if (homeRoutes.contains(initialState.destination.route)) slideIntoContainer(
+//                    AnimatedContentTransitionScope.SlideDirection.Up
+//                ) + fadeIn()
+//                else slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Left) + fadeIn()
+//            },
+//            popEnterTransition = {
+//                if (homeRoutes.contains(initialState.destination.route)) slideIntoContainer(
+//                    AnimatedContentTransitionScope.SlideDirection.Up
+//                ) + fadeIn()
+//                else slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Right) + fadeIn()
+//            }
+//        ) {
+//            HomeScreen(
+//                navController = navController,
+//                screenIndex = 2
+//            )
+//
+//            SheetBackHandler()
+//        }
 
-            SheetBackHandler()
-        }
-
-        composable(
-            route = "albums",
-            enterTransition = {
-                if (homeRoutes.contains(initialState.destination.route)) slideIntoContainer(
-                    AnimatedContentTransitionScope.SlideDirection.Up
-                ) + fadeIn()
-                else slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Left) + fadeIn()
-            },
-            popEnterTransition = {
-                if (homeRoutes.contains(initialState.destination.route)) slideIntoContainer(
-                    AnimatedContentTransitionScope.SlideDirection.Up
-                ) + fadeIn()
-                else slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Right) + fadeIn()
-            }
-        ) {
-            HomeScreen(
-                navController = navController,
-                screenIndex = 3
-            )
-
-            SheetBackHandler()
-        }
+//        composable(
+//            route = "albums",
+//            enterTransition = {
+//                if (homeRoutes.contains(initialState.destination.route)) slideIntoContainer(
+//                    AnimatedContentTransitionScope.SlideDirection.Up
+//                ) + fadeIn()
+//                else slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Left) + fadeIn()
+//            },
+//            popEnterTransition = {
+//                if (homeRoutes.contains(initialState.destination.route)) slideIntoContainer(
+//                    AnimatedContentTransitionScope.SlideDirection.Up
+//                ) + fadeIn()
+//                else slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Right) + fadeIn()
+//            }
+//        ) {
+//            HomeScreen(
+//                navController = navController,
+//                screenIndex = 3
+//            )
+//
+//            SheetBackHandler()
+//        }
 
         composable(
             route = "playlists",
@@ -256,6 +259,27 @@ fun Navigation(
 
         composable(route = "profile") {
             ProfileScreen()
+
+            SheetBackHandler()
+        }
+
+        composable(route = "feedback") {
+            Feedback()
+
+            SheetBackHandler()
+        }
+
+        composable(route = "messages") {
+            Messages()
+
+            SheetBackHandler()
+        }
+
+
+        composable(route = "more") {
+            More(
+                navController = navController
+            )
 
             SheetBackHandler()
         }

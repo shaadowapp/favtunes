@@ -5,22 +5,21 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavController
 import com.shaadow.tunes.R
-import com.shaadow.tunes.models.Screen
+import com.shaadow.tunes.ui.components.AppIcon
 import com.shaadow.tunes.ui.components.TooltipIconButton
+
 
 @OptIn(
     ExperimentalFoundationApi::class,
@@ -32,13 +31,6 @@ fun HomeScreen(
     navController: NavController,
     screenIndex: Int
 ) {
-    val screens = listOf(
-        Screen.Home,
-        Screen.Songs,
-        Screen.Artists,
-        Screen.Albums,
-        Screen.Playlists
-    )
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
     Scaffold(
@@ -46,15 +38,16 @@ fun HomeScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    Text(text = stringResource(id = screens[screenIndex].resourceId))
+                    val context = LocalContext.current
+                    AppIcon(context)
                 },
                 actions = {
-                    TooltipIconButton(
-                        description = R.string.search,
-                        onClick = { navController.navigate(route = "search") },
-                        icon = Icons.Outlined.Search,
-                        inTopBar = true
-                    )
+//                    TooltipIconButton(
+//                        description = R.string.search,
+//                        onClick = { navController.navigate(route = "search") },
+//                        icon = Icons.Outlined.Search,
+//                        inTopBar = true
+//                    )
 
                     TooltipIconButton(
                         description = R.string.settings,

@@ -4,7 +4,9 @@
     <string name="home">Startseite</string>
     <string name="songs">Songs</string>
     <string name="playlists">Wiedergabelisten</string>
+    <string name="feedback">Feedback</string>
     <string name="artists">Künstler</string>
+    <string name="more">More</string>
     <string name="albums">Alben</string>
     <string name="related_albums">Ähnliche Alben</string>
     <string name="similar_artists">Ähnliche Künstler</string>
@@ -67,7 +69,8 @@
     <string name="service_lifetime_information">Wenn die Akku-Optimierung angewendet wird, kann die Benachrichtigung über die Wiedergabe plötzlich verschwinden, wenn die Wiedergabe angehalten wird.</string>
     <string name="service_lifetime_information_plus">Seit Android 12 ist die Deaktivierung der Akku-Optimierung erforderlich, damit die Option "Unbezwingbarer Dienst" wirksam wird.</string>
     <string name="about">Info</string>
-    <string name="search">Suche</string>
+    <string name="search_btn">Suche</string>
+    <string name="search">Suche HyTunes</string>
     <string name="featured">Ausgewählte</string>
     <string name="confirm">Bestätigen</string>
     <string name="set">Einstellen</string>

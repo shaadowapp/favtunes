@@ -4,7 +4,9 @@
     <string name="home">Inicio</string>
     <string name="songs">Canciones</string>
     <string name="playlists">Listas</string>
+    <string name="feedback">Feedback</string>
     <string name="artists">Artistas</string>
+    <string name="more">More</string>
     <string name="albums">Álbumes</string>
     <string name="related_albums">Álbumes relacionados</string>
     <string name="similar_artists">Artistas similares</string>
@@ -65,7 +67,8 @@
     <string name="service_lifetime_information">Si se aplican las optimizaciones de la batería, la notificación de reproducción puede desaparecer repentinamente cuando se detiene la aplicación.</string>
     <string name="service_lifetime_information_plus">A partir de Android 12, debes deshabilitar las optimizaciones de la batería para que el servicio invencible funcione.</string>
     <string name="about">Acerca de</string>
-    <string name="search">Buscar</string>
+    <string name="search_btn">Buscar</string>
+    <string name="search">Buscar HyTunes</string>
     <string name="featured">Destacado</string>
     <string name="confirm">Confirmar</string>
     <string name="set">Establecer</string>
