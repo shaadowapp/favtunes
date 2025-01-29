@@ -1,5 +1,6 @@
 package com.shaadow.tunes.ui.screens.more
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -47,7 +48,7 @@ fun Feedback() {
 
     Column(
         modifier = Modifier
-            .padding(16.dp, top = 100.dp)
+            .padding(start=16.dp, end=16.dp, bottom=16.dp, top = 100.dp)
             .fillMaxWidth()
     ) {
         Text(
@@ -76,8 +77,9 @@ fun Feedback() {
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = 8.dp)
-                .border(2.dp, Color.LightGray, RectangleShape)
-                .height(25.dp),
+                .border(1.dp, Color.DarkGray, RectangleShape)
+                .height(30.dp)
+                .background(Color.LightGray),
             decorationBox = { innerTextField ->
                 Row(
                     verticalAlignment = Alignment.CenterVertically
@@ -121,7 +123,8 @@ fun Feedback() {
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = 8.dp)
-                .border(2.dp, Color.LightGray, RectangleShape)
+                .border(1.dp, Color.DarkGray, RectangleShape)
+                .background(Color.LightGray)
                 .height(200.dp)
                 .verticalScroll(rememberScrollState(),true, reverseScrolling = true),
             decorationBox = { innerTextField ->

@@ -38,7 +38,7 @@ fun ProfileScreen() {
         )
 
         Text(
-            text = "hy new",
+            text = "hy 2",
             style = MaterialTheme.typography.bodyMedium,
             modifier = Modifier
                 .padding(top = 12.dp, start = 18.dp, end = 18.dp),

@@ -4,10 +4,11 @@ import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.QueueMusic
 import androidx.compose.material.icons.automirrored.outlined.QueueMusic
-import androidx.compose.material.icons.filled.Bolt
+import androidx.compose.material.icons.filled.Flag
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.outlined.Flag
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.MusicNote
 import androidx.compose.material.icons.outlined.Search
@@ -51,7 +52,7 @@ sealed class Screen(
     data object More : Screen(
         route = "more",
         resourceId = R.string.more,
-        unselectedIcon = Icons.Filled.Bolt,
-        selectedIcon = Icons.Filled.Bolt
+        unselectedIcon = Icons.Outlined.Flag,
+        selectedIcon = Icons.Filled.Flag
     )
 }

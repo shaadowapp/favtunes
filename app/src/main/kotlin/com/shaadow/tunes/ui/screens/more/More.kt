@@ -1,6 +1,8 @@
 package com.shaadow.tunes.ui.screens.more
 
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -59,6 +61,8 @@ fun FeatureButton(
 
 
 // The main composable function for the screen
+@ExperimentalFoundationApi
+@ExperimentalAnimationApi
 @Composable
     fun More(navController: NavHostController) {
     Card(

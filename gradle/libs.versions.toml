@@ -20,6 +20,7 @@ navigation = "2.8.5"
 reorderable = "2.4.3"
 room = "2.6.1"
 appcompat = "1.7.0"
+room-runtime = "2.6.1"
 ui-tooling-preview-android = "1.7.6"
 firebase-crashlytics = "19.3.0"
 google-gms-google-services = "4.4.2"
@@ -60,6 +61,7 @@ reorderable = { module = "sh.calvin.reorderable:reorderable", version.ref = "reo
 room = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
 room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
 appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+room-runtime = { module = "androidx.room:room-runtime", version.ref = "room-runtime" }
 ui-tooling-preview-android = { group = "androidx.compose.ui", name = "ui-tooling-preview-android", version.ref = "ui-tooling-preview-android" }
 firebase-crashlytics = { group = "com.google.firebase", name = "firebase-crashlytics", version.ref = "firebase-crashlytics" }
 firebase-analytics = { group = "com.google.firebase", name = "firebase-analytics", version.ref = "firebase-analytics" }
