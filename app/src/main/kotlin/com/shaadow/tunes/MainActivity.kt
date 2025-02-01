@@ -97,6 +97,11 @@ class MainActivity : ComponentActivity() {
         // Obtain the FirebaseAnalytics instance.
         analytics = Firebase.analytics
 
+        setContent {
+            AppScreen()
+        }
+
+
         val launchedFromNotification = intent?.extras?.getBoolean("expandPlayerBottomSheet") == true
         data = intent?.data ?: intent?.getStringExtra(Intent.EXTRA_TEXT)?.toUri()
 

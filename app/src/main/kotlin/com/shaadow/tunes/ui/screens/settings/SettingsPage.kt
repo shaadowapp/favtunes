@@ -15,17 +15,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
-import com.shaadow.tunes.ui.screens.settings.ProfileScreen
-import com.shaadow.tunes.ui.screens.settings.About
-import com.shaadow.tunes.ui.screens.settings.CacheSettings
-import com.shaadow.tunes.ui.screens.settings.DatabaseSettings
-import com.shaadow.tunes.ui.screens.settings.GeneralSettings
-import com.shaadow.tunes.ui.screens.settings.OtherSettings
-import com.shaadow.tunes.ui.screens.settings.PlayerSettings
-import com.shaadow.tunes.ui.screens.settings.legal.TermsOfUse
 import com.shaadow.tunes.enums.SettingsSection
 import com.shaadow.tunes.ui.components.consumeCustomWindowInsets
 import com.shaadow.tunes.ui.screens.settings.legal.PrivacyPolicy
+import com.shaadow.tunes.ui.screens.settings.legal.TermsOfUse
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
 @Composable

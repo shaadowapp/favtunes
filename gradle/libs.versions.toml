@@ -30,6 +30,8 @@ play-services-measurement-api = "22.1.2"
 firebase-perf = "21.0.3"
 google-firebase-firebase-perf = "1.4.2"
 firebase-messaging = "24.1.0"
+firebase-firestore-ktx = "25.1.1"
+runtime-livedata = "1.7.6"
 
 [libraries]
 brotli = { group = "org.brotli", name = "dec", version.ref = "brotli" }
@@ -68,6 +70,8 @@ firebase-analytics = { group = "com.google.firebase", name = "firebase-analytics
 play-services-measurement-api = { group = "com.google.android.gms", name = "play-services-measurement-api", version.ref = "play-services-measurement-api" }
 firebase-perf = { group = "com.google.firebase", name = "firebase-perf", version.ref = "firebase-perf" }
 firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging", version.ref = "firebase-messaging" }
+firebase-firestore-ktx = { group = "com.google.firebase", name = "firebase-firestore-ktx", version.ref = "firebase-firestore-ktx" }
+runtime-livedata = { group = "androidx.compose.runtime", name = "runtime-livedata", version.ref = "runtime-livedata" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

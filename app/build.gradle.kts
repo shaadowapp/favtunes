@@ -16,8 +16,8 @@ android {
         applicationId = "com.shaadow.tunes"
         minSdk = 24
         targetSdk = 35
-        versionCode = 6
-        versionName = "1.7"
+        versionCode = 7
+        versionName = "1.8"
     }
 
     splits {
@@ -90,11 +90,13 @@ dependencies {
     implementation(libs.play.services.measurement.api)
     implementation(libs.firebase.perf)
     implementation(libs.firebase.messaging)
+    implementation(libs.firebase.firestore.ktx)
+    implementation(libs.runtime.livedata)
     ksp(libs.room.compiler)
     implementation(projects.innertube)
     implementation(projects.kugou)
     coreLibraryDesugaring(libs.desugaring)
     implementation(platform(libs.firebase.bom))
     implementation(libs.room.runtime)
-    annotationProcessor(libs.room.compiler)
+    ksp(libs.room.compiler)
 }

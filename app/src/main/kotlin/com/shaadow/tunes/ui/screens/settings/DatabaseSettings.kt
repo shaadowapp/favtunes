@@ -193,6 +193,6 @@ fun DatabaseSettings() {
             }
         )
 
-        SettingsInformation(text = stringResource(id = R.string.restore_information))
+        InfoInformation(text = stringResource(id = R.string.restore_information))
     }
 }

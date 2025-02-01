@@ -128,6 +128,6 @@ fun CacheSettings() {
             )
         }
 
-        SettingsInformation(text = stringResource(id = R.string.cache_information))
+        InfoInformation(text = stringResource(id = R.string.cache_information))
     }
 }

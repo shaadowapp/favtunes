@@ -92,7 +92,7 @@ fun OtherSettings() {
             onCheckedChange = { isAndroidAutoEnabled = it }
         )
 
-        SettingsInformation(text = stringResource(id = R.string.android_auto_information))
+        InfoInformation(text = stringResource(id = R.string.android_auto_information))
 
         Spacer(modifier = Modifier.height(Dimensions.spacer))
 
@@ -143,7 +143,7 @@ fun OtherSettings() {
             onCheckedChange = { isInvincibilityEnabled = it }
         )
 
-        SettingsInformation(
+        InfoInformation(
             text = stringResource(id = R.string.service_lifetime_information) +
                     if (isAtLeastAndroid12) "\n" + stringResource(id = R.string.service_lifetime_information_plus) else ""
         )
