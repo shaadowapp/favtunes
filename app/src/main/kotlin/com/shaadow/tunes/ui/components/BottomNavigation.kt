@@ -39,7 +39,7 @@ fun BottomNavigation(navController: NavHostController) {
         Screen.Songs,
         Screen.Search,
         Screen.Playlists,
-        Screen.More
+        Screen.Artists
     )
 
     NavigationBar(

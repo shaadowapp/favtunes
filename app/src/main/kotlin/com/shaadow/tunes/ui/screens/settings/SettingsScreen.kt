@@ -237,7 +237,6 @@ fun InfoInformation(
         Text(
             text = text,
             fontSize = 15.sp,
-            color = Color.DarkGray,
             style = MaterialTheme.typography.bodyMedium
         )
     }

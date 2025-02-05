@@ -188,4 +188,5 @@
     <string name="backup_description">Export the database to the external storage</string>
     <string name="TermsOfUse" translatable="false">Terms of Use</string>
     <string name="PrivacyPolicy" translatable="false">Privacy Policy</string>
+    <string name="messages" translatable="false">Messages</string>
 </resources>

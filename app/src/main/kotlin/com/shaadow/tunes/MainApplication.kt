@@ -7,16 +7,22 @@ import coil3.SingletonImageLoader
 import coil3.disk.DiskCache
 import coil3.disk.directory
 import coil3.request.crossfade
+import com.google.firebase.FirebaseApp
 import com.shaadow.tunes.enums.CoilDiskCacheMaxSize
 import com.shaadow.tunes.utils.coilDiskCacheMaxSizeKey
 import com.shaadow.tunes.utils.getEnum
 import com.shaadow.tunes.utils.preferences
 
 class MainApplication : Application(), SingletonImageLoader.Factory {
+
     override fun onCreate() {
         super.onCreate()
         DatabaseInitializer()
+
+        FirebaseApp.initializeApp(this)
+
     }
+
 
     override fun newImageLoader(context: PlatformContext): ImageLoader {
         return ImageLoader.Builder(this)

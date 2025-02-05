@@ -3,6 +3,7 @@ package com.shaadow.tunes.ui.screens.localplaylist
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.Delete
@@ -37,7 +38,6 @@ import com.shaadow.tunes.models.SongPlaylistMap
 import com.shaadow.tunes.query
 import com.shaadow.tunes.transaction
 import com.shaadow.tunes.ui.components.TooltipIconButton
-import com.shaadow.tunes.ui.components.consumeCustomWindowInsets
 import com.shaadow.tunes.ui.components.themed.ConfirmationDialog
 import com.shaadow.tunes.ui.components.themed.TextFieldDialog
 import com.shaadow.tunes.utils.asMediaItem
@@ -144,7 +144,7 @@ fun LocalPlaylistScreen(
         Surface(
             modifier = Modifier
                 .fillMaxSize()
-                .consumeCustomWindowInsets(paddingValues)
+                .padding(top = paddingValues.calculateTopPadding())
         ) {
             LocalPlaylistSongs(
                 playlistId = playlistId,

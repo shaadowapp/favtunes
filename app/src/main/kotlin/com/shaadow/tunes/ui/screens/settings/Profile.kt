@@ -148,8 +148,7 @@ fun ProfileScreen(userViewModel: UserViewModel = viewModel()) {
                         .fillMaxWidth()
                         .background(Color.LightGray, shape = RoundedCornerShape(50.dp))
                         .border(2.dp, Color.DarkGray, shape = RoundedCornerShape(50.dp))
-                        .padding(18.dp, 6.dp),
-                    color = Color.Black
+                        .padding(18.dp, 6.dp)
                 )
             }
 
@@ -166,8 +165,7 @@ fun ProfileScreen(userViewModel: UserViewModel = viewModel()) {
                     text = user.deviceModel,
                     fontSize = 15.sp,
                     modifier = Modifier
-                        .fillMaxWidth(),
-                    color = Color.Black
+                        .fillMaxWidth()
                 )
             }
 
@@ -183,15 +181,14 @@ fun ProfileScreen(userViewModel: UserViewModel = viewModel()) {
                     text = user.getFormattedDate(),
                     fontSize = 15.sp,
                     modifier = Modifier
-                        .fillMaxWidth(),
-                    color = Color.Black
+                        .fillMaxWidth()
                 )
             }
 
 
             Spacer(modifier = Modifier.height(35.dp))
 
-            InfoInformation(text = "This new-age login system ensures security without passwords. Your private key stays safe while you log in using just a username and PIN.")
+            InfoInformation(text = "This new-age login system ensures security without passwords and emails. Your public-private key stays safe inside your device without any usage restriction and third-party interference.")
         }
 
         // Show the popup when user clicks the profile picture

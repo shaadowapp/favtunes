@@ -5,6 +5,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
@@ -43,9 +44,9 @@ fun HomeScreen(
                 },
                 actions = {
 //                    TooltipIconButton(
-//                        description = R.string.search,
-//                        onClick = { navController.navigate(route = "search") },
-//                        icon = Icons.Outlined.Search,
+//                        description = R.string.messages,
+//                        onClick = { navController.navigate(route = "messages") },
+//                        icon = Icons.Outlined.Notifications,
 //                        inTopBar = true
 //                    )
 

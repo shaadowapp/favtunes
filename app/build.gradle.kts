@@ -92,6 +92,7 @@ dependencies {
     implementation(libs.firebase.messaging)
     implementation(libs.firebase.firestore.ktx)
     implementation(libs.runtime.livedata)
+    implementation(libs.core)
     ksp(libs.room.compiler)
     implementation(projects.innertube)
     implementation(projects.kugou)
@@ -99,4 +100,5 @@ dependencies {
     implementation(platform(libs.firebase.bom))
     implementation(libs.room.runtime)
     ksp(libs.room.compiler)
+    implementation(libs.recaptcha)
 }

@@ -7,7 +7,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DownloadForOffline
-import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.outlined.Bookmark
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -33,7 +33,7 @@ fun BuiltInPlaylistThumbnail(builtInPlaylist: BuiltInPlaylist) {
         ) {
             Icon(
                 imageVector = when (builtInPlaylist) {
-                    BuiltInPlaylist.Favorites -> Icons.Default.Favorite
+                    BuiltInPlaylist.Favorites -> Icons.Outlined.Bookmark
                     BuiltInPlaylist.Offline -> Icons.Default.DownloadForOffline
                 },
                 contentDescription = null,

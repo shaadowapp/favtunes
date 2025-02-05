@@ -4,6 +4,7 @@ import android.content.Intent
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.LibraryAdd
@@ -38,7 +39,6 @@ import com.shaadow.tunes.models.SongPlaylistMap
 import com.shaadow.tunes.query
 import com.shaadow.tunes.transaction
 import com.shaadow.tunes.ui.components.TooltipIconButton
-import com.shaadow.tunes.ui.components.consumeCustomWindowInsets
 import com.shaadow.tunes.ui.components.themed.TextFieldDialog
 import com.shaadow.tunes.utils.asMediaItem
 import com.shaadow.tunes.utils.completed
@@ -131,7 +131,7 @@ fun PlaylistScreen(
         Surface(
             modifier = Modifier
                 .fillMaxSize()
-                .consumeCustomWindowInsets(paddingValues)
+                .padding(top = paddingValues.calculateTopPadding())
         ) {
             PlaylistSongList(
                 playlistPage = playlistPage,

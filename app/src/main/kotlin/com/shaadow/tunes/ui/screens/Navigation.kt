@@ -12,7 +12,6 @@ import androidx.compose.material3.SheetValue
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -26,9 +25,6 @@ import com.shaadow.tunes.ui.screens.artist.ArtistScreen
 import com.shaadow.tunes.ui.screens.builtinplaylist.BuiltInPlaylistScreen
 import com.shaadow.tunes.ui.screens.home.HomeScreen
 import com.shaadow.tunes.ui.screens.localplaylist.LocalPlaylistScreen
-import com.shaadow.tunes.ui.screens.more.Feedback
-import com.shaadow.tunes.ui.screens.more.Messages
-import com.shaadow.tunes.ui.screens.more.More
 import com.shaadow.tunes.ui.screens.playlist.PlaylistScreen
 import com.shaadow.tunes.ui.screens.search.SearchScreen
 import com.shaadow.tunes.ui.screens.settings.ProfileScreen
@@ -57,8 +53,7 @@ fun Navigation(
         Screen.Home,
         Screen.Songs,
         Screen.Search,
-        Screen.Playlists,
-        Screen.More
+        Screen.Playlists
     ).map { it.route }
 
 
@@ -131,28 +126,28 @@ fun Navigation(
             SheetBackHandler()
         }
 
-//        composable(
-//            route = "artists",
-//            enterTransition = {
-//                if (homeRoutes.contains(initialState.destination.route)) slideIntoContainer(
-//                    AnimatedContentTransitionScope.SlideDirection.Up
-//                ) + fadeIn()
-//                else slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Left) + fadeIn()
-//            },
-//            popEnterTransition = {
-//                if (homeRoutes.contains(initialState.destination.route)) slideIntoContainer(
-//                    AnimatedContentTransitionScope.SlideDirection.Up
-//                ) + fadeIn()
-//                else slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Right) + fadeIn()
-//            }
-//        ) {
-//            HomeScreen(
-//                navController = navController,
-//                screenIndex = 2
-//            )
-//
-//            SheetBackHandler()
-//        }
+        composable(
+            route = "artists",
+            enterTransition = {
+                if (homeRoutes.contains(initialState.destination.route)) slideIntoContainer(
+                    AnimatedContentTransitionScope.SlideDirection.Up
+                ) + fadeIn()
+                else slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Left) + fadeIn()
+            },
+            popEnterTransition = {
+                if (homeRoutes.contains(initialState.destination.route)) slideIntoContainer(
+                    AnimatedContentTransitionScope.SlideDirection.Up
+                ) + fadeIn()
+                else slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Right) + fadeIn()
+            }
+        ) {
+            HomeScreen(
+                navController = navController,
+                screenIndex = 2
+            )
+
+            SheetBackHandler()
+        }
 
 //        composable(
 //            route = "albums",
@@ -269,27 +264,6 @@ fun Navigation(
         }
 
 
-
-        composable(route = "feedback") {
-            Feedback()
-
-            SheetBackHandler()
-        }
-
-        composable(route = "messages") {
-            Messages()
-
-            SheetBackHandler()
-        }
-
-
-        composable(route = "more") {
-            More(
-                navController = navController
-            )
-
-            SheetBackHandler()
-        }
 
         composable(route = "TermsOfUse") {
             TermsOfUse()

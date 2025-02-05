@@ -4,13 +4,13 @@ import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.QueueMusic
 import androidx.compose.material.icons.automirrored.outlined.QueueMusic
-import androidx.compose.material.icons.filled.Flag
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.MusicNote
+import androidx.compose.material.icons.filled.PersonSearch
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.outlined.Flag
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.MusicNote
+import androidx.compose.material.icons.outlined.PersonSearch
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.shaadow.tunes.R
@@ -49,10 +49,10 @@ sealed class Screen(
         selectedIcon = Icons.AutoMirrored.Filled.QueueMusic
     )
 
-    data object More : Screen(
-        route = "more",
-        resourceId = R.string.more,
-        unselectedIcon = Icons.Outlined.Flag,
-        selectedIcon = Icons.Filled.Flag
+    data object Artists : Screen(
+        route = "artists",
+        resourceId = R.string.artists,
+        unselectedIcon = Icons.Outlined.PersonSearch,
+        selectedIcon = Icons.Filled.PersonSearch
     )
 }

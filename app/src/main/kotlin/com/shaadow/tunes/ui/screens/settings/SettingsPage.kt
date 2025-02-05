@@ -1,6 +1,7 @@
 package com.shaadow.tunes.ui.screens.settings
 
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -16,7 +17,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import com.shaadow.tunes.enums.SettingsSection
-import com.shaadow.tunes.ui.components.consumeCustomWindowInsets
 import com.shaadow.tunes.ui.screens.settings.legal.PrivacyPolicy
 import com.shaadow.tunes.ui.screens.settings.legal.TermsOfUse
 
@@ -47,7 +47,7 @@ fun SettingsPage(
             )
         }
     ) { paddingValues ->
-        Surface(modifier = Modifier.consumeCustomWindowInsets(paddingValues)) {
+        Surface(modifier = Modifier.padding(top = paddingValues.calculateTopPadding())) {
             when (section) {
                 SettingsSection.Profile -> ProfileScreen()
                 SettingsSection.About -> About()

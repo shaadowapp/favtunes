@@ -12,7 +12,7 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.DownloadForOffline
-import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.outlined.Bookmark
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -100,7 +100,7 @@ fun HomePlaylists(
 
         item(key = "favorites") {
             BuiltInPlaylistItem(
-                icon = Icons.Default.Favorite,
+                icon = Icons.Outlined.Bookmark,
                 name = stringResource(id = R.string.favorites),
                 onClick = { onBuiltInPlaylist(BuiltInPlaylist.Favorites.ordinal) }
             )
