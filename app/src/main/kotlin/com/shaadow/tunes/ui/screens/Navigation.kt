@@ -12,6 +12,7 @@ import androidx.compose.material3.SheetValue
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.lifecycle.Lifecycle
+import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -26,6 +27,7 @@ import com.shaadow.tunes.ui.screens.builtinplaylist.BuiltInPlaylistScreen
 import com.shaadow.tunes.ui.screens.home.HomeScreen
 import com.shaadow.tunes.ui.screens.localplaylist.LocalPlaylistScreen
 import com.shaadow.tunes.ui.screens.playlist.PlaylistScreen
+import com.shaadow.tunes.ui.screens.search.explore.ExploreSearch
 import com.shaadow.tunes.ui.screens.search.SearchScreen
 import com.shaadow.tunes.ui.screens.settings.ProfileScreen
 import com.shaadow.tunes.ui.screens.settings.SettingsPage
@@ -52,7 +54,7 @@ fun Navigation(
     val homeRoutes = listOf(
         Screen.Home,
         Screen.Songs,
-        Screen.Search,
+        Screen.Explore,
         Screen.Playlists
     ).map { it.route }
 
@@ -264,19 +266,6 @@ fun Navigation(
         }
 
 
-
-        composable(route = "TermsOfUse") {
-            TermsOfUse()
-
-            SheetBackHandler()
-        }
-
-        composable(route = "PrivacyPolicy") {
-            PrivacyPolicy()
-
-            SheetBackHandler()
-        }
-
         composable(route = "settings") {
             SettingsScreen(
                 pop = popDestination,
@@ -312,9 +301,38 @@ fun Navigation(
                 onArtistClick = navigateToArtist,
                 onPlaylistClick = { browseId -> navController.navigate("playlist/$browseId") }
             )
-
             SheetBackHandler()
         }
+
+        composable(route = "explore") {
+            ExploreSearch(navController)
+            SheetBackHandler()
+        }
+
+        composable(
+            route = "search?initialQuery={initialQuery}",
+            arguments = listOf(
+                navArgument("initialQuery") {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
+                }
+            )
+        ) { backStackEntry ->
+            val initialQuery = backStackEntry.arguments?.getString("initialQuery")?.let {
+                java.net.URLDecoder.decode(it, java.nio.charset.StandardCharsets.UTF_8.toString())
+            } ?: ""
+
+            SearchScreen(
+                pop = popDestination,
+                onAlbumClick = navigateToAlbum,
+                onArtistClick = navigateToArtist,
+                onPlaylistClick = { browseId -> navController.navigate("playlist/$browseId") },
+                initialQuery = initialQuery
+            )
+            SheetBackHandler()
+        }
+
 
         composable(
             route = "builtInPlaylist/{index}",
@@ -357,5 +375,14 @@ fun Navigation(
 
             SheetBackHandler()
         }
+    }
+}
+
+fun NavGraphBuilder.addLegalScreens() {
+    composable("termsofuse") {
+        TermsOfUse()
+    }
+    composable("privacypolicy") {
+        PrivacyPolicy()
     }
 }

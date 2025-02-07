@@ -16,8 +16,8 @@ android {
         applicationId = "com.shaadow.tunes"
         minSdk = 24
         targetSdk = 35
-        versionCode = 7
-        versionName = "1.8"
+        versionCode = 8
+        versionName = "1.9"
     }
 
     splits {
@@ -101,4 +101,5 @@ dependencies {
     implementation(libs.room.runtime)
     ksp(libs.room.compiler)
     implementation(libs.recaptcha)
+    implementation(libs.material3)
 }

@@ -148,7 +148,8 @@ fun ProfileScreen(userViewModel: UserViewModel = viewModel()) {
                         .fillMaxWidth()
                         .background(Color.LightGray, shape = RoundedCornerShape(50.dp))
                         .border(2.dp, Color.DarkGray, shape = RoundedCornerShape(50.dp))
-                        .padding(18.dp, 6.dp)
+                        .padding(18.dp, 6.dp),
+                    color = Color.Black
                 )
             }
 

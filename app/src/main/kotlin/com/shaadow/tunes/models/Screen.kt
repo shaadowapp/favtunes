@@ -4,10 +4,12 @@ import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.QueueMusic
 import androidx.compose.material.icons.automirrored.outlined.QueueMusic
+import androidx.compose.material.icons.filled.Explore
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.PersonSearch
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.outlined.Explore
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.MusicNote
 import androidx.compose.material.icons.outlined.PersonSearch
@@ -35,11 +37,11 @@ sealed class Screen(
         selectedIcon = Icons.Filled.MusicNote
     )
 
-    data object Search : Screen(
-        route = "search",
-        resourceId = R.string.search_btn,
-        unselectedIcon = Icons.Outlined.Search,
-        selectedIcon = Icons.Filled.Search
+    data object Explore : Screen(
+        route = "explore",
+        resourceId = R.string.explore_search,
+        unselectedIcon = Icons.Outlined.Explore,
+        selectedIcon = Icons.Filled.Explore
     )
 
     data object Playlists : Screen(

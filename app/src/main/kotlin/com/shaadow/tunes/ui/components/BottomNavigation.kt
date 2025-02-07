@@ -37,7 +37,7 @@ fun BottomNavigation(navController: NavHostController) {
     val homeScreens = listOf(
         Screen.Home,
         Screen.Songs,
-        Screen.Search,
+        Screen.Explore,
         Screen.Playlists,
         Screen.Artists
     )

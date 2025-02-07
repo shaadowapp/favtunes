@@ -44,6 +44,7 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -69,7 +70,8 @@ fun SearchScreen(
     pop: () -> Unit,
     onAlbumClick: (String) -> Unit,
     onArtistClick: (String) -> Unit,
-    onPlaylistClick: (String) -> Unit
+    onPlaylistClick: (String) -> Unit,
+    initialQuery: String = ""  // Already existed, used for category search
 ) {
     val playerPadding = LocalPlayerPadding.current
 
@@ -77,15 +79,21 @@ fun SearchScreen(
     var history: List<SearchQuery> by remember { mutableStateOf(emptyList()) }
     var suggestionsResult: Result<List<String>?>? by remember { mutableStateOf(null) }
 
-    var query by rememberSaveable { mutableStateOf("") }
-    var expanded by rememberSaveable { mutableStateOf(true) }
-    var searchText: String? by rememberSaveable { mutableStateOf(null) }
+    var query by rememberSaveable { mutableStateOf(initialQuery) }
+    var expanded by rememberSaveable { mutableStateOf(initialQuery.isEmpty()) }
+    // NEW: Added activeSearch state
+    var activeSearch by rememberSaveable { mutableStateOf(false) }
+    var searchText: String? by rememberSaveable { mutableStateOf(initialQuery.ifBlank { null }) }
     val focusRequester = remember { FocusRequester() }
+    val keyboardController = LocalSoftwareKeyboardController.current
 
     fun onSearch(searchQuery: String) {
         query = searchQuery
         searchText = searchQuery
         expanded = false
+        // NEW: Added these lines
+        activeSearch = true
+        keyboardController?.hide()
 
         if (!context.preferences.getBoolean(pauseSearchHistoryKey, false)) {
             query {
@@ -94,6 +102,17 @@ fun SearchScreen(
         }
     }
 
+    // MODIFIED: Updated LaunchedEffect for initialQuery
+    LaunchedEffect(initialQuery) {
+        if (initialQuery.isNotEmpty()) {
+            query = initialQuery
+            delay(100)
+            activeSearch = true
+            keyboardController?.hide()
+        }
+    }
+
+    // UNCOMMENTED: These LaunchedEffect blocks
     LaunchedEffect(query) {
         if (!context.preferences.getBoolean(pauseSearchHistoryKey, false)) {
             Database.queries("%$query%")
@@ -118,7 +137,7 @@ fun SearchScreen(
             else expanded = expandedState
         }
 
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P) { // TODO: Workaround for API < 28 (https://issuetracker.google.com/issues/337191298)
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P) {
             Box(
                 modifier = Modifier
                     .size(1.dp)
@@ -131,9 +150,19 @@ fun SearchScreen(
                 SearchBarDefaults.InputField(
                     query = query,
                     onQueryChange = { query = it },
-                    onSearch = { if (query.isNotBlank()) onSearch(query) },
+                    onSearch = {
+                        // MODIFIED: Updated onSearch handler
+                        activeSearch = true
+                        keyboardController?.hide()
+                    },
                     expanded = expanded,
-                    onExpandedChange = onExpandedChange,
+                    onExpandedChange = { newExpanded ->
+                        if (!newExpanded && query.isEmpty()) {
+                            pop()
+                        } else {
+                            expanded = newExpanded
+                        }
+                    },
                     placeholder = {
                         Text(text = stringResource(id = R.string.search))
                     },
@@ -145,7 +174,6 @@ fun SearchScreen(
                             )
                         }
                     },
-
                     trailingIcon = {
                         if (query.isNotBlank() && expanded) {
                             IconButton(onClick = { query = "" }) {
@@ -260,7 +288,8 @@ fun SearchScreen(
             }
         }
 
-        searchText?.let {
+        // MODIFIED: Changed condition to use activeSearch
+        if (activeSearch) {
             SearchResults(
                 query = query,
                 onAlbumClick = onAlbumClick,

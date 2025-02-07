@@ -170,4 +170,5 @@
     <string name="now_playing">Abhi chal raha hai</string>
     <string name="clear_queue">Queue clear karo</string>
     <string name="song_deleted_playlist">Song playlist se delete ho gaya</string>
+    <string name="see_all">See All</string>
 </resources>
