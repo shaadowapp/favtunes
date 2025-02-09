@@ -7,11 +7,13 @@ import androidx.compose.material.icons.automirrored.outlined.QueueMusic
 import androidx.compose.material.icons.filled.Explore
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.MusicNote
+import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.PersonSearch
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.Explore
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.MusicNote
+import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.PersonSearch
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -51,10 +53,10 @@ sealed class Screen(
         selectedIcon = Icons.AutoMirrored.Filled.QueueMusic
     )
 
-    data object Artists : Screen(
-        route = "artists",
-        resourceId = R.string.artists,
-        unselectedIcon = Icons.Outlined.PersonSearch,
-        selectedIcon = Icons.Filled.PersonSearch
+    data object Inbox : Screen(
+        route = "inbox",
+        resourceId = R.string.inbox,
+        unselectedIcon = Icons.Outlined.Notifications,
+        selectedIcon = Icons.Filled.Notifications
     )
 }

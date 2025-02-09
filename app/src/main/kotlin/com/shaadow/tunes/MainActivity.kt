@@ -6,9 +6,13 @@ import android.content.ServiceConnection
 import android.net.Uri
 import android.os.Bundle
 import android.os.IBinder
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.IntentSenderRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
@@ -37,12 +41,21 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.navigation.compose.rememberNavController
+import com.google.android.material.snackbar.Snackbar
+import com.google.android.play.core.appupdate.AppUpdateManager
+import com.google.android.play.core.appupdate.AppUpdateManagerFactory
+import com.google.android.play.core.appupdate.AppUpdateOptions
+import com.google.android.play.core.install.InstallStateUpdatedListener
+import com.google.android.play.core.install.model.AppUpdateType
+import com.google.android.play.core.install.model.InstallStatus
+import com.google.android.play.core.install.model.UpdateAvailability
 import com.google.firebase.Firebase
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.analytics
@@ -65,9 +78,12 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
+
 class MainActivity : ComponentActivity() {
     private lateinit var analytics: FirebaseAnalytics
 
+    private lateinit var appUpdateManager: AppUpdateManager
+    private lateinit var activityResultLauncher: ActivityResultLauncher<IntentSenderRequest>
 
     private val serviceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
@@ -96,6 +112,18 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         // Obtain the FirebaseAnalytics instance.
         analytics = Firebase.analytics
+
+        // Initialize the ActivityResultLauncher in onCreate
+        activityResultLauncher = registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
+            if (result.resultCode != RESULT_OK) {
+                // If the update is canceled or fails, execute particular code here
+                Log.d("Update flow failed!", "Result Code: ${result.resultCode}")
+            }
+        }
+
+        checkForInAppUpdate()
+
+
 
         setContent {
             AppScreen()
@@ -247,6 +275,55 @@ class MainActivity : ComponentActivity() {
     override fun onStop() {
         unbindService(serviceConnection)
         super.onStop()
+
+        appUpdateManager.unregisterListener(listener)
+    }
+
+    private fun checkForInAppUpdate() {
+        appUpdateManager = AppUpdateManagerFactory.create(this)
+
+        // Registering Listener
+        appUpdateManager.registerListener(listener)
+
+        val appUpdateInfoTask = appUpdateManager.appUpdateInfo
+
+        appUpdateInfoTask.addOnSuccessListener { appUpdateInfo ->
+            if (appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE &&
+                appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.FLEXIBLE)
+            ) {
+                // Request the update here
+                appUpdateManager.startUpdateFlowForResult(
+                    appUpdateInfo,
+                    activityResultLauncher,
+                    AppUpdateOptions.newBuilder(AppUpdateType.FLEXIBLE).build()
+                )
+            }
+        }
+    }
+
+    private val listener = InstallStateUpdatedListener { state ->
+        if (state.installStatus() == InstallStatus.DOWNLOADED) {
+            popupSnackbarForCompleteUpdate()
+        }
+    }
+
+    private fun popupSnackbarForCompleteUpdate() {
+        Snackbar.make(
+            findViewById(android.R.id.content), "An update has just been downloaded.", Snackbar.LENGTH_INDEFINITE
+        ).apply {
+            setAction("RESTART") { appUpdateManager.completeUpdate() }
+            setActionTextColor(ContextCompat.getColor(this@MainActivity, R.color.white))
+            show()
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        appUpdateManager.appUpdateInfo.addOnSuccessListener { appUpdateInfo ->
+            if (appUpdateInfo.installStatus() == InstallStatus.DOWNLOADED) {
+                popupSnackbarForCompleteUpdate()
+            }
+        }
     }
 }
 

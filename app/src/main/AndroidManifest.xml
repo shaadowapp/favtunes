@@ -98,6 +98,8 @@
             </intent-filter>
         </activity>
 
+        <activity android:name="com.shaadow.tunes.ui.screens.inbox.HomeInbox" />
+
         <service
             android:name="com.shaadow.tunes.service.PlayerService"
             android:exported="false"

@@ -1,13 +1,14 @@
 [versions]
 activity = "1.10.0"
 agp = "8.8.0"
+app-update = "2.1.0"
 brotli = "0.1.2"
 coil = "3.0.4"
 compose-bom = "2025.01.01"
 compose-shimmer = "1.3.1"
 core-splashscreen = "1.0.1"
 desugaring = "2.1.4"
-firebase-bom = "33.8.0"
+firebase-bom = "33.9.0"
 junit = "4.13.2"
 kotlin = "2.1.0"
 kotlin-coroutines = "1.10.1"
@@ -18,7 +19,7 @@ material3 = "1.3.1"
 media = "1.7.0"
 media3 = "1.5.1"
 navigation = "2.8.6"
-recaptcha = "18.7.0-beta01"
+recaptcha = "18.7.0"
 reorderable = "2.4.3"
 room = "2.6.1"
 appcompat = "1.7.0"
@@ -26,17 +27,20 @@ room-runtime = "2.6.1"
 ui-tooling-preview-android = "1.7.7"
 firebase-crashlytics = "19.4.0"
 google-gms-google-services = "4.4.2"
-google-firebase-crashlytics = "3.0.2"
+google-firebase-crashlytics = "3.0.3"
 firebase-analytics = "22.2.0"
 play-services-measurement-api = "22.2.0"
 firebase-perf = "21.0.4"
 google-firebase-firebase-perf = "1.4.2"
 firebase-messaging = "24.1.0"
-firebase-firestore-ktx = "25.1.1"
+firebase-firestore-ktx = "25.1.2"
 runtime-livedata = "1.7.7"
-core = "1.13.0"
+core = "1.15.0"
+material = "1.12.0"
 
 [libraries]
+app-update = { module = "com.google.android.play:app-update", version.ref = "app-update" }
+app-update-ktx = { module = "com.google.android.play:app-update-ktx", version.ref = "app-update" }
 brotli = { group = "org.brotli", name = "dec", version.ref = "brotli" }
 coil-compose = { group = "io.coil-kt.coil3", name = "coil-compose", version.ref = "coil" }
 coil-network = { group = "io.coil-kt.coil3", name = "coil-network-okhttp", version.ref = "coil" }
@@ -78,6 +82,7 @@ firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging
 firebase-firestore-ktx = { group = "com.google.firebase", name = "firebase-firestore-ktx", version.ref = "firebase-firestore-ktx" }
 runtime-livedata = { group = "androidx.compose.runtime", name = "runtime-livedata", version.ref = "runtime-livedata" }
 core = { group = "androidx.core", name = "core", version.ref = "core" }
+material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

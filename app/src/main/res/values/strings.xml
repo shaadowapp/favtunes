@@ -191,4 +191,5 @@
     <string name="messages" translatable="false">Messages</string>
     <string name="explore_search" translatable="false">Explore</string>
     <string name="see_all">See All</string>
+    <string name="inbox">Inbox</string>
 </resources>

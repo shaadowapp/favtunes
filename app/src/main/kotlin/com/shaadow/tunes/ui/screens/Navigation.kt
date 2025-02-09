@@ -25,10 +25,12 @@ import com.shaadow.tunes.ui.screens.album.AlbumScreen
 import com.shaadow.tunes.ui.screens.artist.ArtistScreen
 import com.shaadow.tunes.ui.screens.builtinplaylist.BuiltInPlaylistScreen
 import com.shaadow.tunes.ui.screens.home.HomeScreen
+import com.shaadow.tunes.ui.screens.inbox.HomeInbox
+import com.shaadow.tunes.ui.screens.inbox.HomeInboxScreen
 import com.shaadow.tunes.ui.screens.localplaylist.LocalPlaylistScreen
 import com.shaadow.tunes.ui.screens.playlist.PlaylistScreen
-import com.shaadow.tunes.ui.screens.search.explore.ExploreSearch
 import com.shaadow.tunes.ui.screens.search.SearchScreen
+import com.shaadow.tunes.ui.screens.search.explore.ExploreSearch
 import com.shaadow.tunes.ui.screens.settings.ProfileScreen
 import com.shaadow.tunes.ui.screens.settings.SettingsPage
 import com.shaadow.tunes.ui.screens.settings.SettingsScreen
@@ -261,6 +263,12 @@ fun Navigation(
 
         composable(route = "profile") {
             ProfileScreen()
+
+            SheetBackHandler()
+        }
+
+        composable(route = "inbox") {
+            HomeInboxScreen()
 
             SheetBackHandler()
         }

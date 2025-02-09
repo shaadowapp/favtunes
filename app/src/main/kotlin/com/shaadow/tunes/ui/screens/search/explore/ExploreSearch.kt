@@ -73,7 +73,7 @@ fun ExploreSearch(navController: NavController) {
                     contentDescription = "Search",
                     modifier = Modifier.size(22.dp)
                 )
-                Spacer(modifier = Modifier.width(6.dp))
+                Spacer(modifier = Modifier.width(4.dp))
                 Text(
                     text = "Search",
                     style = MaterialTheme.typography.bodyLarge,

@@ -16,8 +16,8 @@ android {
         applicationId = "com.shaadow.tunes"
         minSdk = 24
         targetSdk = 35
-        versionCode = 8
-        versionName = "1.9"
+        versionCode = 4
+        versionName = "1.5"
     }
 
     splits {
@@ -93,6 +93,7 @@ dependencies {
     implementation(libs.firebase.firestore.ktx)
     implementation(libs.runtime.livedata)
     implementation(libs.core)
+    implementation(libs.material)
     ksp(libs.room.compiler)
     implementation(projects.innertube)
     implementation(projects.kugou)
@@ -102,4 +103,6 @@ dependencies {
     ksp(libs.room.compiler)
     implementation(libs.recaptcha)
     implementation(libs.material3)
+    implementation(libs.app.update)
+    implementation(libs.app.update.ktx)
 }
