@@ -9,6 +9,7 @@ import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.PersonOutline
 import androidx.compose.material.icons.outlined.PlayArrow
 import androidx.compose.material.icons.outlined.PrivacyTip
+import androidx.compose.material.icons.outlined.Gesture
 import androidx.compose.material.icons.outlined.Save
 import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -29,6 +30,10 @@ enum class SettingsSection(
     Player(
         resourceId = R.string.player,
         icon = Icons.Outlined.PlayArrow
+    ),
+    Gestures(
+        resourceId = R.string.gestures,
+        icon = Icons.Outlined.Gesture
     ),
     Cache(
         resourceId = R.string.cache,

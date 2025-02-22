@@ -54,6 +54,7 @@ fun SettingsPage(
                 SettingsSection.General -> GeneralSettings()
                 SettingsSection.Player -> PlayerSettings()
                 SettingsSection.Cache -> CacheSettings()
+                SettingsSection.Gestures -> GestureSettings()
                 SettingsSection.Database -> DatabaseSettings()
                 SettingsSection.Other -> OtherSettings()
                 SettingsSection.TermsOfUse -> TermsOfUse()

@@ -23,6 +23,7 @@ import android.media.audiofx.LoudnessEnhancer
 import android.media.session.MediaSession
 import android.media.session.PlaybackState
 import android.net.Uri
+import android.os.Bundle
 import android.os.Handler
 import android.support.v4.media.session.MediaSessionCompat
 import android.text.format.DateUtils
@@ -67,6 +68,7 @@ import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.media3.exoplayer.source.MediaSource
 import androidx.media3.extractor.DefaultExtractorsFactory
 import com.shaadow.innertube.Innertube
+import com.shaadow.innertube.models.NavigationEndpoint
 import com.shaadow.innertube.models.bodies.PlayerBody
 import com.shaadow.innertube.requests.player
 import com.shaadow.tunes.Database
@@ -104,16 +106,29 @@ import com.shaadow.tunes.utils.skipSilenceKey
 import com.shaadow.tunes.utils.timer
 import com.shaadow.tunes.utils.trackLoopEnabledKey
 import com.shaadow.tunes.utils.volumeNormalizationKey
-import com.shaadow.tunes.models.Format
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.cancellable
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapMerge
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 import kotlin.math.roundToInt
 import kotlin.system.exitProcess
 import android.os.Binder as AndroidBinder
@@ -125,18 +140,26 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
     private lateinit var cache: SimpleCache
     private lateinit var player: ExoPlayer
 
-    private val stateBuilder = PlaybackState.Builder()
-        .setActions(
-            PlaybackState.ACTION_PLAY
-                    or PlaybackState.ACTION_PAUSE
-                    or PlaybackState.ACTION_PLAY_PAUSE
-                    or PlaybackState.ACTION_STOP
-                    or PlaybackState.ACTION_SKIP_TO_PREVIOUS
-                    or PlaybackState.ACTION_SKIP_TO_NEXT
-                    or PlaybackState.ACTION_SKIP_TO_QUEUE_ITEM
-                    or PlaybackState.ACTION_SEEK_TO
-                    or PlaybackState.ACTION_REWIND
-        )
+    private val stateBuilder
+        get() = PlaybackState.Builder()
+            .setActions(
+                PlaybackState.ACTION_PLAY
+                        or PlaybackState.ACTION_PAUSE
+                        or PlaybackState.ACTION_PLAY_PAUSE
+                        or PlaybackState.ACTION_STOP
+                        or PlaybackState.ACTION_SKIP_TO_PREVIOUS
+                        or PlaybackState.ACTION_SKIP_TO_NEXT
+                        or PlaybackState.ACTION_SKIP_TO_QUEUE_ITEM
+                        or PlaybackState.ACTION_SEEK_TO
+                        or PlaybackState.ACTION_REWIND
+            )
+            .addCustomAction(
+                FAVORITE_ACTION,
+                "Toggle like",
+                if (isLikedState.value) R.drawable.heart else R.drawable.heart_outline
+            )
+
+    private val playbackStateMutex = Mutex()
 
     private val metadataBuilder = MediaMetadata.Builder()
 
@@ -169,6 +192,25 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
         get() = NOTIFICATION_ID
 
     private lateinit var notificationActionReceiver: NotificationActionReceiver
+
+    private val mediaItemState = MutableStateFlow<MediaItem?>(null)
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private val isLikedState = mediaItemState
+        .flatMapMerge { item ->
+            item?.mediaId?.let {
+                Database
+                    .likedAt(it)
+                    .distinctUntilChanged()
+                    .cancellable()
+            } ?: flowOf(null)
+        }
+        .map { it != null }
+        .stateIn(
+            scope = coroutineScope,
+            started = SharingStarted.Eagerly,
+            initialValue = false
+        )
 
     override fun onBind(intent: Intent?): AndroidBinder {
         super.onBind(intent)
@@ -248,6 +290,12 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
         mediaSession.setCallback(SessionCallback(player))
         mediaSession.setPlaybackState(stateBuilder.build())
         mediaSession.isActive = true
+
+        coroutineScope.launch {
+            isLikedState
+                .onEach { withContext(Dispatchers.Main) { updatePlaybackState() } }
+                .collect()
+        }
 
         notificationActionReceiver = NotificationActionReceiver(player)
 
@@ -338,6 +386,8 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
     }
 
     override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
+        mediaItemState.update { mediaItem }
+
         maybeRecoverPlaybackError()
         maybeNormalizeVolume()
         maybeProcessRadio()
@@ -557,6 +607,19 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
         )
     }
 
+    private fun updatePlaybackState() = coroutineScope.launch {
+        playbackStateMutex.withLock {
+            withContext(Dispatchers.Main) {
+                mediaSession.setPlaybackState(
+                    stateBuilder
+                        .setState(player.androidPlaybackState, player.currentPosition, 1f)
+                        .setBufferedPosition(player.bufferedPosition)
+                        .build()
+                )
+            }
+        }
+    }
+
     private val Player.androidPlaybackState: Int
         get() = when (playbackState) {
             Player.STATE_BUFFERING -> if (playWhenReady) PlaybackState.STATE_BUFFERING else PlaybackState.STATE_PAUSED
@@ -579,11 +642,7 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
             )
         }
 
-        stateBuilder
-            .setState(player.androidPlaybackState, player.currentPosition, 1f)
-            .setBufferedPosition(player.bufferedPosition)
-
-        mediaSession.setPlaybackState(stateBuilder.build())
+        updatePlaybackState()
 
         if (events.containsAny(
                 Player.EVENT_PLAYBACK_STATE_CHANGED,
@@ -796,7 +855,7 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
                                         mediaItem?.let(Database::insert)
 
                                         Database.insert(
-                                            Format(
+                                            com.shaadow.tunes.models.Format(
                                                 songId = videoId,
                                                 itag = format.itag,
                                                 mimeType = format.mimeType,
@@ -911,13 +970,13 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
             timerJob = null
         }
 
-        fun setupRadio(endpoint: com.shaadow.innertube.models.NavigationEndpoint.Endpoint.Watch?) =
+        fun setupRadio(endpoint: NavigationEndpoint.Endpoint.Watch?) =
             startRadio(endpoint = endpoint, justAdd = true)
 
-        fun playRadio(endpoint: com.shaadow.innertube.models.NavigationEndpoint.Endpoint.Watch?) =
+        fun playRadio(endpoint: NavigationEndpoint.Endpoint.Watch?) =
             startRadio(endpoint = endpoint, justAdd = false)
 
-        private fun startRadio(endpoint: com.shaadow.innertube.models.NavigationEndpoint.Endpoint.Watch?, justAdd: Boolean) {
+        private fun startRadio(endpoint: NavigationEndpoint.Endpoint.Watch?, justAdd: Boolean) {
             radioJob?.cancel()
             radio = null
             YouTubeRadio(
@@ -946,7 +1005,18 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
         }
     }
 
-    private class SessionCallback(private val player: Player) : MediaSession.Callback() {
+    private fun likeAction() = mediaItemState.value?.let { mediaItem ->
+        query {
+            runCatching {
+                Database.like(
+                    songId = mediaItem.mediaId,
+                    likedAt = if (isLikedState.value) null else System.currentTimeMillis()
+                )
+            }
+        }
+    }
+
+    private inner class SessionCallback(private val player: Player) : MediaSession.Callback() {
         override fun onPlay() = player.play()
         override fun onPause() = player.pause()
         override fun onSkipToPrevious() = runCatching(player::forceSeekToPrevious).let { }
@@ -956,6 +1026,11 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
         override fun onRewind() = player.seekToDefaultPosition()
         override fun onSkipToQueueItem(id: Long) =
             runCatching { player.seekToDefaultPosition(id.toInt()) }.let { }
+
+        override fun onCustomAction(action: String, extras: Bundle?) {
+            super.onCustomAction(action, extras)
+            if (action == FAVORITE_ACTION) likeAction()
+        }
     }
 
     private class NotificationActionReceiver(private val player: Player) : BroadcastReceiver() {
@@ -978,7 +1053,7 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
     @JvmInline
     private value class Action(val value: String) {
         context(Context)
-        val pendingIntent
+        val pendingIntent: PendingIntent
             get() = PendingIntent.getBroadcast(
                 this@Context,
                 100,
@@ -1000,5 +1075,7 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
 
         const val SLEEP_TIMER_NOTIFICATION_ID = 1002
         const val SLEEP_TIMER_NOTIFICATION_CHANNEL_ID = "sleep_timer_channel_id"
+
+        const val FAVORITE_ACTION = "FAVORITE"
     }
 }

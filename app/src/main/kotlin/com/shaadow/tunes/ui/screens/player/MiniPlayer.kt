@@ -51,7 +51,9 @@ import com.shaadow.tunes.ui.styling.px
 import com.shaadow.tunes.utils.DisposableListener
 import com.shaadow.tunes.utils.forceSeekToNext
 import com.shaadow.tunes.utils.forceSeekToPrevious
+import com.shaadow.tunes.utils.miniplayerGesturesEnabledKey
 import com.shaadow.tunes.utils.positionAndDurationState
+import com.shaadow.tunes.utils.rememberPreference
 import com.shaadow.tunes.utils.shouldBePlaying
 import com.shaadow.tunes.utils.thumbnail
 import kotlin.math.absoluteValue
@@ -65,13 +67,12 @@ fun MiniPlayer(
     val binder = LocalPlayerServiceBinder.current
     binder?.player ?: return
 
-    var nullableMediaItem by remember {
-        mutableStateOf(
-            binder.player.currentMediaItem,
-            neverEqualPolicy()
-        )
-    }
+    var miniplayerGesturesEnabled by rememberPreference(miniplayerGesturesEnabledKey, true)
     var shouldBePlaying by remember { mutableStateOf(binder.player.shouldBePlaying) }
+
+    var nullableMediaItem by remember {
+        mutableStateOf(binder.player.currentMediaItem, neverEqualPolicy())
+    }
 
     binder.player.DisposableListener {
         object : Player.Listener {
@@ -126,7 +127,8 @@ fun MiniPlayer(
                     )
                 }
             }
-        }
+        },
+        gesturesEnabled = miniplayerGesturesEnabled
     ) {
         Column(modifier = Modifier.clickable(onClick = openPlayer)) {
             ListItem(

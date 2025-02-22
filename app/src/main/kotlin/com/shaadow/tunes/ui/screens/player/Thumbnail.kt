@@ -27,7 +27,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.SkipNext
 import androidx.compose.material.icons.outlined.SkipPrevious
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.rememberSwipeToDismissBoxState
@@ -41,7 +40,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.media3.common.MediaItem
 import androidx.media3.common.ParserException
@@ -51,7 +49,6 @@ import androidx.media3.common.util.UnstableApi
 import coil3.compose.AsyncImage
 import com.shaadow.tunes.Database
 import com.shaadow.tunes.LocalPlayerServiceBinder
-import com.shaadow.tunes.R
 import com.shaadow.tunes.service.LoginRequiredException
 import com.shaadow.tunes.service.PlayableFormatNotFoundException
 import com.shaadow.tunes.service.UnplayableException
@@ -62,10 +59,12 @@ import com.shaadow.tunes.utils.DisposableListener
 import com.shaadow.tunes.utils.currentWindow
 import com.shaadow.tunes.utils.forceSeekToNext
 import com.shaadow.tunes.utils.forceSeekToPrevious
+import com.shaadow.tunes.utils.rememberPreference
 import com.shaadow.tunes.utils.thumbnail
 import java.io.EOFException
-import java.net.UnknownHostException
-import java.nio.channels.UnresolvedAddressException
+import androidx.compose.material3.MaterialTheme
+import com.shaadow.tunes.utils.playerGesturesEnabledKey
+
 
 @OptIn(ExperimentalFoundationApi::class)
 @ExperimentalAnimationApi
@@ -82,16 +81,12 @@ fun Thumbnail(
     val binder = LocalPlayerServiceBinder.current
     val player = binder?.player ?: return
 
+    var playerGesturesEnabled by rememberPreference(playerGesturesEnabledKey, true)
+    var nullableWindow by remember { mutableStateOf(player.currentWindow) }
+    var error by remember { mutableStateOf<PlaybackException?>(player.playerError) }
+
     val (thumbnailSizeDp, thumbnailSizePx) = Dimensions.thumbnails.player.song.let {
         it to (it - 64.dp).px
-    }
-
-    var nullableWindow by remember {
-        mutableStateOf(player.currentWindow)
-    }
-
-    var error by remember {
-        mutableStateOf<PlaybackException?>(player.playerError)
     }
 
     player.DisposableListener {
@@ -202,7 +197,8 @@ fun Thumbnail(
                     }
                 }
             },
-            modifier = modifier.clip(MaterialTheme.shapes.large)
+            modifier = modifier.clip(MaterialTheme.shapes.large),
+            gesturesEnabled = playerGesturesEnabled
         ) {
             Box(
                 modifier = Modifier
@@ -244,34 +240,15 @@ fun Thumbnail(
                     toggleFullScreenLyrics = toggleFullScreenLyrics
                 )
 
-                if (isShowingStatsForNerds && error == null) {
+                if (isShowingStatsForNerds) {
                     StatsForNerds(
                         mediaId = currentWindow.mediaItem.mediaId,
                         onDismiss = { onShowStatsForNerds(false) }
                     )
                 }
 
-                val networkErrorText = stringResource(id = R.string.network_error)
-                val playableFormatNotFoundText =
-                    stringResource(id = R.string.playable_format_not_found_error)
-                val videoSourceDeletedText =
-                    stringResource(id = R.string.video_source_deleted_error)
-                val serverRestrictionsText = stringResource(id = R.string.server_restrictions_error)
-                val idMismatchText = stringResource(id = R.string.id_mismatch_error)
-                val unkownPlayBackErrorText = stringResource(id = R.string.unknown_playback_error)
-
                 PlaybackError(
-                    isDisplayed = error != null,
-                    messageProvider = {
-                        when (error?.cause?.cause) {
-                            is UnresolvedAddressException, is UnknownHostException -> networkErrorText
-                            is PlayableFormatNotFoundException -> playableFormatNotFoundText
-                            is UnplayableException -> videoSourceDeletedText
-                            is LoginRequiredException -> serverRestrictionsText
-                            is VideoIdMismatchException -> idMismatchText
-                            else -> unkownPlayBackErrorText
-                        }
-                    },
+                    error = error,
                     onDismiss = player::prepare
                 )
             }

@@ -13,12 +13,15 @@ import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.shaadow.tunes.models.ActionInfo
+import com.shaadow.tunes.utils.listGesturesEnabledKey
+import com.shaadow.tunes.utils.rememberPreference
 
 @Composable
 fun SwipeToActionBox(
@@ -27,6 +30,8 @@ fun SwipeToActionBox(
     destructiveAction: ActionInfo? = null,
     content: @Composable () -> Unit
 ) {
+    var listGesturesEnabled by rememberPreference(listGesturesEnabledKey, true)
+
     val state = rememberSwipeToDismissBoxState(
         confirmValueChange = { value ->
             when (value) {
@@ -89,8 +94,9 @@ fun SwipeToActionBox(
 
         },
         enableDismissFromStartToEnd = primaryAction != null && primaryAction.enabled,
-        enableDismissFromEndToStart = destructiveAction != null && destructiveAction.enabled
-    ) {
+        enableDismissFromEndToStart = destructiveAction != null && destructiveAction.enabled,
+        gesturesEnabled = listGesturesEnabled    )
+    {
         content()
     }
 }
