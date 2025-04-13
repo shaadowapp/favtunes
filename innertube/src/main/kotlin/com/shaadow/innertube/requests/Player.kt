@@ -9,6 +9,7 @@ import io.ktor.http.contentType
 import com.shaadow.innertube.Innertube
 import com.shaadow.innertube.models.Context
 import com.shaadow.innertube.models.PlayerResponse
+import com.shaadow.innertube.models.YouTubeClient
 import com.shaadow.innertube.models.bodies.PlayerBody
 import com.shaadow.innertube.utils.runCatchingNonCancellable
 import kotlinx.serialization.Serializable
@@ -16,7 +17,9 @@ import kotlinx.serialization.Serializable
 suspend fun Innertube.player(body: PlayerBody) = runCatchingNonCancellable {
     val response = client.post(PLAYER) {
         setBody(
-            body.copy(context = Context.DefaultIOS)
+            body.copy(
+                context = YouTubeClient.IOS.toContext(visitorData)
+            )
         )
         mask("playabilityStatus.status,playerConfig.audioConfig,streamingData.adaptiveFormats,videoDetails.videoId")
     }.body<PlayerResponse>()
@@ -38,11 +41,11 @@ suspend fun Innertube.player(body: PlayerBody) = runCatchingNonCancellable {
         val safePlayerResponse = client.post(PLAYER) {
             setBody(
                 body.copy(
-                    context = Context.DefaultAgeRestrictionBypass.copy(
+                    context = YouTubeClient.TVHTML5_SIMPLY_EMBEDDED_PLAYER.toContext().copy(
                         thirdParty = Context.ThirdParty(
                             embedUrl = "https://www.youtube.com/watch?v=${body.videoId}"
                         )
-                    ),
+                    )
                 )
             )
             mask("playabilityStatus.status,playerConfig.audioConfig,streamingData.adaptiveFormats,videoDetails.videoId")

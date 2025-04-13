@@ -167,7 +167,7 @@ fun DatabaseSettings() {
                 val dateFormat = SimpleDateFormat("yyyyMMddHHmmss")
 
                 try {
-                    backupLauncher.launch("hytunes_${dateFormat.format(Date())}.db")
+                    backupLauncher.launch("favtunes_${dateFormat.format(Date())}.db")
                 } catch (_: ActivityNotFoundException) {
                     context.toast("Couldn't find an application to create documents")
                 }

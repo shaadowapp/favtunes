@@ -79,7 +79,7 @@ fun About() {
 
         // Description
         Text(
-            text = "HyTunes is a powerful music player that lets you stream your favorite songs, and customize your audio experience with an equalizer. Enjoy seamless playback and intuitive controls, all wrapped in a sleek and modern design.",
+            text = "FavTunes is a powerful music player that lets you stream your favorite songs, and customize your audio experience with an equalizer. Enjoy seamless playback and intuitive controls, all wrapped in a sleek and modern design.",
             style = MaterialTheme.typography.bodyMedium,
             modifier = Modifier
                 .fillMaxWidth()
@@ -98,7 +98,7 @@ fun About() {
             contentAlignment = Alignment.Center
         ) {
             Button(onClick = {
-                uriHandler.openUri("https://tunes.shaadow.in?utm_source=HyTunes_Android&utm_from=setting-about&utm_pkg=com-shaadow-tunes")
+                uriHandler.openUri("https://tunes.shaadow.in?utm_source=FavTunes_Android&utm_from=setting-about&utm_pkg=com-shaadow-tunes")
             }) {
                 Text(text = "Our Official Website")
             }

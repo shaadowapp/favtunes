@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">HyTunes</string>
+    <string name="app_name">FavTunes</string>
     <string name="home">Home</string>
     <string name="songs">Canzoni</string>
     <string name="playlists">Playlist</string>
@@ -66,7 +66,7 @@
     <string name="service_lifetime_information">Se le ottimizzazioni della batteria sono attive, la notifica di riproduzione potrebbe scomparire improvvisamente quando la riproduzione è in pausa.</string>
     <string name="service_lifetime_information_plus">Dal sistema Android 12, disabilitare le ottimizzazioni della batteria è necessario affinché l\'opzione "Servizio invincibile" abbia effetto.</string>    <string name="about">Informazioni</string>
     <string name="search_btn">Cerca</string>
-    <string name="search">Cerca HyTunes</string>
+    <string name="search">Cerca FavTunes</string>
     <string name="featured">In evidenza</string>
     <string name="confirm">Conferma</string>
     <string name="set">Imposta</string>

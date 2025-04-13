@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">HyTunes</string>
+    <string name="app_name">FavTunes</string>
     <string name="home">Accueil</string>
     <string name="songs">Titres</string>
     <string name="playlists">Playlists</string>
@@ -68,7 +68,7 @@
     <string name="service_lifetime_information_plus">Depuis Android 12, la désactivation des optimisations de la batterie est nécessaire pour que l\'option \"Service invincible\" prenne effet.</string>
     <string name="about">À propos</string>
     <string name="search_btn">Recherche</string>
-    <string name="search">Recherche HyTunes</string>
+    <string name="search">Recherche FavTunes</string>
     <string name="featured">En vedette</string>
     <string name="confirm">Confirmer</string>
     <string name="set">Définir</string>

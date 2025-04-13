@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.net.Uri
+import androidx.core.graphics.createBitmap
 import androidx.core.graphics.applyCanvas
 import coil3.imageLoader
 import coil3.request.Disposable
@@ -52,10 +53,9 @@ class BitmapProvider(
 
         lastIsSystemInDarkMode = isSystemInDarkMode
 
-        defaultBitmap =
-            Bitmap.createBitmap(bitmapSize, bitmapSize, Bitmap.Config.ARGB_8888).applyCanvas {
-                drawColor(colorProvider(isSystemInDarkMode))
-            }
+        defaultBitmap = createBitmap(bitmapSize, bitmapSize).applyCanvas {
+            drawColor(colorProvider(isSystemInDarkMode))
+        }
         previousBitmap?.recycle()
 
         return lastBitmap == null

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">HyTunes</string>
+    <string name="app_name">FavTunes</string>
     <string name="home">Startseite</string>
     <string name="songs">Songs</string>
     <string name="playlists">Wiedergabelisten</string>
@@ -70,7 +70,7 @@
     <string name="service_lifetime_information_plus">Seit Android 12 ist die Deaktivierung der Akku-Optimierung erforderlich, damit die Option "Unbezwingbarer Dienst" wirksam wird.</string>
     <string name="about">Info</string>
     <string name="search_btn">Suche</string>
-    <string name="search">Suche HyTunes</string>
+    <string name="search">Suche FavTunes</string>
     <string name="featured">Ausgewählte</string>
     <string name="confirm">Bestätigen</string>
     <string name="set">Einstellen</string>

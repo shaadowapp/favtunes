@@ -18,7 +18,7 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "HyTunes"
+rootProject.name = "FavTunes"
 include(":app")
 include(":innertube")
 include(":ktor-client-brotli")

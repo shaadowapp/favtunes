@@ -27,11 +27,13 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.SkipNext
 import androidx.compose.material.icons.outlined.SkipPrevious
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -42,29 +44,21 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.media3.common.MediaItem
-import androidx.media3.common.ParserException
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import coil3.compose.AsyncImage
 import com.shaadow.tunes.Database
 import com.shaadow.tunes.LocalPlayerServiceBinder
-import com.shaadow.tunes.service.LoginRequiredException
-import com.shaadow.tunes.service.PlayableFormatNotFoundException
-import com.shaadow.tunes.service.UnplayableException
-import com.shaadow.tunes.service.VideoIdMismatchException
 import com.shaadow.tunes.ui.styling.Dimensions
 import com.shaadow.tunes.ui.styling.px
 import com.shaadow.tunes.utils.DisposableListener
 import com.shaadow.tunes.utils.currentWindow
 import com.shaadow.tunes.utils.forceSeekToNext
 import com.shaadow.tunes.utils.forceSeekToPrevious
+import com.shaadow.tunes.utils.playerGesturesEnabledKey
 import com.shaadow.tunes.utils.rememberPreference
 import com.shaadow.tunes.utils.thumbnail
-import java.io.EOFException
-import androidx.compose.material3.MaterialTheme
-import com.shaadow.tunes.utils.playerGesturesEnabledKey
-
 
 @OptIn(ExperimentalFoundationApi::class)
 @ExperimentalAnimationApi
@@ -84,6 +78,7 @@ fun Thumbnail(
     var playerGesturesEnabled by rememberPreference(playerGesturesEnabledKey, true)
     var nullableWindow by remember { mutableStateOf(player.currentWindow) }
     var error by remember { mutableStateOf<PlaybackException?>(player.playerError) }
+    var errorCounter by remember(error) { mutableIntStateOf(0) }
 
     val (thumbnailSizeDp, thumbnailSizePx) = Dimensions.thumbnails.player.song.let {
         it to (it - 64.dp).px
@@ -103,16 +98,9 @@ fun Thumbnail(
             override fun onPlayerError(playbackException: PlaybackException) {
                 error = playbackException
 
-                when (error?.cause?.cause) {
-                    is PlayableFormatNotFoundException, is UnplayableException, is LoginRequiredException, is VideoIdMismatchException -> player.seekToNext()
-                    else -> {
-                        when (error?.cause) {
-                            is ParserException, is IllegalStateException, is EOFException -> player.currentMediaItem?.let {
-                                binder.cache.removeResource(it.mediaId)
-                            }
-                        }
-                        player.prepare()
-                    }
+                if (errorCounter == 0) {
+                    player.prepare()
+                    errorCounter += 1
                 }
             }
         }

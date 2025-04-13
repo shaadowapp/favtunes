@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">HyTunes</string>
+    <string name="app_name">FavTunes</string>
     <string name="home">Ghar</string>
     <string name="songs">Gaane</string>
     <string name="playlists">Playlists</string>
@@ -71,7 +71,7 @@
     <string name="service_lifetime_information_plus">Android 12 se, battery optimizations ko disable karna zaroori hai taaki Invincible service option ka effect ho sake</string>
     <string name="about">About</string>
     <string name="search_btn">Search</string>
-    <string name="search">Search HyTunes</string>
+    <string name="search">Search FavTunes</string>
     <string name="featured">Featured</string>
     <string name="confirm">Confirm</string>
     <string name="set">Set</string>
