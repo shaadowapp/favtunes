@@ -73,6 +73,7 @@ dependencies {
     implementation(libs.coil.network)
     implementation(libs.compose.material.icons)
     implementation(libs.compose.material3)
+    implementation(libs.material.motion.compose)
     implementation(libs.compose.navigation)
     implementation(libs.compose.shimmer)
     implementation(libs.compose.ui)

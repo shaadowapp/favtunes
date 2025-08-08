@@ -94,6 +94,8 @@ class MainActivity : ComponentActivity() {
             binder = null
         }
     }
+    
+    private var isServiceBound = false
 
     private var binder by mutableStateOf<PlayerService.Binder?>(null)
     private var data by mutableStateOf<Uri?>(null)
@@ -107,9 +109,9 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
 
-
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        
         // Obtain the FirebaseAnalytics instance.
         analytics = Firebase.analytics
 
@@ -123,15 +125,22 @@ class MainActivity : ComponentActivity() {
 
         checkForInAppUpdate()
 
+        val launchedFromNotification = intent?.extras?.getBoolean("expandPlayerBottomSheet") == true
+        data = intent?.data ?: intent?.getStringExtra(Intent.EXTRA_TEXT)?.toUri()
 
+        // Preload content immediately on IO thread
+        lifecycleScope.launch(Dispatchers.IO) {
+            try {
+                // Preload database connections
+                Database.trending().first()
+            } catch (e: Exception) {
+                // Silently handle errors
+            }
+        }
 
         setContent {
             AppScreen()
         }
-
-
-        val launchedFromNotification = intent?.extras?.getBoolean("expandPlayerBottomSheet") == true
-        data = intent?.data ?: intent?.getStringExtra(Intent.EXTRA_TEXT)?.toUri()
 
         setContent {
             val navController = rememberNavController()
@@ -323,6 +332,18 @@ class MainActivity : ComponentActivity() {
             if (appUpdateInfo.installStatus() == InstallStatus.DOWNLOADED) {
                 popupSnackbarForCompleteUpdate()
             }
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        try {
+            if (isServiceBound) {
+                unbindService(serviceConnection)
+                isServiceBound = false
+            }
+        } catch (e: IllegalArgumentException) {
+            // Service was not bound or already unbound
         }
     }
 }

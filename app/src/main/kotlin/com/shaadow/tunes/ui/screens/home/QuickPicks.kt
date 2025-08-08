@@ -101,8 +101,11 @@ fun QuickPicks(
         .padding(horizontal = 16.dp)
         .padding(bottom = 8.dp)
 
+    // Only reload if source changes, not on every composition
     LaunchedEffect(quickPicksSource) {
-        viewModel.loadQuickPicks(quickPicksSource = quickPicksSource)
+        if (viewModel.relatedPageResult == null || viewModel.trending == null) {
+            viewModel.loadQuickPicks(quickPicksSource = quickPicksSource)
+        }
     }
 
     BoxWithConstraints {
@@ -130,6 +133,7 @@ fun QuickPicks(
                 .verticalScroll(rememberScrollState())
                 .padding(top = 4.dp, bottom = 16.dp + playerPadding)
         ) {
+            // Show content immediately if available, even while loading updates
             viewModel.relatedPageResult?.getOrNull()?.let { related ->
                 Text(
                     text = stringResource(id = R.string.quick_picks),
@@ -332,51 +336,30 @@ fun QuickPicks(
                         Text(text = stringResource(id = R.string.offline))
                     }
                 }
-            } ?: ShimmerHost {
-                TextPlaceholder(modifier = sectionTextModifier)
-
-                repeat(4) {
-                    ListItemPlaceholder()
-                }
-
-                Spacer(modifier = Modifier.height(Dimensions.spacer))
-
-                TextPlaceholder(modifier = sectionTextModifier)
-
-                Row(
-                    modifier = Modifier.padding(start = 8.dp)
-                ) {
-                    repeat(2) {
-                        ItemPlaceholder(modifier = Modifier.widthIn(max = itemSize))
+            } ?: if (viewModel.isLoading) {
+                // Show loading only when no data is available
+                Text(
+                    text = stringResource(id = R.string.quick_picks),
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = sectionTextModifier
+                )
+                
+                ShimmerHost {
+                    repeat(4) {
+                        ListItemPlaceholder()
+                    }
+                    
+                    Spacer(modifier = Modifier.height(Dimensions.spacer))
+                    TextPlaceholder(modifier = sectionTextModifier)
+                    
+                    Row(modifier = Modifier.padding(start = 8.dp)) {
+                        repeat(2) {
+                            ItemPlaceholder(modifier = Modifier.widthIn(max = itemSize))
+                        }
                     }
                 }
-
-                Spacer(modifier = Modifier.height(Dimensions.spacer))
-
-                TextPlaceholder(modifier = sectionTextModifier)
-
-                Row(
-                    modifier = Modifier.padding(start = 8.dp)
-                ) {
-                    repeat(2) {
-                        ItemPlaceholder(
-                            modifier = Modifier.widthIn(max = itemSize),
-                            shape = CircleShape
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(Dimensions.spacer))
-
-                TextPlaceholder(modifier = sectionTextModifier)
-
-                Row(
-                    modifier = Modifier.padding(start = 8.dp)
-                ) {
-                    repeat(2) {
-                        ItemPlaceholder(modifier = Modifier.widthIn(max = itemSize))
-                    }
-                }
+            } else {
+                // Empty state
             }
         }
     }

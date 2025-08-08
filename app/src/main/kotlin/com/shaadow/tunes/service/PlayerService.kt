@@ -175,6 +175,13 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
 
     private var volumeNormalizationJob: Job? = null
 
+    // Add error tracking
+    private val failedVideoIds = mutableSetOf<String>()
+    private val errorRetryCount = mutableMapOf<String, Int>()
+    private val lastErrorTime = mutableMapOf<String, Long>()
+    private val maxRetries = 3
+    private val retryDelayMs = 5000L // 5 seconds
+
     private var isPersistentQueueEnabled = false
     private var isShowingThumbnailInLockscreen = true
     override var isInvincibilityEnabled = false
@@ -388,6 +395,12 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
     override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
         mediaItemState.update { mediaItem }
 
+        // Clear error tracking for new media item
+        mediaItem?.mediaId?.let { videoId ->
+            errorRetryCount.remove(videoId)
+            lastErrorTime.remove(videoId)
+        }
+
         maybeRecoverPlaybackError()
         maybeNormalizeVolume()
         maybeProcessRadio()
@@ -443,7 +456,57 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
     }
 
     private fun maybeRecoverPlaybackError() {
-        if (player.playerError != null) player.prepare()
+        val currentMediaItem = player.currentMediaItem
+        val videoId = currentMediaItem?.mediaId
+        
+        if (player.playerError != null && videoId != null) {
+            val error = player.playerError
+            
+            // Don't retry for non-recoverable errors
+            if (isNonRecoverableError(error)) {
+                failedVideoIds.add(videoId)
+                return
+            }
+            
+            // Don't retry if video already failed multiple times
+            if (failedVideoIds.contains(videoId)) {
+                return
+            }
+            
+            // Implement exponential backoff
+            val retryCount = errorRetryCount.getOrDefault(videoId, 0)
+            val lastError = lastErrorTime.getOrDefault(videoId, 0L)
+            val currentTime = System.currentTimeMillis()
+            
+            if (retryCount >= maxRetries) {
+                failedVideoIds.add(videoId)
+                return
+            }
+            
+            if (currentTime - lastError < retryDelayMs * (retryCount + 1)) {
+                return // Too soon to retry
+            }
+            
+            errorRetryCount[videoId] = retryCount + 1
+            lastErrorTime[videoId] = currentTime
+            
+            player.prepare()
+        }
+    }
+    
+    private fun isNonRecoverableError(error: PlaybackException?): Boolean {
+        return when {
+            error is VideoIdMismatchException -> true
+            error is UnplayableException -> true
+            error is LoginRequiredException -> true
+            error?.cause is VideoIdMismatchException -> true
+            error?.cause is UnplayableException -> true
+            error?.cause is LoginRequiredException -> true
+            error?.cause?.cause is VideoIdMismatchException -> true
+            error?.cause?.cause is UnplayableException -> true
+            error?.cause?.cause is LoginRequiredException -> true
+            else -> false
+        }
     }
 
     private fun maybeProcessRadio() {
@@ -519,21 +582,33 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
             return
         }
 
-        if (loudnessEnhancer == null) {
-            loudnessEnhancer = LoudnessEnhancer(player.audioSessionId)
-        }
+        try {
+            if (loudnessEnhancer == null) {
+                loudnessEnhancer = LoudnessEnhancer(player.audioSessionId)
+            }
 
-        player.currentMediaItem?.mediaId?.let { songId ->
-            volumeNormalizationJob?.cancel()
-            volumeNormalizationJob = coroutineScope.launch(Dispatchers.Main) {
-                Database.loudnessDb(songId).cancellable().collectLatest { loudnessDb ->
+            player.currentMediaItem?.mediaId?.let { songId ->
+                volumeNormalizationJob?.cancel()
+                volumeNormalizationJob = coroutineScope.launch(Dispatchers.IO) {
                     try {
-                        loudnessEnhancer?.setTargetGain(-((loudnessDb ?: 0f) * 100).toInt() + 500)
-                        loudnessEnhancer?.enabled = true
-                    } catch (_: Exception) {
+                        Database.loudnessDb(songId).cancellable().collectLatest { loudnessDb ->
+                            try {
+                                withContext(Dispatchers.Main) {
+                                    loudnessEnhancer?.setTargetGain(-((loudnessDb ?: 0f) * 100).toInt() + 500)
+                                    loudnessEnhancer?.enabled = true
+                                }
+                            } catch (e: Exception) {
+                                // Handle audio effect errors gracefully
+                            }
+                        }
+                    } catch (e: Exception) {
+                        // Handle database errors gracefully
                     }
                 }
             }
+        } catch (e: Exception) {
+            // Handle LoudnessEnhancer creation errors
+            loudnessEnhancer = null
         }
     }
 
@@ -827,9 +902,21 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
                     ringBuffer.getOrNull(1)?.first -> dataSpec.withUri(ringBuffer.getOrNull(1)!!.second)
                     else -> {
                         val urlResult = runBlocking(Dispatchers.IO) {
+                            // Check if this video ID has already failed
+                            if (failedVideoIds.contains(videoId)) {
+                                return@runBlocking Result.failure(
+                                    PlaybackException(
+                                        "Video previously failed",
+                                        VideoIdMismatchException(),
+                                        PlaybackException.ERROR_CODE_REMOTE_ERROR
+                                    )
+                                )
+                            }
+                            
                             Innertube.player(PlayerBody(videoId = videoId))
                         }?.mapCatching { body ->
                             if (body.videoDetails?.videoId != videoId) {
+                                failedVideoIds.add(videoId)
                                 throw VideoIdMismatchException()
                             }
 

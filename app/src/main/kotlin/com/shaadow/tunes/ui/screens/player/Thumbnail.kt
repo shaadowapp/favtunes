@@ -50,6 +50,9 @@ import androidx.media3.common.util.UnstableApi
 import coil3.compose.AsyncImage
 import com.shaadow.tunes.Database
 import com.shaadow.tunes.LocalPlayerServiceBinder
+import com.shaadow.tunes.service.LoginRequiredException
+import com.shaadow.tunes.service.UnplayableException
+import com.shaadow.tunes.service.VideoIdMismatchException
 import com.shaadow.tunes.ui.styling.Dimensions
 import com.shaadow.tunes.ui.styling.px
 import com.shaadow.tunes.utils.DisposableListener
@@ -84,21 +87,38 @@ fun Thumbnail(
         it to (it - 64.dp).px
     }
 
+    // Helper function to determine if error is recoverable
+    fun isRecoverableError(error: PlaybackException?): Boolean {
+        return when {
+            error is VideoIdMismatchException -> false
+            error is UnplayableException -> false
+            error is LoginRequiredException -> false
+            error?.cause is VideoIdMismatchException -> false
+            error?.cause is UnplayableException -> false
+            error?.cause is LoginRequiredException -> false
+            error?.cause?.cause is VideoIdMismatchException -> false
+            error?.cause?.cause is UnplayableException -> false
+            error?.cause?.cause is LoginRequiredException -> false
+            else -> true // Network errors, etc. are recoverable
+        }
+    }
+
     player.DisposableListener {
         object : Player.Listener {
             override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
                 nullableWindow = player.currentWindow
+                errorCounter = 0 // Reset error counter for new media item
             }
 
             override fun onPlaybackStateChanged(playbackState: Int) {
                 error = player.playerError
             }
 
-            @androidx.annotation.OptIn(UnstableApi::class)
             override fun onPlayerError(playbackException: PlaybackException) {
                 error = playbackException
 
-                if (errorCounter == 0) {
+                // Only retry once for recoverable errors
+                if (errorCounter == 0 && isRecoverableError(playbackException)) {
                     player.prepare()
                     errorCounter += 1
                 }
@@ -235,8 +255,11 @@ fun Thumbnail(
                     )
                 }
 
+                val errorMessage = getErrorMessage(error)
+                
                 PlaybackError(
-                    error = error,
+                    isDisplayed = error != null,
+                    messageProvider = { errorMessage },
                     onDismiss = player::prepare
                 )
             }

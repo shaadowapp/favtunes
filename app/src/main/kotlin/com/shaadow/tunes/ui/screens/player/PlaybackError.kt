@@ -4,25 +4,34 @@ import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Refresh
+import androidx.compose.material.icons.rounded.Close
+import androidx.compose.material.icons.rounded.Error
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -53,103 +62,81 @@ import java.nio.channels.UnresolvedAddressException
 
 @Composable
 fun PlaybackError(
-    error: PlaybackException?,
+    isDisplayed: Boolean,
+    messageProvider: () -> String,
     onDismiss: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    val clipboardManager = LocalClipboardManager.current
-    var isShowingLogsDialog by rememberSaveable { mutableStateOf(false) }
-
-    val errorMessage = when (error?.cause?.cause) {
-        is UnresolvedAddressException, is UnknownHostException -> stringResource(id = R.string.network_error)
-        is PlayableFormatNotFoundException -> stringResource(id = R.string.playable_format_not_found_error)
-        is UnplayableException -> stringResource(id = R.string.video_source_deleted_error)
-        is LoginRequiredException -> stringResource(id = R.string.server_restrictions_error)
-        is VideoIdMismatchException -> stringResource(id = R.string.id_mismatch_error)
-        else -> stringResource(id = R.string.unknown_playback_error)
-    }
-
     AnimatedVisibility(
-        visible = error != null,
-        enter = fadeIn(),
-        exit = fadeOut()
+        visible = isDisplayed,
+        enter = slideInVertically { -it },
+        exit = slideOutVertically { -it },
+        modifier = modifier
     ) {
-        Column(
+        Card(
             modifier = Modifier
-                .fillMaxSize()
-                .background(Color.Black.copy(0.8F))
-                .padding(all = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(
-                space = 16.dp,
-                alignment = Alignment.CenterVertically
-            ),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .padding(12.dp)
+                .fillMaxWidth(),
+            shape = RoundedCornerShape(8.dp)
         ) {
-            Text(
-                text = errorMessage,
-                style = MaterialTheme.typography.bodyLarge,
-                color = Color.White,
-                textAlign = TextAlign.Center
-            )
-
             Row(
-                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.padding(16.dp)
             ) {
-                Button(
-                    onClick = onDismiss
-                ) {
+                Icon(
+                    imageVector = Icons.Rounded.Error,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.error
+                )
+                
+                Spacer(modifier = Modifier.width(16.dp))
+                
+                Text(
+                    text = messageProvider(),
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.weight(1f)
+                )
+                
+                Spacer(modifier = Modifier.width(16.dp))
+                
+                IconButton(onClick = onDismiss) {
                     Icon(
-                        imageVector = Icons.Outlined.Refresh,
-                        contentDescription = stringResource(id = R.string.retry)
-                    )
-
-                    Spacer(Modifier.size(ButtonDefaults.IconSpacing))
-
-                    Text(text = stringResource(id = R.string.retry))
-                }
-                FilledTonalIconButton(
-                    onClick = { isShowingLogsDialog = true }
-                ) {
-                    Icon(
-                        imageVector = Icons.Outlined.Info,
-                        contentDescription = stringResource(id = R.string.error_log)
+                        imageVector = Icons.Rounded.Close,
+                        contentDescription = "Dismiss"
                     )
                 }
             }
         }
     }
-        if (isShowingLogsDialog) {
-            val errorText = Log.getStackTraceString(error)
+}
 
-            AlertDialog(
-                onDismissRequest = { isShowingLogsDialog = false },
-                confirmButton = {
-                    TextButton(
-                        onClick = { isShowingLogsDialog = false }
-                    ) {
-                        Text(text = stringResource(id = R.string.close))
-                    }
-                },
-                dismissButton = {
-                    TextButton(
-                        onClick = { clipboardManager.setText(AnnotatedString(errorText)) }
-                    ) {
-                        Text(text = stringResource(id = R.string.copy))
-                    }
-                },
-                title = {
-                    Text(text = stringResource(id = R.string.error_log))
-                },
-                text = {
-                    Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-                        SelectionContainer {
-                            Text(
-                                text = errorText,
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.Light
-                            )
-                        }
-                    }
-                }
-            )
-        }
+@Composable
+fun getErrorMessage(error: PlaybackException?): String {
+    return when {
+        // Check direct error types first
+        error is PlayableFormatNotFoundException -> stringResource(id = R.string.playable_format_not_found_error)
+        error is UnplayableException -> stringResource(id = R.string.video_source_deleted_error)
+        error is LoginRequiredException -> stringResource(id = R.string.server_restrictions_error)
+        error is VideoIdMismatchException -> stringResource(id = R.string.id_mismatch_error)
+        
+        // Check first level cause
+        error?.cause is UnresolvedAddressException || error?.cause is UnknownHostException -> stringResource(id = R.string.network_error)
+        error?.cause is PlayableFormatNotFoundException -> stringResource(id = R.string.playable_format_not_found_error)
+        error?.cause is UnplayableException -> stringResource(id = R.string.video_source_deleted_error)
+        error?.cause is LoginRequiredException -> stringResource(id = R.string.server_restrictions_error)
+        error?.cause is VideoIdMismatchException -> stringResource(id = R.string.id_mismatch_error)
+        
+        // Check second level cause
+        error?.cause?.cause is UnresolvedAddressException || error?.cause?.cause is UnknownHostException -> stringResource(id = R.string.network_error)
+        error?.cause?.cause is PlayableFormatNotFoundException -> stringResource(id = R.string.playable_format_not_found_error)
+        error?.cause?.cause is UnplayableException -> stringResource(id = R.string.video_source_deleted_error)
+        error?.cause?.cause is LoginRequiredException -> stringResource(id = R.string.server_restrictions_error)
+        error?.cause?.cause is VideoIdMismatchException -> stringResource(id = R.string.id_mismatch_error)
+        
+        // Check error message for network issues
+        error?.message?.contains("network", ignoreCase = true) == true -> stringResource(id = R.string.network_error)
+        error?.message?.contains("connection", ignoreCase = true) == true -> stringResource(id = R.string.network_error)
+        
+        else -> stringResource(id = R.string.unknown_playback_error)
     }
+}

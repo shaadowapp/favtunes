@@ -506,20 +506,30 @@ abstract class DatabaseInitializer protected constructor() : RoomDatabase() {
     abstract val database: Database
 
     companion object {
-        lateinit var Instance: DatabaseInitializer
+        @Volatile
+        private var INSTANCE: DatabaseInitializer? = null
+
+        val Instance: DatabaseInitializer
+            get() = INSTANCE ?: throw IllegalStateException("Database not initialized")
 
         context(Context)
         operator fun invoke() {
-            if (!Companion::Instance.isInitialized) {
-                Instance = Room
-                    .databaseBuilder(this@Context, DatabaseInitializer::class.java, "data.db")
-                    .addMigrations(
-                        From8To9Migration(),
-                        From10To11Migration(),
-                        From14To15Migration(),
-                        From22To23Migration()
-                    )
-                    .build()
+            // Double-checked locking pattern for thread safety
+            if (INSTANCE == null) {
+                synchronized(this) {
+                    if (INSTANCE == null) {
+                        INSTANCE = Room
+                            .databaseBuilder(this@Context, DatabaseInitializer::class.java, "data.db")
+                            .addMigrations(
+                                From8To9Migration(),
+                                From10To11Migration(),
+                                From14To15Migration(),
+                                From22To23Migration()
+                            )
+                            .fallbackToDestructiveMigration()
+                            .build()
+                    }
+                }
             }
         }
     }
@@ -674,27 +684,34 @@ object Converters {
     @TypeConverter
     fun mediaItemFromByteArray(value: ByteArray?): MediaItem? {
         return value?.let { byteArray ->
-            runCatching {
-                val parcel = Parcel.obtain()
+            var parcel: Parcel? = null
+            try {
+                parcel = Parcel.obtain()
                 parcel.unmarshall(byteArray, 0, byteArray.size)
                 parcel.setDataPosition(0)
                 val bundle = parcel.readBundle(MediaItem::class.java.classLoader)
-                parcel.recycle()
-
                 bundle?.let(MediaItem::fromBundle)
-            }.getOrNull()
+            } catch (e: Exception) {
+                null
+            } finally {
+                parcel?.recycle()
+            }
         }
     }
 
     @TypeConverter
     fun mediaItemToByteArray(mediaItem: MediaItem?): ByteArray? {
         return mediaItem?.toBundle()?.let { persistableBundle ->
-            val parcel = Parcel.obtain()
-            parcel.writeBundle(persistableBundle)
-            val bytes = parcel.marshall()
-            parcel.recycle()
-
-            bytes
+            var parcel: Parcel? = null
+            try {
+                parcel = Parcel.obtain()
+                parcel.writeBundle(persistableBundle)
+                parcel.marshall()
+            } catch (e: Exception) {
+                null
+            } finally {
+                parcel?.recycle()
+            }
         }
     }
 }
