@@ -49,7 +49,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.shaadow.innertube.Innertube
-import com.shaadow.innertube.models.bodies.SearchSuggestionsBody
+
 import com.shaadow.innertube.requests.searchSuggestions
 import com.shaadow.tunes.Database
 import com.shaadow.tunes.LocalPlayerPadding
@@ -124,7 +124,7 @@ fun SearchScreen(
     LaunchedEffect(query) {
         suggestionsResult = if (query.isNotEmpty()) {
             delay(200)
-            Innertube.searchSuggestions(SearchSuggestionsBody(input = query))
+            Innertube.searchSuggestions(input = query)
         } else null
     }
 

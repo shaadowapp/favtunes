@@ -13,9 +13,9 @@ import com.shaadow.innertube.models.bodies.ContinuationBody
 import com.shaadow.innertube.utils.from
 import com.shaadow.innertube.utils.runCatchingNonCancellable
 
-suspend fun Innertube.playlistPage(body: BrowseBody) = runCatchingNonCancellable {
+suspend fun Innertube.playlistPage(browseId: String, params: String? = null) = runCatchingNonCancellable {
     val response = client.post(BROWSE) {
-        setBody(body)
+        setBody(BrowseBody(browseId = browseId, params = params))
     }.body<BrowseResponse>()
 
     val header = response
@@ -79,9 +79,9 @@ suspend fun Innertube.playlistPage(body: BrowseBody) = runCatchingNonCancellable
     )
 }
 
-suspend fun Innertube.playlistPage(body: ContinuationBody) = runCatchingNonCancellable {
+suspend fun Innertube.playlistPage(continuation: String) = runCatchingNonCancellable {
     val response = client.post(BROWSE) {
-        setBody(body)
+        setBody(ContinuationBody(continuation = continuation))
         mask("continuationContents.musicPlaylistShelfContinuation(continuations,contents.$MUSIC_RESPONSIVE_LIST_ITEM_RENDERER_MASK)")
     }.body<ContinuationResponse>()
 

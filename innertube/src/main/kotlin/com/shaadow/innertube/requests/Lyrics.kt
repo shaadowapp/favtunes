@@ -10,9 +10,9 @@ import com.shaadow.innertube.models.bodies.BrowseBody
 import com.shaadow.innertube.models.bodies.NextBody
 import com.shaadow.innertube.utils.runCatchingNonCancellable
 
-suspend fun Innertube.lyrics(body: NextBody): Result<String?>? = runCatchingNonCancellable {
+suspend fun Innertube.lyrics(videoId: String): Result<String?>? = runCatchingNonCancellable {
     val nextResponse = client.post(NEXT) {
-        setBody(body)
+        setBody(NextBody(videoId = videoId))
         mask("contents.singleColumnMusicWatchNextResultsRenderer.tabbedRenderer.watchNextTabbedResultsRenderer.tabs.tabRenderer(endpoint,title)")
     }.body<NextResponse>()
 

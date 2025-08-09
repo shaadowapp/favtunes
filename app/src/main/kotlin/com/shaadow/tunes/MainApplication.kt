@@ -9,9 +9,10 @@ import coil3.disk.directory
 import coil3.request.crossfade
 import com.google.firebase.FirebaseApp
 import com.shaadow.innertube.Innertube
-import com.shaadow.innertube.models.bodies.NextBody
 import com.shaadow.innertube.requests.relatedPage
 import com.shaadow.innertube.requests.visitorData
+import com.shaadow.tunes.Database
+import com.shaadow.tunes.DatabaseInitializer
 import com.shaadow.tunes.enums.CoilDiskCacheMaxSize
 import com.shaadow.tunes.utils.coilDiskCacheMaxSizeKey
 import com.shaadow.tunes.utils.getEnum
@@ -29,15 +30,21 @@ class MainApplication : Application(), SingletonImageLoader.Factory {
 
     override fun onCreate() {
         super.onCreate()
-        DatabaseInitializer()
+        with(this) { DatabaseInitializer() }
 
         FirebaseApp.initializeApp(this)
 
         // Preload critical data immediately
         applicationScope.launch {
             // Initialize visitor data
-            if (Innertube.visitorData.isNullOrBlank()) {
-                Innertube.visitorData = Innertube.visitorData().getOrNull()
+            try {
+                if (Innertube.visitorData.isNullOrBlank()) {
+                    Innertube.visitorData().onSuccess { visitorData ->
+                        Innertube.visitorData = visitorData
+                    }
+                }
+            } catch (e: Exception) {
+                // Silently handle visitor data initialization errors
             }
             
             // Preload trending song for QuickPicks
@@ -45,7 +52,7 @@ class MainApplication : Application(), SingletonImageLoader.Factory {
                 val song = Database.trending().first()
                 if (song != null) {
                     // Preload related page for the trending song
-                    Innertube.relatedPage(NextBody(videoId = song.id))
+                    Innertube.relatedPage(videoId = song.id)
                 }
             } catch (e: Exception) {
                 // Silently handle errors to not block app startup

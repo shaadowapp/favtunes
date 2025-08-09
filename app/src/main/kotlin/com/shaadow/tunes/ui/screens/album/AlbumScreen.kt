@@ -21,7 +21,6 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import com.shaadow.innertube.Innertube
-import com.shaadow.innertube.models.bodies.BrowseBody
 import com.shaadow.innertube.requests.albumPage
 import com.shaadow.tunes.Database
 import com.shaadow.tunes.R
@@ -68,7 +67,7 @@ fun AlbumScreen(
 
                 if (albumPage == null && (currentAlbum?.timestamp == null || tabIndex == 1)) {
                     withContext(Dispatchers.IO) {
-                        Innertube.albumPage(BrowseBody(browseId = browseId))
+                        Innertube.albumPage(browseId = browseId)
                             ?.completed()
                             ?.onSuccess { currentAlbumPage ->
                                 albumPage = currentAlbumPage

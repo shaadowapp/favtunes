@@ -14,12 +14,13 @@ import com.shaadow.innertube.models.bodies.ContinuationBody
 import com.shaadow.innertube.utils.runCatchingNonCancellable
 
 suspend fun <T : Innertube.Item> Innertube.itemsPage(
-    body: BrowseBody,
+    browseId: String,
+    params: String? = null,
     fromMusicResponsiveListItemRenderer: (MusicResponsiveListItemRenderer) -> T? = { null },
     fromMusicTwoRowItemRenderer: (MusicTwoRowItemRenderer) -> T? = { null },
 ) = runCatchingNonCancellable {
     val response = client.post(BROWSE) {
-        setBody(body)
+        setBody(BrowseBody(browseId = browseId, params = params))
 //        mask("contents.singleColumnBrowseResultsRenderer.tabs.tabRenderer.content.sectionListRenderer.contents(musicPlaylistShelfRenderer(continuations,contents.$musicResponsiveListItemRendererMask),gridRenderer(continuations,items.$musicTwoRowItemRendererMask))")
     }.body<BrowseResponse>()
 
@@ -45,12 +46,12 @@ suspend fun <T : Innertube.Item> Innertube.itemsPage(
 }
 
 suspend fun <T : Innertube.Item> Innertube.itemsPage(
-    body: ContinuationBody,
+    continuation: String,
     fromMusicResponsiveListItemRenderer: (MusicResponsiveListItemRenderer) -> T? = { null },
     fromMusicTwoRowItemRenderer: (MusicTwoRowItemRenderer) -> T? = { null },
 ) = runCatchingNonCancellable {
     val response = client.post(BROWSE) {
-        setBody(body)
+        setBody(ContinuationBody(continuation = continuation))
 //        mask("contents.singleColumnBrowseResultsRenderer.tabs.tabRenderer.content.sectionListRenderer.contents(musicPlaylistShelfRenderer(continuations,contents.$musicResponsiveListItemRendererMask),gridRenderer(continuations,items.$musicTwoRowItemRendererMask))")
     }.body<ContinuationResponse>()
 

@@ -6,7 +6,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.ViewModel
 import com.shaadow.innertube.Innertube
-import com.shaadow.innertube.models.bodies.BrowseBody
+
 import com.shaadow.innertube.requests.artistPage
 import com.shaadow.tunes.Database
 import com.shaadow.tunes.models.Artist
@@ -30,7 +30,7 @@ class ArtistViewModel : ViewModel() {
 
                 if (artistPage == null && (currentArtist?.timestamp == null || mustFetch)) {
                     withContext(Dispatchers.IO) {
-                        Innertube.artistPage(BrowseBody(browseId = browseId))
+                        Innertube.artistPage(browseId = browseId)
                             ?.onSuccess { currentArtistPage ->
                                 artistPage = currentArtistPage
 

@@ -48,6 +48,8 @@ import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import coil3.compose.AsyncImage
+import com.shaadow.innertube.Innertube
+import com.shaadow.innertube.requests.visitorData
 import com.shaadow.tunes.Database
 import com.shaadow.tunes.LocalPlayerServiceBinder
 import com.shaadow.tunes.service.LoginRequiredException
@@ -62,6 +64,7 @@ import com.shaadow.tunes.utils.forceSeekToPrevious
 import com.shaadow.tunes.utils.playerGesturesEnabledKey
 import com.shaadow.tunes.utils.rememberPreference
 import com.shaadow.tunes.utils.thumbnail
+import kotlinx.coroutines.runBlocking
 
 @OptIn(ExperimentalFoundationApi::class)
 @ExperimentalAnimationApi
@@ -103,6 +106,13 @@ fun Thumbnail(
         }
     }
 
+    val retry = {
+        if (error?.cause?.cause is VideoIdMismatchException) runBlocking {
+            Innertube.visitorData = Innertube.visitorData().getOrNull()
+        }
+        if (error != null) player.prepare()
+    }
+
     player.DisposableListener {
         object : Player.Listener {
             override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
@@ -117,9 +127,8 @@ fun Thumbnail(
             override fun onPlayerError(playbackException: PlaybackException) {
                 error = playbackException
 
-                // Only retry once for recoverable errors
-                if (errorCounter == 0 && isRecoverableError(playbackException)) {
-                    player.prepare()
+                if (errorCounter == 0) {
+                    retry()
                     errorCounter += 1
                 }
             }
@@ -260,7 +269,7 @@ fun Thumbnail(
                 PlaybackError(
                     isDisplayed = error != null,
                     messageProvider = { errorMessage },
-                    onDismiss = player::prepare
+                    onDismiss = retry
                 )
             }
         }

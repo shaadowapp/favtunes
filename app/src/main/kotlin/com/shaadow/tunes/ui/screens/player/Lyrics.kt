@@ -53,7 +53,7 @@ import androidx.media3.common.C
 import androidx.media3.common.MediaMetadata
 import com.valentinilk.shimmer.shimmer
 import com.shaadow.innertube.Innertube
-import com.shaadow.innertube.models.bodies.NextBody
+
 import com.shaadow.innertube.requests.lyrics
 import com.shaadow.kugou.KuGou
 import com.shaadow.tunes.Database
@@ -148,7 +148,7 @@ fun Lyrics(
                             isError = true
                         }
                     } else if (!isShowingSynchronizedLyrics && it?.fixed == null) {
-                        Innertube.lyrics(NextBody(videoId = mediaId))?.onSuccess { fixedLyrics ->
+                        Innertube.lyrics(videoId = mediaId)?.onSuccess { fixedLyrics ->
                             Database.upsert(
                                 Lyrics(
                                     songId = mediaId,

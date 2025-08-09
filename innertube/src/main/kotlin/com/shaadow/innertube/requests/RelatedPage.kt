@@ -14,9 +14,9 @@ import com.shaadow.innertube.utils.findSectionByTitle
 import com.shaadow.innertube.utils.from
 import com.shaadow.innertube.utils.runCatchingNonCancellable
 
-suspend fun Innertube.relatedPage(body: NextBody) = runCatchingNonCancellable {
+suspend fun Innertube.relatedPage(videoId: String) = runCatchingNonCancellable {
     val nextResponse = client.post(NEXT) {
-        setBody(body)
+        setBody(NextBody(videoId = videoId))
         mask("contents.singleColumnMusicWatchNextResultsRenderer.tabbedRenderer.watchNextTabbedResultsRenderer.tabs.tabRenderer(endpoint,title)")
     }.body<NextResponse>()
 

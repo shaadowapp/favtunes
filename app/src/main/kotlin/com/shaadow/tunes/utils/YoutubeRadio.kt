@@ -2,8 +2,7 @@ package com.shaadow.tunes.utils
 
 import androidx.media3.common.MediaItem
 import com.shaadow.innertube.Innertube
-import com.shaadow.innertube.models.bodies.ContinuationBody
-import com.shaadow.innertube.models.bodies.NextBody
+
 import com.shaadow.innertube.requests.nextPage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -24,12 +23,10 @@ data class YouTubeRadio(
 
             if (continuation == null) {
                Innertube.nextPage(
-                    NextBody(
-                        videoId = videoId,
-                        playlistId = playlistId,
-                        params = parameters,
-                        playlistSetVideoId = playlistSetVideoId
-                    )
+                    videoId = videoId,
+                    playlistId = playlistId,
+                    params = parameters,
+                    playlistSetVideoId = playlistSetVideoId
                 )?.map { nextResult ->
                     playlistId = nextResult.playlistId
                     parameters = nextResult.params
@@ -38,7 +35,7 @@ data class YouTubeRadio(
                     nextResult.itemsPage
                 }
             } else {
-                Innertube.nextPage(ContinuationBody(continuation = continuation))
+                Innertube.nextPage(continuation = continuation)
             }?.getOrNull()?.let { songsPage ->
                 mediaItems = songsPage.items?.map(Innertube.SongItem::asMediaItem)
                 songsPage.continuation?.takeUnless { nextContinuation == it }

@@ -13,10 +13,10 @@ import com.shaadow.innertube.utils.findSectionByTitle
 import com.shaadow.innertube.utils.from
 import com.shaadow.innertube.utils.runCatchingNonCancellable
 
-suspend fun Innertube.artistPage(body: BrowseBody): Result<Innertube.ArtistPage>? =
+suspend fun Innertube.artistPage(browseId: String, params: String? = null): Result<Innertube.ArtistPage>? =
     runCatchingNonCancellable {
         val response = client.post(BROWSE) {
-            setBody(body)
+            setBody(BrowseBody(browseId = browseId, params = params))
             mask("contents,header")
         }.body<BrowseResponse>()
 

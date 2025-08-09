@@ -14,7 +14,8 @@ import com.shaadow.innertube.models.bodies.PlayerBody
 import com.shaadow.innertube.utils.runCatchingNonCancellable
 import kotlinx.serialization.Serializable
 
-suspend fun Innertube.player(body: PlayerBody) = runCatchingNonCancellable {
+suspend fun Innertube.player(videoId: String) = runCatchingNonCancellable {
+    val body = PlayerBody(videoId = videoId)
     val response = client.post(PLAYER) {
         setBody(
             body.copy(
@@ -43,7 +44,7 @@ suspend fun Innertube.player(body: PlayerBody) = runCatchingNonCancellable {
                 body.copy(
                     context = YouTubeClient.TVHTML5_SIMPLY_EMBEDDED_PLAYER.toContext().copy(
                         thirdParty = Context.ThirdParty(
-                            embedUrl = "https://www.youtube.com/watch?v=${body.videoId}"
+                            embedUrl = "https://www.youtube.com/watch?v=${videoId}"
                         )
                     )
                 )
@@ -55,7 +56,7 @@ suspend fun Innertube.player(body: PlayerBody) = runCatchingNonCancellable {
             return@runCatchingNonCancellable response
         }
 
-        val audioStreams = client.get("https://pipedapi.adminforge.de/streams/${body.videoId}") {
+        val audioStreams = client.get("https://pipedapi.adminforge.de/streams/${videoId}") {
             contentType(ContentType.Application.Json)
         }.body<PipedResponse>().audioStreams
 

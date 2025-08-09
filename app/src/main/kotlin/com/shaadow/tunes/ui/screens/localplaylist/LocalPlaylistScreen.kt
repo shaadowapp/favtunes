@@ -29,7 +29,7 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import com.shaadow.innertube.Innertube
-import com.shaadow.innertube.models.bodies.BrowseBody
+
 import com.shaadow.innertube.requests.playlistPage
 import com.shaadow.tunes.Database
 import com.shaadow.tunes.R
@@ -95,9 +95,7 @@ fun LocalPlaylistScreen(
                                     transaction {
                                         runBlocking(Dispatchers.IO) {
                                             withContext(Dispatchers.IO) {
-                                                Innertube.playlistPage(
-                                                    BrowseBody(browseId = browseId)
-                                                )
+                                                Innertube.playlistPage(browseId = browseId)
                                                     ?.completed()
                                             }
                                         }?.getOrNull()?.let { remotePlaylist ->

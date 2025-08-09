@@ -60,7 +60,6 @@ import com.google.firebase.Firebase
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.analytics
 import com.shaadow.innertube.Innertube
-import com.shaadow.innertube.models.bodies.BrowseBody
 import com.shaadow.innertube.requests.playlistPage
 import com.shaadow.innertube.requests.song
 import com.shaadow.tunes.models.LocalMenuState
@@ -239,7 +238,7 @@ class MainActivity : ComponentActivity() {
                             val browseId = "VL$playlistId"
 
                             if (playlistId.startsWith("OLAK5uy_")) {
-                                Innertube.playlistPage(BrowseBody(browseId = browseId))?.getOrNull()
+                                Innertube.playlistPage(browseId = browseId)?.getOrNull()
                                     ?.let {
                                         it.songsPage?.items?.firstOrNull()?.album?.endpoint?.browseId?.let { browseId ->
                                             navController.navigate(

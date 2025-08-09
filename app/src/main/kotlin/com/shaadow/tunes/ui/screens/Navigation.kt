@@ -120,15 +120,15 @@ fun Navigation(
             content: @Composable AnimatedContentScope.(NavBackStackEntry) -> Unit
         ) {
             composable(
-            route = route,
-            arguments = arguments
-        ) { navBackStackEntry ->
-            content(navBackStackEntry)
+                route = route,
+                arguments = arguments
+            ) { navBackStackEntry ->
+                content(navBackStackEntry)
 
-            BackHandler(enabled = sheetState.currentValue == SheetValue.Expanded) {
-                scope.launch { sheetState.partialExpand() }
+                BackHandler(enabled = sheetState.currentValue == SheetValue.Expanded) {
+                    scope.launch { sheetState.partialExpand() }
+                }
             }
-        }
         }
 
         playerComposable(route = "home") {
@@ -151,13 +151,6 @@ fun Navigation(
                 screenIndex = 2
             )
         }
-
-//        playerComposable(route = "albums") {
-//            HomeScreen(
-//                navController = navController,
-//                screenIndex = 3
-//            )
-//        }
 
         playerComposable(route = "playlists") {
             HomeScreen(

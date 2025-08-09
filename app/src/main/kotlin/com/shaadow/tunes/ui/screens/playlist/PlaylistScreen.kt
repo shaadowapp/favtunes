@@ -30,7 +30,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import com.shaadow.innertube.Innertube
-import com.shaadow.innertube.models.bodies.BrowseBody
+
 import com.shaadow.innertube.requests.playlistPage
 import com.shaadow.tunes.Database
 import com.shaadow.tunes.R
@@ -63,8 +63,7 @@ fun PlaylistScreen(
         if (playlistPage != null && playlistPage?.songsPage?.continuation == null) return@LaunchedEffect
 
         playlistPage = withContext(Dispatchers.IO) {
-            Innertube.playlistPage(BrowseBody(browseId = browseId))?.completed()
-                ?.getOrNull()
+            Innertube.playlistPage(browseId = browseId)?.completed()?.getOrNull()
         }
     }
 

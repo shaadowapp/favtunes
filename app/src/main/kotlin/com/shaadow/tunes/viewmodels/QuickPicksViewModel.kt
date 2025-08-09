@@ -6,7 +6,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.shaadow.innertube.Innertube
-import com.shaadow.innertube.models.bodies.NextBody
+
 import com.shaadow.innertube.requests.relatedPage
 import com.shaadow.tunes.Database
 import com.shaadow.tunes.enums.QuickPicksSource
@@ -108,7 +108,7 @@ class QuickPicksViewModel : ViewModel() {
             Result.success(cached)
         } else {
             try {
-                val result = Innertube.relatedPage(NextBody(videoId = songId))
+                val result = Innertube.relatedPage(videoId = songId)
                 result?.getOrNull()?.let { page ->
                     relatedPageCache[songId] = page
                     cacheExpiry[songId] = now + cacheTimeout

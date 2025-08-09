@@ -36,7 +36,7 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.cache.Cache
 import androidx.media3.datasource.cache.CacheSpan
 import com.shaadow.innertube.Innertube
-import com.shaadow.innertube.models.bodies.PlayerBody
+
 import com.shaadow.innertube.requests.player
 import com.shaadow.tunes.Database
 import com.shaadow.tunes.LocalPlayerServiceBinder
@@ -72,7 +72,7 @@ fun StatsForNerds(
                 binder.player.currentMediaItem?.takeIf { it.mediaId == mediaId }?.let { mediaItem ->
                     withContext(Dispatchers.IO) {
                         delay(2000)
-                        Innertube.player(PlayerBody(videoId = mediaId))?.onSuccess { response ->
+                        Innertube.player(videoId = mediaId)?.onSuccess { response ->
                             response.streamingData?.highestQualityFormat?.let { format ->
                                 Database.insert(mediaItem)
                                 Database.insert(

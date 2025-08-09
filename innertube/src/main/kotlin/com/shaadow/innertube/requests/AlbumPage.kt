@@ -2,12 +2,12 @@ package com.shaadow.innertube.requests
 
 import io.ktor.http.Url
 import com.shaadow.innertube.Innertube
-import com.shaadow.innertube.models.bodies.BrowseBody
 
-suspend fun Innertube.albumPage(body: BrowseBody): Result<Innertube.PlaylistOrAlbumPage>? {
-    return playlistPage(body)?.map { album ->
+
+suspend fun Innertube.albumPage(browseId: String, params: String? = null): Result<Innertube.PlaylistOrAlbumPage>? {
+    return playlistPage(browseId = browseId, params = params)?.map { album ->
         album.url?.let { Url(it).parameters["list"] }?.let { playlistId ->
-            playlistPage(BrowseBody(browseId = "VL$playlistId"))?.getOrNull()?.let { playlist ->
+            playlistPage(browseId = "VL$playlistId")?.getOrNull()?.let { playlist ->
                 album.copy(songsPage = playlist.songsPage)
             }
         } ?: album
@@ -15,8 +15,8 @@ suspend fun Innertube.albumPage(body: BrowseBody): Result<Innertube.PlaylistOrAl
         val albumInfo = Innertube.Info(
             name = album.title,
             endpoint = _root_ide_package_.com.shaadow.innertube.models.NavigationEndpoint.Endpoint.Browse(
-                browseId = body.browseId,
-                params = body.params
+                browseId = browseId,
+                params = params
             )
         )
 
