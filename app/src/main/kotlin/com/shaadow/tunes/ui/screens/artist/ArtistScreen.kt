@@ -24,6 +24,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.shaadow.innertube.Innertube
 import com.shaadow.innertube.requests.itemsPage
+import com.shaadow.innertube.requests.itemsPageContinuation
 import com.shaadow.innertube.utils.from
 import com.shaadow.tunes.Database
 import com.shaadow.tunes.LocalPlayerServiceBinder
@@ -164,7 +165,7 @@ fun ArtistScreen(
                     itemsPageProvider = viewModel.artistPage?.let {
                         ({ continuation ->
                             continuation?.let {
-                                Innertube.itemsPage(
+                                Innertube.itemsPageContinuation(
                                     continuation = continuation,
                                     fromMusicResponsiveListItemRenderer = Innertube.SongItem::from,
                                 )
@@ -218,7 +219,7 @@ fun ArtistScreen(
                     itemsPageProvider = viewModel.artistPage?.let {
                         ({ continuation ->
                             continuation?.let {
-                                Innertube.itemsPage(
+                                Innertube.itemsPageContinuation(
                                     continuation = continuation,
                                     fromMusicTwoRowItemRenderer = Innertube.AlbumItem::from,
                                 )
@@ -259,7 +260,7 @@ fun ArtistScreen(
                     itemsPageProvider = viewModel.artistPage?.let {
                         ({ continuation ->
                             continuation?.let {
-                                Innertube.itemsPage(
+                                Innertube.itemsPageContinuation(
                                     continuation = continuation,
                                     fromMusicTwoRowItemRenderer = Innertube.AlbumItem::from,
                                 )

@@ -79,7 +79,7 @@ suspend fun Innertube.playlistPage(browseId: String, params: String? = null) = r
     )
 }
 
-suspend fun Innertube.playlistPage(continuation: String) = runCatchingNonCancellable {
+suspend fun Innertube.playlistPageContinuation(continuation: String) = runCatchingNonCancellable {
     val response = client.post(BROWSE) {
         setBody(ContinuationBody(continuation = continuation))
         mask("continuationContents.musicPlaylistShelfContinuation(continuations,contents.$MUSIC_RESPONSIVE_LIST_ITEM_RENDERER_MASK)")

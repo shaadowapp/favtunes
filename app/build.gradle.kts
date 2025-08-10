@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.compose.compiler)
@@ -8,16 +10,23 @@ plugins {
     alias(libs.plugins.google.firebase.firebase.perf)
 }
 
+kotlin {
+    compilerOptions {
+        jvmTarget = JvmTarget.fromTarget("17")
+        freeCompilerArgs.addAll("-Xcontext-receivers")
+    }
+}
+
 android {
     namespace = "com.shaadow.tunes"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.shaadow.tunes"
         minSdk = 24
-        targetSdk = 35
-        versionCode = 12
-        versionName = "2.2.0"
+        targetSdk = 36
+        versionCode = 13
+        versionName = "2.2.1"
     }
 
     splits {
@@ -54,11 +63,6 @@ android {
         isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
-    }
-
-    kotlinOptions {
-        freeCompilerArgs += "-Xcontext-receivers"
-        jvmTarget = "17"
     }
 }
 

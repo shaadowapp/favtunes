@@ -9,7 +9,7 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import com.shaadow.innertube.Innertube
 
-import com.shaadow.innertube.requests.playlistPage
+import com.shaadow.innertube.requests.playlistPageContinuation
 import com.shaadow.innertube.utils.plus
 import com.shaadow.tunes.models.Song
 
@@ -98,7 +98,8 @@ suspend fun Result<Innertube.PlaylistOrAlbumPage>.completed(): Result<Innertube.
 
     while (playlistPage.songsPage?.continuation != null) {
         val continuation = playlistPage.songsPage?.continuation!!
-        val otherPlaylistPageResult = Innertube.playlistPage(continuation = continuation) ?: break
+        val otherPlaylistPageResult =
+            Innertube.playlistPageContinuation(continuation = continuation) ?: break
 
         if (otherPlaylistPageResult.isFailure) break
 

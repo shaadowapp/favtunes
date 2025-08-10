@@ -53,6 +53,7 @@ import com.shaadow.innertube.requests.visitorData
 import com.shaadow.tunes.Database
 import com.shaadow.tunes.LocalPlayerServiceBinder
 import com.shaadow.tunes.service.LoginRequiredException
+import com.shaadow.tunes.service.PlayableFormatNotFoundException
 import com.shaadow.tunes.service.UnplayableException
 import com.shaadow.tunes.service.VideoIdMismatchException
 import com.shaadow.tunes.ui.styling.Dimensions
@@ -65,6 +66,8 @@ import com.shaadow.tunes.utils.playerGesturesEnabledKey
 import com.shaadow.tunes.utils.rememberPreference
 import com.shaadow.tunes.utils.thumbnail
 import kotlinx.coroutines.runBlocking
+import java.net.UnknownHostException
+import java.nio.channels.UnresolvedAddressException
 
 @OptIn(ExperimentalFoundationApi::class)
 @ExperimentalAnimationApi
@@ -107,10 +110,20 @@ fun Thumbnail(
     }
 
     val retry = {
-        if (error?.cause?.cause is VideoIdMismatchException) runBlocking {
-            Innertube.visitorData = Innertube.visitorData().getOrNull()
+        when (error?.cause?.cause) {
+            is UnresolvedAddressException,
+            is UnknownHostException,
+            is PlayableFormatNotFoundException,
+            is UnplayableException,
+            is LoginRequiredException -> player.prepare()
+
+            else -> {
+                runBlocking {
+                    Innertube.visitorData = Innertube.visitorData().getOrNull()
+                }
+                player.prepare()
+            }
         }
-        if (error != null) player.prepare()
     }
 
     player.DisposableListener {
