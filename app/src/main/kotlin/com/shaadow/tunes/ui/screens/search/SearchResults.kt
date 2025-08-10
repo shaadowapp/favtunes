@@ -22,6 +22,7 @@ import androidx.compose.material.icons.outlined.MusicNote
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -130,6 +131,7 @@ fun SearchResults(
                     itemContent = { song ->
                         SwipeToActionBox(
                             modifier = Modifier.animateItem(),
+                            state = rememberSwipeToDismissBoxState(),
                             primaryAction = ActionInfo(
                                 onClick = { binder?.player?.enqueue(song.asMediaItem) },
                                 icon = Icons.AutoMirrored.Outlined.PlaylistPlay,
@@ -247,6 +249,7 @@ fun SearchResults(
                     itemContent = { video ->
                         SwipeToActionBox(
                             modifier = Modifier.animateItem(),
+                            state = rememberSwipeToDismissBoxState(),
                             primaryAction = ActionInfo(
                                 onClick = { binder?.player?.enqueue(video.asMediaItem) },
                                 icon = Icons.AutoMirrored.Outlined.PlaylistPlay,
@@ -350,6 +353,7 @@ fun SearchResults(
                     ) { index, song ->
                         SwipeToActionBox(
                             modifier = Modifier.animateItem(),
+                            state = rememberSwipeToDismissBoxState(),
                             primaryAction = ActionInfo(
                                 onClick = { binder?.player?.enqueue(song.asMediaItem) },
                                 icon = Icons.AutoMirrored.Outlined.PlaylistPlay,

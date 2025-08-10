@@ -206,4 +206,6 @@
     <string name="no_updates_available">No updates available</string>
     <string name="version">Version %s</string>
     <string name="open_in_github">Open in GitHub</string>
+    <string name="go_back">Go back</string>
+    <string name="clear">Clear</string>
 </resources>

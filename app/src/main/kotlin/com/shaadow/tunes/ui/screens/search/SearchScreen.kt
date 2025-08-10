@@ -27,8 +27,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SearchBar
-import androidx.compose.material3.SearchBarDefaults
+import com.shaadow.tunes.ui.components.SearchInputField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -145,49 +144,20 @@ fun SearchScreen(
             )
         }
 
-        SearchBar(
-            inputField = {
-                SearchBarDefaults.InputField(
-                    query = query,
-                    onQueryChange = { query = it },
-                    onSearch = {
-                        // MODIFIED: Updated onSearch handler
-                        activeSearch = true
-                        keyboardController?.hide()
-                    },
-                    expanded = expanded,
-                    onExpandedChange = { newExpanded ->
-                        if (!newExpanded && query.isEmpty()) {
-                            pop()
-                        } else {
-                            expanded = newExpanded
-                        }
-                    },
-                    placeholder = {
-                        Text(text = stringResource(id = R.string.search))
-                    },
-                    leadingIcon = {
-                        IconButton(onClick = pop) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
-                                contentDescription = null
-                            )
-                        }
-                    },
-                    trailingIcon = {
-                        if (query.isNotBlank() && expanded) {
-                            IconButton(onClick = { query = "" }) {
-                                Icon(
-                                    imageVector = Icons.Outlined.Close,
-                                    contentDescription = null
-                                )
-                            }
-                        }
-                    }
-                )
+        SearchInputField(
+            query = query,
+            onQueryChange = { query = it },
+            onSearch = {
+                activeSearch = true
             },
-            expanded = expanded,
-            onExpandedChange = onExpandedChange,
+            active = expanded,
+            onActiveChange = { newExpanded ->
+                if (!newExpanded && query.isEmpty()) {
+                    pop()
+                } else {
+                    expanded = newExpanded
+                }
+            },
             modifier = Modifier.focusRequester(focusRequester)
         ) {
             LazyColumn(
@@ -235,7 +205,7 @@ fun SearchScreen(
                             }
                         },
                         colors = ListItemDefaults.colors(
-                            containerColor = SearchBarDefaults.colors().containerColor
+                            containerColor = MaterialTheme.colorScheme.surfaceContainer
                         )
                     )
                 }
@@ -265,7 +235,7 @@ fun SearchScreen(
                                 }
                             },
                             colors = ListItemDefaults.colors(
-                                containerColor = SearchBarDefaults.colors().containerColor
+                                containerColor = MaterialTheme.colorScheme.surfaceContainer
                             )
                         )
                     }

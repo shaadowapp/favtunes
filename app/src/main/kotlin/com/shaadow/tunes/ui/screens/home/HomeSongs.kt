@@ -32,6 +32,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -158,6 +159,7 @@ fun HomeSongs(
             ) { index, song ->
                 SwipeToActionBox(
                     modifier = Modifier.animateItem(),
+                    state = rememberSwipeToDismissBoxState(),
                     primaryAction = ActionInfo(
                         onClick = { binder?.player?.enqueue(song.asMediaItem) },
                         icon = Icons.AutoMirrored.Outlined.PlaylistPlay,
