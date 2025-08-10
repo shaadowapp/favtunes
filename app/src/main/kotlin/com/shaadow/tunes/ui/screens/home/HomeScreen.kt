@@ -8,10 +8,13 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -39,8 +42,30 @@ fun HomeScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    val context = LocalContext.current
-                    AppIcon(context)
+                    when (screenIndex) {
+                        0 -> {
+                            val context = LocalContext.current
+                            AppIcon(context)
+                        }
+                        1 -> {
+                            Text(
+                                text = "Songs",
+                                style = MaterialTheme.typography.headlineSmall,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                        }
+                        4 -> {
+                            Text(
+                                text = "Playlists",
+                                style = MaterialTheme.typography.headlineSmall,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                        }
+                        else -> {
+                            val context = LocalContext.current
+                            AppIcon(context)
+                        }
+                    }
                 },
                 actions = {
                     TooltipIconButton(

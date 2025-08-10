@@ -104,8 +104,6 @@ dependencies {
     implementation(projects.kugou)
     coreLibraryDesugaring(libs.desugaring)
     implementation(platform(libs.firebase.bom))
-    implementation(libs.room.runtime)
-    ksp(libs.room.compiler)
     implementation(libs.material3)
     implementation(libs.app.update)
     implementation(libs.app.update.ktx)

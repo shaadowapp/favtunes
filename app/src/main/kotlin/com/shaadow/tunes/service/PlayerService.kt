@@ -341,6 +341,11 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
 
         unregisterReceiver(notificationActionReceiver)
 
+        // Unregister audio device callback to prevent memory leak
+        audioDeviceCallback?.let { callback ->
+            audioManager?.unregisterAudioDeviceCallback(callback)
+        }
+
         mediaSession.isActive = false
         mediaSession.release()
         cache.release()

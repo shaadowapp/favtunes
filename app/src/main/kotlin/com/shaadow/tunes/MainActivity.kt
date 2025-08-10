@@ -101,7 +101,10 @@ class MainActivity : ComponentActivity() {
 
     override fun onStart() {
         super.onStart()
-        bindService(intent<PlayerService>(), serviceConnection, BIND_AUTO_CREATE)
+        if (!isServiceBound) {
+            bindService(intent<PlayerService>(), serviceConnection, BIND_AUTO_CREATE)
+            isServiceBound = true
+        }
     }
 
     @OptIn(ExperimentalMaterial3Api::class)
@@ -135,10 +138,6 @@ class MainActivity : ComponentActivity() {
             } catch (e: Exception) {
                 // Silently handle errors
             }
-        }
-
-        setContent {
-            AppScreen()
         }
 
         setContent {
@@ -281,7 +280,14 @@ class MainActivity : ComponentActivity() {
     }
 
     override fun onStop() {
-        unbindService(serviceConnection)
+        if (isServiceBound) {
+            try {
+                unbindService(serviceConnection)
+                isServiceBound = false
+            } catch (e: IllegalArgumentException) {
+                // Service was not bound
+            }
+        }
         super.onStop()
 
         appUpdateManager.unregisterListener(listener)
@@ -336,14 +342,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        try {
-            if (isServiceBound) {
-                unbindService(serviceConnection)
-                isServiceBound = false
-            }
-        } catch (e: IllegalArgumentException) {
-            // Service was not bound or already unbound
-        }
+        // Service unbinding is handled in onStop()
     }
 }
 

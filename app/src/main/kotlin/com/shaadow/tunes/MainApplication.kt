@@ -66,6 +66,20 @@ class MainApplication : Application(), SingletonImageLoader.Factory {
         applicationScope.cancel()
     }
 
+    override fun onLowMemory() {
+        super.onLowMemory()
+        // Cancel non-critical coroutines on low memory
+        applicationScope.cancel()
+    }
+
+    override fun onTrimMemory(level: Int) {
+        super.onTrimMemory(level)
+        if (level >= TRIM_MEMORY_MODERATE) {
+            // Cancel coroutines when memory pressure is high
+            applicationScope.cancel()
+        }
+    }
+
     override fun newImageLoader(context: PlatformContext): ImageLoader {
         return ImageLoader.Builder(this)
             .crossfade(true)
