@@ -112,8 +112,8 @@ class QuickPicksViewModel : ViewModel() {
                 result?.getOrNull()?.let { page ->
                     relatedPageCache[songId] = page
                     cacheExpiry[songId] = now + cacheTimeout
-                }
-                result ?: Result.failure(Exception("Failed to fetch related page"))
+                    Result.success(page)
+                } ?: Result.failure(Exception("Failed to fetch related page"))
             } catch (e: Exception) {
                 Result.failure(e)
             }

@@ -133,7 +133,7 @@ fun QuickPicks(
                 .verticalScroll(rememberScrollState())
                 .padding(top = 4.dp, bottom = 16.dp + playerPadding)
         ) {
-            // Show content immediately if available, even while loading updates
+            // Progressive loading: Show basic content first, load details gradually
             viewModel.relatedPageResult?.getOrNull()?.let { related ->
                 Text(
                     text = stringResource(id = R.string.quick_picks),
@@ -184,7 +184,7 @@ fun QuickPicks(
                     }
 
                     items(
-                        items = related.songs?.dropLast(if (viewModel.trending == null) 0 else 1)
+                        items = related?.songs?.dropLast(if (viewModel.trending == null) 0 else 1)
                             ?: emptyList(),
                         key = Innertube.SongItem::key
                     ) { song ->
@@ -215,7 +215,7 @@ fun QuickPicks(
                     }
                 }
 
-                related.albums?.let { albums ->
+                related?.albums?.let { albums ->
                     Spacer(modifier = Modifier.height(Dimensions.spacer))
 
                     Text(
@@ -240,7 +240,7 @@ fun QuickPicks(
                     }
                 }
 
-                related.artists?.let { artists ->
+                related?.artists?.let { artists ->
                     Spacer(modifier = Modifier.height(Dimensions.spacer))
 
                     Text(
@@ -265,7 +265,7 @@ fun QuickPicks(
                     }
                 }
 
-                related.playlists?.let { playlists ->
+                related?.playlists?.let { playlists ->
                     Spacer(modifier = Modifier.height(Dimensions.spacer))
 
                     Text(
