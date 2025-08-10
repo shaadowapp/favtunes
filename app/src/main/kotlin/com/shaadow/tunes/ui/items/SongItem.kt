@@ -67,7 +67,7 @@ fun LocalSongItem(
                     AsyncImage(
                         model = song.thumbnailUrl?.thumbnail(size.px),
                         contentDescription = null,
-                        contentScale = ContentScale.Crop,
+                        contentScale = ContentScale.FillBounds,
                         modifier = Modifier
                             .fillMaxSize()
                             .clip(MaterialTheme.shapes.medium)

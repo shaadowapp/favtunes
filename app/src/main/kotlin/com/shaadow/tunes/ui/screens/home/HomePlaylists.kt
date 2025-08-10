@@ -35,6 +35,7 @@ import com.shaadow.tunes.ui.components.SortingHeader
 import com.shaadow.tunes.ui.components.themed.TextFieldDialog
 import com.shaadow.tunes.ui.items.BuiltInPlaylistItem
 import com.shaadow.tunes.ui.items.LocalPlaylistItem
+import com.shaadow.tunes.ui.items.PlaylistItem
 import com.shaadow.tunes.utils.playlistSortByKey
 import com.shaadow.tunes.utils.playlistSortOrderKey
 import com.shaadow.tunes.utils.rememberPreference
@@ -45,7 +46,8 @@ import com.shaadow.tunes.viewmodels.HomePlaylistsViewModel
 @Composable
 fun HomePlaylists(
     onBuiltInPlaylist: (Int) -> Unit,
-    onPlaylistClick: (Playlist) -> Unit
+    onPlaylistClick: (Playlist) -> Unit,
+    onYouTubePlaylistClick: (String) -> Unit = {}
 ) {
     val playerPadding = LocalPlayerPadding.current
 
@@ -130,6 +132,22 @@ fun HomePlaylists(
                 modifier = Modifier.animateItem(),
                 playlist = playlistPreview,
                 onClick = { onPlaylistClick(playlistPreview.playlist) }
+            )
+        }
+
+        items(
+            items = viewModel.youtubePlaylists,
+            key = { "youtube_${it.key}" }
+        ) { youtubePlaylist ->
+            PlaylistItem(
+                modifier = Modifier.animateItem(),
+                playlist = youtubePlaylist,
+                onClick = {
+                    val browseId = youtubePlaylist.info?.endpoint?.browseId
+                    if (browseId != null) {
+                        onYouTubePlaylistClick(browseId)
+                    }
+                }
             )
         }
     }

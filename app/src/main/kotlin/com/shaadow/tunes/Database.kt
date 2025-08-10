@@ -46,7 +46,6 @@ import com.shaadow.tunes.models.Playlist
 import com.shaadow.tunes.models.PlaylistPreview
 import com.shaadow.tunes.models.PlaylistWithSongs
 import com.shaadow.tunes.models.QueuedMediaItem
-import com.shaadow.tunes.models.RecentSong
 import com.shaadow.tunes.models.SearchQuery
 import com.shaadow.tunes.models.Song
 import com.shaadow.tunes.models.SongAlbumMap
@@ -354,15 +353,6 @@ interface Database {
     @Query("DELETE FROM Event WHERE songId = :songId")
     fun clearEventsFor(songId: String)
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insertRecentSong(recentSong: RecentSong)
-
-    @Query("SELECT * FROM RecentSong ORDER BY lastPlayedAt DESC LIMIT 50")
-    fun getRecentSongs(): Flow<List<RecentSong>>
-
-    @Query("DELETE FROM RecentSong WHERE songId = :songId")
-    fun removeRecentSong(songId: String)
-
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     @Throws(SQLException::class)
     fun insert(event: Event)
@@ -484,7 +474,6 @@ interface Database {
         Format::class,
         Event::class,
         Lyrics::class,
-        RecentSong::class,
     ],
     views = [
         SortedSongPlaylistMap::class

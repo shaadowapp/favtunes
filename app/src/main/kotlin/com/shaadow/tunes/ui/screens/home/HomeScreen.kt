@@ -114,7 +114,8 @@ fun HomeScreen(
 
                 4 -> HomePlaylists(
                     onBuiltInPlaylist = { playlistIndex -> navController.navigate(route = "builtInPlaylist/$playlistIndex") },
-                    onPlaylistClick = { playlist -> navController.navigate(route = "localPlaylist/${playlist.id}") }
+                    onPlaylistClick = { playlist -> navController.navigate(route = "localPlaylist/${playlist.id}") },
+                    onYouTubePlaylistClick = { browseId -> navController.navigate(route = "playlist/$browseId") }
                 )
             }
         }

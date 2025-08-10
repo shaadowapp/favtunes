@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.PlaylistPlay
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -99,36 +101,58 @@ fun LocalPlaylistItem(
             val thumbnailWidthDp = maxWidth
             val thumbnailWidthPx = maxWidth.px
 
-            val thumbnails by remember {
-                Database.playlistThumbnailUrls(playlist.playlist.id).distinctUntilChanged().map {
-                    it.map { url ->
-                        url.thumbnail(size = thumbnailWidthPx / 2)
-                    }
-                }
-            }.collectAsState(initial = emptyList(), context = Dispatchers.IO)
-
-            if (thumbnails.toSet().size == 1) {
-                AsyncImage(
-                    model = thumbnails.first().thumbnail(thumbnailWidthPx),
+            if (playlist.playlist.id < 0) {
+                // Default playlists - always show icon
+                Icon(
+                    imageVector = Icons.Filled.PlaylistPlay,
                     contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.clip(MaterialTheme.shapes.large)
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier
+                        .size(thumbnailWidthDp)
+                        .align(Alignment.Center)
                 )
             } else {
-                listOf(
-                    Alignment.TopStart,
-                    Alignment.TopEnd,
-                    Alignment.BottomStart,
-                    Alignment.BottomEnd
-                ).forEachIndexed { index, alignment ->
+                // Real playlists - load thumbnails from database
+                val thumbnails by remember {
+                    Database.playlistThumbnailUrls(playlist.playlist.id).distinctUntilChanged().map {
+                        it.map { url ->
+                            url.thumbnail(size = thumbnailWidthPx / 2)
+                        }
+                    }
+                }.collectAsState(initial = emptyList(), context = Dispatchers.IO)
+
+                if (thumbnails.isEmpty()) {
+                    Icon(
+                        imageVector = Icons.Filled.PlaylistPlay,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier
+                            .size(thumbnailWidthDp / 2)
+                            .align(Alignment.Center)
+                    )
+                } else if (thumbnails.toSet().size == 1) {
                     AsyncImage(
-                        model = thumbnails.getOrNull(index),
+                        model = thumbnails.first().thumbnail(thumbnailWidthPx),
                         contentDescription = null,
                         contentScale = ContentScale.Crop,
-                        modifier = Modifier
-                            .align(alignment)
-                            .size(thumbnailWidthDp / 2)
+                        modifier = Modifier.clip(MaterialTheme.shapes.large)
                     )
+                } else {
+                    listOf(
+                        Alignment.TopStart,
+                        Alignment.TopEnd,
+                        Alignment.BottomStart,
+                        Alignment.BottomEnd
+                    ).forEachIndexed { index, alignment ->
+                        AsyncImage(
+                            model = thumbnails.getOrNull(index),
+                            contentDescription = null,
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier
+                                .align(alignment)
+                                .size(thumbnailWidthDp / 2)
+                        )
+                    }
                 }
             }
         }
