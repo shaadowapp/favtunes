@@ -3,18 +3,19 @@ package com.shaadow.tunes.suggestion.onboarding
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.selection.toggleable
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.MusicNote
-import androidx.compose.material.icons.outlined.ArrowForward
-import androidx.compose.material.icons.outlined.Skip
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -23,91 +24,101 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.shaadow.tunes.suggestion.AdvancedSuggestionSystem
+import androidx.compose.ui.semantics.Role
 
 /**
- * Smart onboarding screen that learns user preferences
+ * Smart onboarding screen for the suggestion system
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun OnboardingScreen(
     onComplete: () -> Unit,
+    onSkip: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
-    val suggestionSystem = remember { AdvancedSuggestionSystem(context) }
+    val onboardingManager = remember { OnboardingManager(context) }
     
     var currentStep by remember { mutableIntStateOf(0) }
-    var selectedGenres by remember { mutableStateOf(setOf<String>()) }
-    var selectedListeningHabits by remember { mutableStateOf(setOf<ListeningHabit>()) }
-    var isCompleting by remember { mutableStateOf(false) }
+    var preferences by remember { mutableStateOf(OnboardingPreferences()) }
     
-    val steps = listOf(
-        OnboardingStep.Welcome,
-        OnboardingStep.GenreSelection,
-        OnboardingStep.ListeningHabits,
-        OnboardingStep.Complete
-    )
+    val steps = listOf("Welcome", "Genres", "Habits", "Discovery")
+    val totalSteps = steps.size
     
     Column(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+        modifier = modifier.fillMaxSize()
     ) {
         // Progress indicator
         LinearProgressIndicator(
-            progress = { (currentStep + 1).toFloat() / steps.size },
+            progress = { (currentStep + 1).toFloat() / totalSteps },
             modifier = Modifier.fillMaxWidth(),
         )
         
-        Spacer(modifier = Modifier.height(32.dp))
-        
-        // Step content
-        when (steps[currentStep]) {
-            OnboardingStep.Welcome -> {
+        // Content
+        Box(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth()
+        ) {
+            androidx.compose.animation.AnimatedVisibility(
+                visible = currentStep == 0,
+                enter = slideInHorizontally() + fadeIn(),
+                exit = slideOutHorizontally() + fadeOut()
+            ) {
                 WelcomeStep(
-                    onNext = { currentStep++ }
+                    onNext = { currentStep = 1 },
+                    onSkip = onSkip
                 )
             }
-            OnboardingStep.GenreSelection -> {
+            
+            androidx.compose.animation.AnimatedVisibility(
+                visible = currentStep == 1,
+                enter = slideInHorizontally() + fadeIn(),
+                exit = slideOutHorizontally() + fadeOut()
+            ) {
                 GenreSelectionStep(
-                    selectedGenres = selectedGenres,
-                    onGenreToggle = { genre ->
-                        selectedGenres = if (genre in selectedGenres) {
-                            selectedGenres - genre
-                        } else {
-                            selectedGenres + genre
-                        }
+                    genres = onboardingManager.getAvailableGenres(),
+                    selectedGenres = preferences.selectedGenres,
+                    onGenresChanged = { genres ->
+                        preferences = preferences.copy(selectedGenres = genres)
                     },
-                    onNext = { currentStep++ },
-                    onSkip = { currentStep++ }
+                    onNext = { currentStep = 2 },
+                    onBack = { currentStep = 0 }
                 )
             }
-            OnboardingStep.ListeningHabits -> {
+            
+            androidx.compose.animation.AnimatedVisibility(
+                visible = currentStep == 2,
+                enter = slideInHorizontally() + fadeIn(),
+                exit = slideOutHorizontally() + fadeOut()
+            ) {
                 ListeningHabitsStep(
-                    selectedHabits = selectedListeningHabits,
-                    onHabitToggle = { habit ->
-                        selectedListeningHabits = if (habit in selectedListeningHabits) {
-                            selectedListeningHabits - habit
-                        } else {
-                            selectedListeningHabits + habit
-                        }
+                    habits = onboardingManager.getListeningHabits(),
+                    selectedHabit = preferences.listeningHabit,
+                    onHabitSelected = { habit ->
+                        preferences = preferences.copy(listeningHabit = habit)
                     },
-                    onNext = { currentStep++ },
-                    onSkip = { currentStep++ }
+                    onNext = { currentStep = 3 },
+                    onBack = { currentStep = 1 }
                 )
             }
-            OnboardingStep.Complete -> {
-                CompleteStep(
-                    isCompleting = isCompleting,
-                    onFinish = {
-                        isCompleting = true
-                        // Apply user preferences
-                        suggestionSystem.setInitialPreferences(selectedGenres)
-                        // Could also apply listening habits here
+            
+            androidx.compose.animation.AnimatedVisibility(
+                visible = currentStep == 3,
+                enter = slideInHorizontally() + fadeIn(),
+                exit = slideOutHorizontally() + fadeOut()
+            ) {
+                DiscoveryPreferencesStep(
+                    discoveryPreferences = onboardingManager.getDiscoveryPreferences(),
+                    selectedPreference = preferences.discoveryPreference,
+                    onPreferenceSelected = { preference ->
+                        preferences = preferences.copy(discoveryPreference = preference)
+                    },
+                    onComplete = {
+                        onboardingManager.completeOnboarding(preferences)
                         onComplete()
-                    }
+                    },
+                    onBack = { currentStep = 2 }
                 )
             }
         }
@@ -119,18 +130,19 @@ fun OnboardingScreen(
  */
 @Composable
 private fun WelcomeStep(
-    onNext: () -> Unit
+    onNext: () -> Unit,
+    onSkip: () -> Unit
 ) {
     Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(32.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-        modifier = Modifier.fillMaxSize()
+        verticalArrangement = Arrangement.Center
     ) {
-        Icon(
-            imageVector = Icons.Default.MusicNote,
-            contentDescription = null,
-            modifier = Modifier.size(80.dp),
-            tint = MaterialTheme.colorScheme.primary
+        Text(
+            text = "🎵",
+            style = MaterialTheme.typography.displayLarge
         )
         
         Spacer(modifier = Modifier.height(24.dp))
@@ -145,7 +157,7 @@ private fun WelcomeStep(
         Spacer(modifier = Modifier.height(16.dp))
         
         Text(
-            text = "Let's personalize your music experience.\nWe'll learn your preferences to suggest music you'll love.",
+            text = "Let's personalize your music experience! We'll learn your preferences to suggest music you'll love.",
             style = MaterialTheme.typography.bodyLarge,
             textAlign = TextAlign.Center,
             color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -159,11 +171,13 @@ private fun WelcomeStep(
         ) {
             Text("Get Started")
             Spacer(modifier = Modifier.width(8.dp))
-            Icon(
-                imageVector = Icons.Outlined.ArrowForward,
-                contentDescription = null,
-                modifier = Modifier.size(18.dp)
-            )
+            Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = null)
+        }
+        
+        Spacer(modifier = Modifier.height(16.dp))
+        
+        TextButton(onClick = onSkip) {
+            Text("Skip for now")
         }
     }
 }
@@ -173,49 +187,51 @@ private fun WelcomeStep(
  */
 @Composable
 private fun GenreSelectionStep(
+    genres: List<Genre>,
     selectedGenres: Set<String>,
-    onGenreToggle: (String) -> Unit,
+    onGenresChanged: (Set<String>) -> Unit,
     onNext: () -> Unit,
-    onSkip: () -> Unit
+    onBack: () -> Unit
 ) {
-    val genres = listOf(
-        "Pop", "Rock", "Hip-Hop", "Jazz", "Classical", "Electronic",
-        "Country", "R&B", "Indie", "Folk", "Metal", "Reggae",
-        "Blues", "Funk", "Punk", "Alternative"
-    )
-    
-    Column {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(24.dp)
+    ) {
         Text(
             text = "What music do you enjoy?",
             style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.Bold,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.fillMaxWidth()
+            fontWeight = FontWeight.Bold
         )
         
         Spacer(modifier = Modifier.height(8.dp))
         
         Text(
-            text = "Select your favorite genres (optional)",
+            text = "Select your favorite genres (choose at least 3)",
             style = MaterialTheme.typography.bodyMedium,
-            textAlign = TextAlign.Center,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.fillMaxWidth()
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
         
         Spacer(modifier = Modifier.height(24.dp))
         
         LazyVerticalGrid(
             columns = GridCells.Fixed(2),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
             modifier = Modifier.weight(1f)
         ) {
             items(genres) { genre ->
-                GenreChip(
+                GenreCard(
                     genre = genre,
-                    isSelected = genre in selectedGenres,
-                    onToggle = { onGenreToggle(genre) }
+                    isSelected = selectedGenres.contains(genre.name),
+                    onToggle = {
+                        val newSelection = if (selectedGenres.contains(genre.name)) {
+                            selectedGenres - genre.name
+                        } else {
+                            selectedGenres + genre.name
+                        }
+                        onGenresChanged(newSelection)
+                    }
                 )
             }
         }
@@ -224,62 +240,77 @@ private fun GenreSelectionStep(
         
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            OutlinedButton(
-                onClick = onSkip,
-                modifier = Modifier.weight(1f)
-            ) {
-                Icon(
-                    imageVector = Icons.Outlined.Skip,
-                    contentDescription = null,
-                    modifier = Modifier.size(18.dp)
-                )
+            OutlinedButton(onClick = onBack) {
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Skip")
+                Text("Back")
             }
             
             Button(
                 onClick = onNext,
-                modifier = Modifier.weight(1f),
-                enabled = selectedGenres.isNotEmpty()
+                enabled = selectedGenres.size >= 3
             ) {
-                Text("Continue")
+                Text("Next")
                 Spacer(modifier = Modifier.width(8.dp))
-                Icon(
-                    imageVector = Icons.Outlined.ArrowForward,
-                    contentDescription = null,
-                    modifier = Modifier.size(18.dp)
-                )
+                Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = null)
             }
         }
     }
 }
 
 /**
- * Genre chip component
+ * Genre selection card
  */
 @Composable
-private fun GenreChip(
-    genre: String,
+private fun GenreCard(
+    genre: Genre,
     isSelected: Boolean,
     onToggle: () -> Unit
 ) {
-    FilterChip(
+    Card(
         onClick = onToggle,
-        label = { Text(genre) },
-        selected = isSelected,
-        leadingIcon = if (isSelected) {
-            {
-                Icon(
-                    imageVector = Icons.Default.Check,
-                    contentDescription = null,
-                    modifier = Modifier.size(18.dp)
-                )
+        colors = CardDefaults.cardColors(
+            containerColor = if (isSelected) {
+                MaterialTheme.colorScheme.primaryContainer
+            } else {
+                MaterialTheme.colorScheme.surface
             }
-        } else null,
-        modifier = Modifier.fillMaxWidth()
-    )
+        ),
+        border = if (isSelected) {
+            CardDefaults.outlinedCardBorder()
+        } else null
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = genre.icon,
+                style = MaterialTheme.typography.headlineMedium
+            )
+            
+            Spacer(modifier = Modifier.height(8.dp))
+            
+            Text(
+                text = genre.name,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Medium
+            )
+            
+            Spacer(modifier = Modifier.height(4.dp))
+            
+            Text(
+                text = genre.description,
+                style = MaterialTheme.typography.bodySmall,
+                textAlign = TextAlign.Center,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
 }
 
 /**
@@ -287,51 +318,42 @@ private fun GenreChip(
  */
 @Composable
 private fun ListeningHabitsStep(
-    selectedHabits: Set<ListeningHabit>,
-    onHabitToggle: (ListeningHabit) -> Unit,
+    habits: List<ListeningHabit>,
+    selectedHabit: ListeningHabit?,
+    onHabitSelected: (ListeningHabit) -> Unit,
     onNext: () -> Unit,
-    onSkip: () -> Unit
+    onBack: () -> Unit
 ) {
-    val habits = listOf(
-        ListeningHabit.DISCOVERY to "I love discovering new music",
-        ListeningHabit.FAMILIAR to "I prefer familiar songs",
-        ListeningHabit.LONG_SESSIONS to "I listen for long periods",
-        ListeningHabit.SHORT_SESSIONS to "I prefer quick listening sessions",
-        ListeningHabit.BACKGROUND to "Music is usually in the background",
-        ListeningHabit.FOCUSED to "I actively listen to music"
-    )
-    
-    Column {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(24.dp)
+    ) {
         Text(
-            text = "How do you listen?",
+            text = "How do you listen to music?",
             style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.Bold,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.fillMaxWidth()
+            fontWeight = FontWeight.Bold
         )
         
         Spacer(modifier = Modifier.height(8.dp))
         
         Text(
-            text = "Help us understand your listening style (optional)",
+            text = "This helps us understand your listening style",
             style = MaterialTheme.typography.bodyMedium,
-            textAlign = TextAlign.Center,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.fillMaxWidth()
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
         
         Spacer(modifier = Modifier.height(24.dp))
         
         LazyColumn(
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier.weight(1f)
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            items(habits) { (habit, description) ->
-                ListeningHabitItem(
+            items(habits) { habit ->
+                HabitCard(
                     habit = habit,
-                    description = description,
-                    isSelected = habit in selectedHabits,
-                    onToggle = { onHabitToggle(habit) }
+                    isSelected = selectedHabit == habit,
+                    onSelect = { onHabitSelected(habit) }
                 )
             }
         }
@@ -340,54 +362,37 @@ private fun ListeningHabitsStep(
         
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            OutlinedButton(
-                onClick = onSkip,
-                modifier = Modifier.weight(1f)
-            ) {
-                Icon(
-                    imageVector = Icons.Outlined.Skip,
-                    contentDescription = null,
-                    modifier = Modifier.size(18.dp)
-                )
+            OutlinedButton(onClick = onBack) {
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Skip")
+                Text("Back")
             }
             
             Button(
                 onClick = onNext,
-                modifier = Modifier.weight(1f)
+                enabled = selectedHabit != null
             ) {
-                Text("Continue")
+                Text("Next")
                 Spacer(modifier = Modifier.width(8.dp))
-                Icon(
-                    imageVector = Icons.Outlined.ArrowForward,
-                    contentDescription = null,
-                    modifier = Modifier.size(18.dp)
-                )
+                Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = null)
             }
         }
     }
 }
 
 /**
- * Listening habit item
+ * Habit selection card
  */
 @Composable
-private fun ListeningHabitItem(
+private fun HabitCard(
     habit: ListeningHabit,
-    description: String,
     isSelected: Boolean,
-    onToggle: () -> Unit
+    onSelect: () -> Unit
 ) {
     Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .toggleable(
-                value = isSelected,
-                onValueChange = { onToggle() }
-            ),
+        onClick = onSelect,
         colors = CardDefaults.cardColors(
             containerColor = if (isSelected) {
                 MaterialTheme.colorScheme.primaryContainer
@@ -403,21 +408,30 @@ private fun ListeningHabitItem(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = description,
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.weight(1f)
+                text = habit.icon,
+                style = MaterialTheme.typography.headlineSmall
             )
             
-            AnimatedVisibility(
-                visible = isSelected,
-                enter = fadeIn(),
-                exit = fadeOut()
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Check,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(20.dp)
+            Spacer(modifier = Modifier.width(16.dp))
+            
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = habit.title,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Medium
+                )
+                
+                Text(
+                    text = habit.description,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            
+            if (isSelected) {
+                RadioButton(
+                    selected = true,
+                    onClick = null
                 )
             }
         }
@@ -425,82 +439,134 @@ private fun ListeningHabitItem(
 }
 
 /**
- * Completion step
+ * Discovery preferences step
  */
 @Composable
-private fun CompleteStep(
-    isCompleting: Boolean,
-    onFinish: () -> Unit
+private fun DiscoveryPreferencesStep(
+    discoveryPreferences: List<DiscoveryPreference>,
+    selectedPreference: DiscoveryPreference?,
+    onPreferenceSelected: (DiscoveryPreference) -> Unit,
+    onComplete: () -> Unit,
+    onBack: () -> Unit
 ) {
     Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(24.dp)
     ) {
-        Icon(
-            imageVector = Icons.Default.Check,
-            contentDescription = null,
-            modifier = Modifier.size(80.dp),
-            tint = MaterialTheme.colorScheme.primary
+        Text(
+            text = "How adventurous are you?",
+            style = MaterialTheme.typography.headlineMedium,
+            fontWeight = FontWeight.Bold
+        )
+        
+        Spacer(modifier = Modifier.height(8.dp))
+        
+        Text(
+            text = "Choose how much you want to explore new music",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
         
         Spacer(modifier = Modifier.height(24.dp))
         
-        Text(
-            text = "You're all set!",
-            style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.Bold,
-            textAlign = TextAlign.Center
-        )
-        
-        Spacer(modifier = Modifier.height(16.dp))
-        
-        Text(
-            text = "We'll start learning your preferences as you listen.\nYour recommendations will get better over time.",
-            style = MaterialTheme.typography.bodyLarge,
-            textAlign = TextAlign.Center,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        
-        Spacer(modifier = Modifier.height(48.dp))
-        
-        Button(
-            onClick = onFinish,
-            modifier = Modifier.fillMaxWidth(),
-            enabled = !isCompleting
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .selectableGroup(),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            if (isCompleting) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(18.dp),
-                    strokeWidth = 2.dp
+            discoveryPreferences.forEach { preference ->
+                DiscoveryCard(
+                    preference = preference,
+                    isSelected = selectedPreference == preference,
+                    onSelect = { onPreferenceSelected(preference) }
                 )
+            }
+        }
+        
+        Spacer(modifier = Modifier.height(24.dp))
+        
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            OutlinedButton(onClick = onBack) {
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Setting up...")
-            } else {
-                Text("Start Listening")
+                Text("Back")
+            }
+            
+            Button(
+                onClick = onComplete,
+                enabled = selectedPreference != null
+            ) {
+                Text("Complete Setup")
             }
         }
     }
 }
 
 /**
- * Onboarding steps
+ * Discovery preference card
  */
-private enum class OnboardingStep {
-    Welcome,
-    GenreSelection,
-    ListeningHabits,
-    Complete
-}
-
-/**
- * Listening habits
- */
-enum class ListeningHabit {
-    DISCOVERY,
-    FAMILIAR,
-    LONG_SESSIONS,
-    SHORT_SESSIONS,
-    BACKGROUND,
-    FOCUSED
+@Composable
+private fun DiscoveryCard(
+    preference: DiscoveryPreference,
+    isSelected: Boolean,
+    onSelect: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .selectable(
+                selected = isSelected,
+                onClick = onSelect,
+                role = Role.RadioButton
+            ),
+        colors = CardDefaults.cardColors(
+            containerColor = if (isSelected) {
+                MaterialTheme.colorScheme.primaryContainer
+            } else {
+                MaterialTheme.colorScheme.surface
+            }
+        )
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = preference.title,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Medium
+                )
+                
+                Spacer(modifier = Modifier.height(4.dp))
+                
+                Text(
+                    text = preference.description,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                
+                Spacer(modifier = Modifier.height(8.dp))
+                
+                LinearProgressIndicator(
+                    progress = { preference.explorationLevel },
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+            
+            Spacer(modifier = Modifier.width(16.dp))
+            
+            RadioButton(
+                selected = isSelected,
+                onClick = null
+            )
+        }
+    }
 }
