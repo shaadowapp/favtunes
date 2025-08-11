@@ -215,6 +215,11 @@ fun QuickPicks(
                     }
                 }
 
+                // Add Personalized Recommendations section
+                Spacer(modifier = Modifier.height(Dimensions.spacer))
+                
+                PersonalizedRecommendations()
+
                 related?.albums?.let { albums ->
                     Spacer(modifier = Modifier.height(Dimensions.spacer))
 

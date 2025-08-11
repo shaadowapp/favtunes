@@ -226,7 +226,7 @@ private fun GenreSelectionStep(
         Spacer(modifier = Modifier.height(8.dp))
         
         Text(
-            text = "Select your favorite genres (choose at least 3)",
+            text = "Select your favorite genres (choose 3-6 genres)",
             style = MaterialTheme.typography.bodyMedium,
             color = Color.White
         )
@@ -248,7 +248,12 @@ private fun GenreSelectionStep(
                         val newSelection = if (selectedGenres.contains(genre.name)) {
                             selectedGenres - genre.name
                         } else {
-                            selectedGenres + genre.name
+                            // Enforce maximum of 6 genres
+                            if (selectedGenres.size < 6) {
+                                selectedGenres + genre.name
+                            } else {
+                                selectedGenres // Don't add if already at max
+                            }
                         }
                         onGenresChanged(newSelection)
                     }
@@ -270,9 +275,9 @@ private fun GenreSelectionStep(
             
             Button(
                 onClick = onNext,
-                enabled = selectedGenres.size >= 3
+                enabled = selectedGenres.size >= 3 && selectedGenres.size <= 6
             ) {
-                Text("Next")
+                Text("Next (${selectedGenres.size}/6)")
                 Spacer(modifier = Modifier.width(8.dp))
                 Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = null)
             }
