@@ -92,12 +92,15 @@ fun HomeScreen(
                 .padding(top = paddingValues.calculateTopPadding())
         ) {
             when (screenIndex) {
-                0 -> QuickPicks(
-                    onAlbumClick = { browseId -> navController.navigate(route = "album/$browseId") },
-                    onArtistClick = { browseId -> navController.navigate(route = "artist/$browseId") },
-                    onPlaylistClick = { browseId -> navController.navigate(route = "playlist/$browseId") },
-                    onOfflinePlaylistClick = { navController.navigate(route = "builtInPlaylist/1") }
-                )
+                0 -> {
+                    // Use enhanced home screen with suggestions
+                    com.shaadow.tunes.suggestion.ui.HomeScreenIntegration.EnhancedHomeScreen(
+                        onAlbumClick = { browseId -> navController.navigate(route = "album/$browseId") },
+                        onArtistClick = { browseId -> navController.navigate(route = "artist/$browseId") },
+                        onPlaylistClick = { browseId -> navController.navigate(route = "playlist/$browseId") },
+                        onOfflinePlaylistClick = { navController.navigate(route = "builtInPlaylist/1") }
+                    )
+                }
 
                 1 -> HomeSongs(
                     onGoToAlbum = { browseId -> navController.navigate(route = "album/$browseId") },

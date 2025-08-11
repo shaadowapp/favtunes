@@ -47,6 +47,7 @@
     <string name="profile">Profile</string>
     <string name="profile_heading">Profile Page Under Development</string>
     <string name="profile_desc">We\'re working on an automated login system that will eliminate the need for personal credentials like email or phone number. Stay tuned for a seamless and hassle-free login experience, coming soon</string>
+    <string name="suggestions">Suggestions</string>
     <string name="image_cache">Image cache</string>
     <string name="song_cache">Song cache</string>
     <string name="max_size">Max size</string>

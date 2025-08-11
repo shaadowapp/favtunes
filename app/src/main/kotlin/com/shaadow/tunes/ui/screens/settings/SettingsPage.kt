@@ -52,6 +52,9 @@ fun SettingsPage(
                 SettingsSection.Profile -> ProfileScreen()
                 SettingsSection.About -> About()
                 SettingsSection.General -> GeneralSettings()
+                SettingsSection.Suggestions -> com.shaadow.tunes.suggestion.settings.SuggestionSettingsScreen(
+                    onNavigateBack = { /* This will be handled by the navigation */ }
+                )
                 SettingsSection.Player -> PlayerSettings()
                 SettingsSection.Cache -> CacheSettings()
                 SettingsSection.Gestures -> GestureSettings()

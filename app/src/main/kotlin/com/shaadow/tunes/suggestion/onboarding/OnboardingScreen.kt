@@ -25,6 +25,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.semantics.Role
+import androidx.compose.foundation.background
+import androidx.compose.ui.graphics.Color
+import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.windowInsetsPadding
 
 /**
  * Smart onboarding screen for the suggestion system
@@ -45,8 +52,16 @@ fun OnboardingScreen(
     val steps = listOf("Welcome", "Genres", "Habits", "Discovery")
     val totalSteps = steps.size
     
+    // Handle back button
+    BackHandler(enabled = currentStep > 0) {
+        currentStep = maxOf(0, currentStep - 1)
+    }
+    
     Column(
-        modifier = modifier.fillMaxSize()
+        modifier = modifier
+            .fillMaxSize()
+            .background(Color.Black)
+            .windowInsetsPadding(WindowInsets.systemBars)
     ) {
         // Progress indicator
         LinearProgressIndicator(
@@ -136,6 +151,7 @@ private fun WelcomeStep(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .background(Color.Black)
             .padding(32.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
@@ -151,7 +167,8 @@ private fun WelcomeStep(
             text = "Welcome to FavTunes",
             style = MaterialTheme.typography.headlineMedium,
             fontWeight = FontWeight.Bold,
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Center,
+            color = Color.White
         )
         
         Spacer(modifier = Modifier.height(16.dp))
@@ -160,7 +177,7 @@ private fun WelcomeStep(
             text = "Let's personalize your music experience! We'll learn your preferences to suggest music you'll love.",
             style = MaterialTheme.typography.bodyLarge,
             textAlign = TextAlign.Center,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = Color.Gray
         )
         
         Spacer(modifier = Modifier.height(48.dp))
@@ -196,12 +213,14 @@ private fun GenreSelectionStep(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .background(Color.Black)
             .padding(24.dp)
     ) {
         Text(
             text = "What music do you enjoy?",
             style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Bold,
+            color = Color.White
         )
         
         Spacer(modifier = Modifier.height(8.dp))
@@ -209,15 +228,16 @@ private fun GenreSelectionStep(
         Text(
             text = "Select your favorite genres (choose at least 3)",
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = Color.White
         )
         
         Spacer(modifier = Modifier.height(24.dp))
         
         LazyVerticalGrid(
-            columns = GridCells.Fixed(2),
+            columns = GridCells.Adaptive(minSize = 140.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
+            contentPadding = PaddingValues(vertical = 8.dp),
             modifier = Modifier.weight(1f)
         ) {
             items(genres) { genre ->
@@ -273,14 +293,20 @@ private fun GenreCard(
         onClick = onToggle,
         colors = CardDefaults.cardColors(
             containerColor = if (isSelected) {
-                MaterialTheme.colorScheme.primaryContainer
+                Color(0xFF4CAF50) // Green for selected
             } else {
-                MaterialTheme.colorScheme.surface
+                Color(0xFF2C2C2C) // Dark gray for unselected
             }
         ),
         border = if (isSelected) {
+            CardDefaults.outlinedCardBorder().copy(
+                width = 2.dp
+            )
+        } else {
             CardDefaults.outlinedCardBorder()
-        } else null
+        },
+        shape = RoundedCornerShape(12.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Column(
             modifier = Modifier
@@ -298,7 +324,8 @@ private fun GenreCard(
             Text(
                 text = genre.name,
                 style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Medium
+                fontWeight = FontWeight.Medium,
+                color = Color.White
             )
             
             Spacer(modifier = Modifier.height(4.dp))
@@ -307,7 +334,7 @@ private fun GenreCard(
                 text = genre.description,
                 style = MaterialTheme.typography.bodySmall,
                 textAlign = TextAlign.Center,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = Color.Gray
             )
         }
     }
@@ -327,12 +354,14 @@ private fun ListeningHabitsStep(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .background(Color.Black)
             .padding(24.dp)
     ) {
         Text(
             text = "How do you listen to music?",
             style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Bold,
+            color = Color.White
         )
         
         Spacer(modifier = Modifier.height(8.dp))
@@ -340,7 +369,7 @@ private fun ListeningHabitsStep(
         Text(
             text = "This helps us understand your listening style",
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = Color.White
         )
         
         Spacer(modifier = Modifier.height(24.dp))
@@ -395,9 +424,9 @@ private fun HabitCard(
         onClick = onSelect,
         colors = CardDefaults.cardColors(
             containerColor = if (isSelected) {
-                MaterialTheme.colorScheme.primaryContainer
+                Color(0xFF4CAF50) // Green for selected
             } else {
-                MaterialTheme.colorScheme.surface
+                Color(0xFF2C2C2C) // Dark gray for unselected
             }
         )
     ) {
@@ -418,13 +447,14 @@ private fun HabitCard(
                 Text(
                     text = habit.title,
                     style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Medium
+                    fontWeight = FontWeight.Medium,
+                    color = Color.White
                 )
                 
                 Text(
                     text = habit.description,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = Color.Gray
                 )
             }
             
@@ -452,12 +482,14 @@ private fun DiscoveryPreferencesStep(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .background(Color.Black)
             .padding(24.dp)
     ) {
         Text(
             text = "How adventurous are you?",
             style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Bold,
+            color = Color.White
         )
         
         Spacer(modifier = Modifier.height(8.dp))
@@ -465,7 +497,7 @@ private fun DiscoveryPreferencesStep(
         Text(
             text = "Choose how much you want to explore new music",
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = Color.Gray
         )
         
         Spacer(modifier = Modifier.height(24.dp))
@@ -526,9 +558,9 @@ private fun DiscoveryCard(
             ),
         colors = CardDefaults.cardColors(
             containerColor = if (isSelected) {
-                MaterialTheme.colorScheme.primaryContainer
+                Color(0xFF4CAF50) // Green for selected
             } else {
-                MaterialTheme.colorScheme.surface
+                Color(0xFF2C2C2C) // Dark gray for unselected
             }
         )
     ) {
@@ -542,7 +574,8 @@ private fun DiscoveryCard(
                 Text(
                     text = preference.title,
                     style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Medium
+                    fontWeight = FontWeight.Medium,
+                    color = Color.White
                 )
                 
                 Spacer(modifier = Modifier.height(4.dp))
@@ -550,7 +583,7 @@ private fun DiscoveryCard(
                 Text(
                     text = preference.description,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = Color.Gray
                 )
                 
                 Spacer(modifier = Modifier.height(8.dp))

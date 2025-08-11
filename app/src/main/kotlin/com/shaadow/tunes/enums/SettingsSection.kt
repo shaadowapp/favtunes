@@ -12,6 +12,7 @@ import androidx.compose.material.icons.outlined.PrivacyTip
 import androidx.compose.material.icons.outlined.Gesture
 import androidx.compose.material.icons.outlined.Save
 import androidx.compose.material.icons.outlined.Tune
+import androidx.compose.material.icons.outlined.Psychology
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.shaadow.tunes.R
 
@@ -26,6 +27,10 @@ enum class SettingsSection(
     General(
         resourceId = R.string.general,
         Icons.Outlined.Tune
+    ),
+    Suggestions(
+        resourceId = R.string.suggestions,
+        Icons.Outlined.Psychology
     ),
     Player(
         resourceId = R.string.player,

@@ -71,6 +71,8 @@ import com.shaadow.tunes.ui.styling.AppTheme
 import com.shaadow.tunes.utils.asMediaItem
 import com.shaadow.tunes.utils.forcePlay
 import com.shaadow.tunes.utils.intent
+import com.shaadow.tunes.suggestion.SuggestionSystemIntegration
+import com.shaadow.tunes.suggestion.onboarding.OnboardingScreen
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
@@ -98,6 +100,8 @@ class MainActivity : ComponentActivity() {
 
     private var binder by mutableStateOf<PlayerService.Binder?>(null)
     private var data by mutableStateOf<Uri?>(null)
+    private var showOnboarding by mutableStateOf(false)
+    private lateinit var suggestionIntegration: SuggestionSystemIntegration
 
     override fun onStart() {
         super.onStart()
@@ -113,6 +117,10 @@ class MainActivity : ComponentActivity() {
 
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        
+        // Initialize suggestion system
+        suggestionIntegration = SuggestionSystemIntegration.getInstance(this)
+        showOnboarding = suggestionIntegration.needsOnboarding()
         
         // Obtain the FirebaseAnalytics instance.
         analytics = Firebase.analytics
@@ -158,7 +166,21 @@ class MainActivity : ComponentActivity() {
 
             AppTheme {
                 Box(modifier = Modifier.fillMaxSize()) {
-                    CompositionLocalProvider(value = LocalPlayerServiceBinder provides binder) {
+                    if (showOnboarding) {
+                        // Show onboarding screen
+                        OnboardingScreen(
+                            onComplete = {
+                                showOnboarding = false
+                                suggestionIntegration.completeOnboarding()
+                            },
+                            onSkip = {
+                                showOnboarding = false
+                                suggestionIntegration.completeOnboarding()
+                            }
+                        )
+                    } else {
+                        // Show main app
+                        CompositionLocalProvider(value = LocalPlayerServiceBinder provides binder) {
                         val menuState = LocalMenuState.current
 
                         Scaffold(
@@ -200,6 +222,7 @@ class MainActivity : ComponentActivity() {
                             ) {
                                 menuState.content()
                             }
+                        }
                         }
                     }
                 }
