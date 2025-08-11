@@ -107,4 +107,7 @@ dependencies {
     implementation(libs.material3)
     implementation(libs.app.update)
     implementation(libs.app.update.ktx)
+    
+    // Suggestion System Dependencies
+    implementation(libs.gson)
 }
