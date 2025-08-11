@@ -4,101 +4,96 @@ import android.content.Context
 import android.content.SharedPreferences
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import java.util.concurrent.TimeUnit
 
 class SuggestionStorage(private val context: Context) {
-    private val prefs: SharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+    private val prefs: SharedPreferences = context.getSharedPreferences("suggestion_data", Context.MODE_PRIVATE)
     private val gson = Gson()
     
     companion object {
-        private const val PREFS_NAME = "suggestion_storage"
-        private const val KEY_USER_PROFILE = "user_profile"
-        private const val KEY_FIRST_LAUNCH = "first_launch"
-        private const val KEY_LAST_CLEANUP = "last_cleanup"
+        private const val USER_PROFILE_KEY = "user_profile"
+        private const val FIRST_LAUNCH_KEY = "first_launch"
+        private const val DATA_VERSION_KEY = "data_version"
+        private const val CURRENT_VERSION = 1
     }
     
     fun saveUserProfile(profile: UserProfile) {
         val json = gson.toJson(profile)
-        prefs.edit().putString(KEY_USER_PROFILE, json).apply()
+        prefs.edit()
+            .putString(USER_PROFILE_KEY, json)
+            .putInt(DATA_VERSION_KEY, CURRENT_VERSION)
+            .apply()
     }
     
     fun getUserProfile(): UserProfile {
-        val json = prefs.getString(KEY_USER_PROFILE, null)
+        val json = prefs.getString(USER_PROFILE_KEY, null)
         return if (json != null) {
             try {
                 gson.fromJson(json, UserProfile::class.java)
             } catch (e: Exception) {
-                UserProfile.default()
+                UserProfile() // Return default if parsing fails
             }
         } else {
-            UserProfile.default()
+            UserProfile()
         }
     }
     
     fun trackSongInteraction(songId: String, action: InteractionType, duration: Long = 0) {
-        val currentProfile = getUserProfile()
+        val profile = getUserProfile()
+        val timestamp = System.currentTimeMillis()
+        
         val updatedProfile = when (action) {
-            InteractionType.PLAY -> currentProfile.addPlayEvent(songId, duration)
-            InteractionType.SKIP -> currentProfile.addToSkipHistory(songId)
-            InteractionType.LIKE -> currentProfile.addLikedSong(songId)
-            InteractionType.COMPLETE -> currentProfile.addPlayEvent(songId, duration)
-            InteractionType.DISLIKE -> currentProfile.addToSkipHistory(songId)
+            InteractionType.LIKE -> profile.copy(
+                likedSongs = profile.likedSongs + (songId to timestamp)
+            )
+            InteractionType.SKIP -> profile.copy(
+                skipHistory = profile.skipHistory + (songId to timestamp)
+            )
+            InteractionType.PLAY, InteractionType.COMPLETE -> {
+                val newPlayEvent = PlayEvent(songId, duration, timestamp)
+                profile.copy(
+                    playHistory = (profile.playHistory + newPlayEvent).takeLast(1000) // Keep last 1000 plays
+                )
+            }
+            else -> profile
         }
-        saveUserProfile(updatedProfile)
+        
+        saveUserProfile(updatedProfile.copy(lastUpdated = timestamp))
     }
     
     fun getRecentActivity(days: Int = 7): List<PlayEvent> {
+        val cutoff = System.currentTimeMillis() - (days * 24 * 60 * 60 * 1000L)
+        return getUserProfile().playHistory.filter { it.timestamp > cutoff }
+    }
+    
+    fun updateGenrePreference(genre: String, weightDelta: Float) {
         val profile = getUserProfile()
-        val cutoffTime = System.currentTimeMillis() - TimeUnit.DAYS.toMillis(days.toLong())
-        return profile.playHistory.filter { it.timestamp >= cutoffTime }
-    }
-    
-    fun isFirstLaunch(): Boolean {
-        return prefs.getBoolean(KEY_FIRST_LAUNCH, true)
-    }
-    
-    fun setFirstLaunchComplete() {
-        prefs.edit().putBoolean(KEY_FIRST_LAUNCH, false).apply()
+        val currentWeight = profile.preferredGenres[genre] ?: 0f
+        val newWeight = (currentWeight + weightDelta).coerceIn(0f, 1f)
+        
+        val updatedGenres = profile.preferredGenres.toMutableMap()
+        updatedGenres[genre] = newWeight
+        
+        saveUserProfile(profile.copy(preferredGenres = updatedGenres))
     }
     
     fun cleanOldData() {
-        val lastCleanup = prefs.getLong(KEY_LAST_CLEANUP, 0)
-        val now = System.currentTimeMillis()
-        
-        // Clean every 24 hours
-        if (now - lastCleanup < TimeUnit.HOURS.toMillis(24)) return
-        
         val profile = getUserProfile()
-        val cutoffTime = now - TimeUnit.DAYS.toMillis(30)
-        
-        // Remove old skip history and liked songs
-        val cleanedSkipHistory = profile.skipHistory.filterValues { it >= cutoffTime }
-        val cleanedLikedSongs = profile.likedSongs.filterValues { it >= cutoffTime }
-        val cleanedPlayHistory = profile.playHistory.filter { it.timestamp >= cutoffTime }
+        val cutoff = System.currentTimeMillis() - (30 * 24 * 60 * 60 * 1000L) // 30 days
         
         val cleanedProfile = profile.copy(
-            skipHistory = cleanedSkipHistory,
-            likedSongs = cleanedLikedSongs,
-            playHistory = cleanedPlayHistory
+            skipHistory = profile.skipHistory.filterValues { it > cutoff },
+            playHistory = profile.playHistory.filter { it.timestamp > cutoff },
+            recentArtists = profile.recentArtists.filter { it.timestamp > cutoff }
         )
         
         saveUserProfile(cleanedProfile)
-        prefs.edit().putLong(KEY_LAST_CLEANUP, now).apply()
     }
     
-    fun updateGenrePreference(genre: String, adjustment: Float) {
-        val profile = getUserProfile()
-        val updatedProfile = profile.updateGenreWeight(genre, adjustment)
-        saveUserProfile(updatedProfile)
+    fun isFirstLaunch(): Boolean {
+        return prefs.getBoolean(FIRST_LAUNCH_KEY, true)
     }
     
-    fun setInitialGenres(genres: Set<String>) {
-        val profile = UserProfile.withInitialGenres(genres)
-        saveUserProfile(profile)
-        setFirstLaunchComplete()
-    }
-    
-    fun clearAllData() {
-        prefs.edit().clear().apply()
+    fun setFirstLaunchComplete() {
+        prefs.edit().putBoolean(FIRST_LAUNCH_KEY, false).apply()
     }
 }
