@@ -13,7 +13,7 @@ import com.shaadow.tunes.suggestion.integration.ActivityTracker
  */
 class SuggestionSystem(context: Context) {
     private val storage = SuggestionStorage(context)
-    private val engine = SuggestionEngine(context)
+    internal val engine = SuggestionEngine(context)
     val activityTracker = ActivityTracker(engine, storage)
     
     suspend fun getRecommendations(
