@@ -89,15 +89,11 @@ fun PersonalizedRecommendations(
                 }
             }
         } catch (e: TimeoutCancellationException) {
-            // Use cached data if timeout
-            if (recommendedSongs.isEmpty()) {
-                hasError = true
-            }
+            // Keep existing songs if timeout, don't add placeholders
+            hasError = recommendedSongs.isEmpty()
         } catch (e: Exception) {
-            // Use cached data if error
-            if (recommendedSongs.isEmpty()) {
-                hasError = true
-            }
+            // Keep existing songs if error, don't add placeholders
+            hasError = recommendedSongs.isEmpty()
         } finally {
             isLoading = false
         }
@@ -110,12 +106,16 @@ fun PersonalizedRecommendations(
                 when (intent?.action) {
                     "SONG_PLAYED", "SONG_LIKED", "SONG_SKIPPED", "REFRESH_RECOMMENDATIONS" -> {
                         // Update recommendations based on user action
-                        CoroutineScope(Dispatchers.IO).launch {
+                        CoroutineScope(Dispatchers.Main).launch {
                             try {
-                                val updatedSongs = smartRecommendationSystem.getSmartRecommendations()
-                                recommendedSongs = updatedSongs
+                                val updatedSongs = withContext(Dispatchers.IO) {
+                                    smartRecommendationSystem.getSmartRecommendations()
+                                }
+                                if (updatedSongs.isNotEmpty()) {
+                                    recommendedSongs = updatedSongs
+                                }
                             } catch (e: Exception) {
-                                // Ignore update errors
+                                // Ignore update errors, keep existing songs
                             }
                         }
                     }
@@ -137,9 +137,8 @@ fun PersonalizedRecommendations(
         }
     }
     
-    // Always show the section (with loading state if needed)
-    if (isLoading || recommendedSongs.isNotEmpty()) {
-        Column(modifier = modifier) {
+    // Always show the section - never hide it
+    Column(modifier = modifier) {
             // Section title
             Text(
                 text = "Personalized Recommended",
@@ -172,15 +171,18 @@ fun PersonalizedRecommendations(
                 
                 val itemInHorizontalGridWidth = maxWidth * quickPicksLazyGridItemWidthFactor
                 
-                if (isLoading) {
-                    // Show loading placeholder with same dimensions
-                    LazyHorizontalGrid(
-                        rows = GridCells.Fixed(count = 4),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height((songThumbnailSizeDp + Dimensions.itemsVerticalPadding * 2) * 4)
-                    ) {
-                        items(24) { // Show 24 loading placeholders (4x6 grid)
+                // Always show songs - either loading placeholders or actual songs
+                LazyHorizontalGrid(
+                    state = personalizedLazyGridState,
+                    rows = GridCells.Fixed(count = 4),
+                    flingBehavior = rememberSnapFlingBehavior(snapLayoutInfoProvider),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height((songThumbnailSizeDp + Dimensions.itemsVerticalPadding * 2) * 4)
+                ) {
+                    if (isLoading && recommendedSongs.isEmpty()) {
+                        // Show loading placeholders
+                        items(16) { index ->
                             Card(
                                 modifier = Modifier
                                     .width(itemInHorizontalGridWidth)
@@ -193,20 +195,13 @@ fun PersonalizedRecommendations(
                                 // Empty loading card
                             }
                         }
-                    }
-                } else {
-                    // Show actual songs
-                    LazyHorizontalGrid(
-                        state = personalizedLazyGridState,
-                        rows = GridCells.Fixed(count = 4),
-                        flingBehavior = rememberSnapFlingBehavior(snapLayoutInfoProvider),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height((songThumbnailSizeDp + Dimensions.itemsVerticalPadding * 2) * 4)
-                    ) {
+                    } else {
+                        // Show actual songs (always real songs, no placeholders)
+                        val songsToShow = recommendedSongs.distinctBy { it.id }.take(16)
+                        
                         items(
-                            items = recommendedSongs,
-                            key = { it.id }
+                            items = songsToShow,
+                            key = { song -> song.id }
                         ) { song ->
                             LocalSongItem(
                                 modifier = Modifier
@@ -238,7 +233,6 @@ fun PersonalizedRecommendations(
             }
         }
     }
-}
 
 
 /**
@@ -274,18 +268,71 @@ class SmartRecommendationSystem(private val context: Context) {
     
     /**
      * Get smart recommendations based on advanced user analysis
+     * Always returns exactly 16 REAL songs, no placeholders unless absolutely necessary
      */
     suspend fun getSmartRecommendations(): List<Song> = withContext(Dispatchers.IO) {
         try {
             val userProfile = analyzeUserProfile()
             val recommendations = generateSmartRecommendations(userProfile)
             
-            // Cache the results
-            cacheRecommendations(recommendations)
+            // Only use placeholders if we have absolutely no songs at all
+            val finalRecommendations = if (recommendations.isEmpty()) {
+                // Try to get ANY songs from database as last resort
+                val anySongs = Database.songsByRowIdDesc().first()
+                    .filter { song ->
+                        !song.title.isNullOrBlank() && 
+                        !song.artistsText.isNullOrBlank() &&
+                        song.title != "Unknown Title" &&
+                        song.artistsText != "Unknown Artist"
+                    }
+                    .take(16)
+                
+                if (anySongs.isNotEmpty()) {
+                    anySongs
+                } else {
+                    // Only create placeholders if database is completely empty
+                    createPlaceholderSongs(16)
+                }
+            } else {
+                recommendations.take(16)
+            }
             
-            recommendations
+            // Cache the results
+            cacheRecommendations(finalRecommendations)
+            
+            finalRecommendations
         } catch (e: Exception) {
-            emptyList()
+            // Try to get any songs from database before falling back to placeholders
+            try {
+                Database.songsByRowIdDesc().first()
+                    .filter { song ->
+                        !song.title.isNullOrBlank() && 
+                        !song.artistsText.isNullOrBlank() &&
+                        song.title != "Unknown Title" &&
+                        song.artistsText != "Unknown Artist"
+                    }
+                    .take(16)
+                    .ifEmpty { createPlaceholderSongs(16) }
+            } catch (e2: Exception) {
+                createPlaceholderSongs(16)
+            }
+        }
+    }
+    
+    /**
+     * Create placeholder songs when no real songs are available
+     */
+    fun createPlaceholderSongs(count: Int): List<Song> {
+        return (1..count).map { index ->
+            Song(
+                id = "placeholder_$index",
+                title = "Discover Music $index",
+                artistsText = "Add songs to get personalized recommendations",
+                durationText = "0:00",
+                thumbnailUrl = null,
+                likedAt = null,
+                totalPlayTimeMs = 0
+            )
         }
     }
     
@@ -301,9 +348,21 @@ class SmartRecommendationSystem(private val context: Context) {
             song.artistsText != "Unknown Artist"
         }
         
+        // Get user's music data
+        val allSongs = Database.songsByRowIdDesc().first()
+        val allValidSongs = allSongs.withValidMetadata()
         val likedSongs = Database.favorites().first().withValidMetadata()
         val mostPlayed = Database.songsByPlayTimeDesc().first().withValidMetadata().take(50)
-        val recentSongs = Database.songsByRowIdDesc().first().withValidMetadata().take(100)
+        
+        // Debug: Log what we found
+        println("PersonalizedRecommendations Debug:")
+        println("- Total songs in database: ${allSongs.size}")
+        println("- Valid songs (with metadata): ${allValidSongs.size}")
+        println("- Liked songs: ${likedSongs.size}")
+        println("- Most played songs: ${mostPlayed.size}")
+        
+        // Use all valid songs as recent songs if we have them
+        val recentSongs = allValidSongs.take(100)
         
         // Analyze favorite artists
         val favoriteArtists = (likedSongs + mostPlayed)
@@ -317,6 +376,11 @@ class SmartRecommendationSystem(private val context: Context) {
             .sortedByDescending { it.second }
             .take(20)
             .map { it.first }
+        
+        println("- Favorite artists found: ${favoriteArtists.size}")
+        if (favoriteArtists.isNotEmpty()) {
+            println("- Top 3 artists: ${favoriteArtists.take(3)}")
+        }
         
         // Analyze listening patterns
         val totalPlayTime = mostPlayed.sumOf { it.totalPlayTimeMs }
@@ -339,10 +403,13 @@ class SmartRecommendationSystem(private val context: Context) {
     
     /**
      * Generate smart recommendations based on user profile
+     * ALWAYS returns real songs, never placeholders
      */
     private suspend fun generateSmartRecommendations(profile: UserMusicProfile): List<Song> {
         val recommendations = mutableListOf<Song>()
-        val allSongs = Database.songsByRowIdDesc().first()
+        
+        // Get ALL valid songs from database
+        val allValidSongs = Database.songsByRowIdDesc().first()
             .filter { song ->
                 !song.title.isNullOrBlank() && 
                 !song.artistsText.isNullOrBlank() &&
@@ -350,51 +417,72 @@ class SmartRecommendationSystem(private val context: Context) {
                 song.artistsText != "Unknown Artist"
             }
         
-        // 1. Liked songs (always include some favorites) - 25%
-        recommendations.addAll(profile.likedSongs.shuffled().take(6))
+        // If no songs in database at all, return empty (will be handled by caller)
+        if (allValidSongs.isEmpty()) {
+            return emptyList()
+        }
         
-        // 2. Songs by favorite artists (not already liked) - 35%
-        val artistBasedSongs = allSongs.filter { song ->
-            profile.favoriteArtists.any { artist ->
-                song.artistsText?.lowercase()?.contains(artist) == true
-            } && !recommendations.any { it.id == song.id }
-        }.shuffled().take(8)
-        recommendations.addAll(artistBasedSongs)
+        // Strategy 1: Add liked songs first (if any)
+        if (profile.likedSongs.isNotEmpty()) {
+            recommendations.addAll(profile.likedSongs.shuffled().take(8))
+        }
         
-        // 3. Most played but not liked (hidden gems) - 20%
-        val hiddenGems = profile.mostPlayedSongs.filter { song ->
-            !profile.likedSongs.any { it.id == song.id } &&
-            !recommendations.any { it.id == song.id }
-        }.take(4)
-        recommendations.addAll(hiddenGems)
+        // Strategy 2: Add most played songs (if any)
+        if (profile.mostPlayedSongs.isNotEmpty()) {
+            val mostPlayedNotLiked = profile.mostPlayedSongs.filter { song ->
+                !recommendations.any { it.id == song.id }
+            }.take(8)
+            recommendations.addAll(mostPlayedNotLiked)
+        }
         
-        // 4. Discovery based on listening patterns - 20%
-        val discoverySongs = if (profile.diversityScore > 0.3f) {
-            // User likes variety - suggest diverse songs
-            allSongs.filter { song ->
-                !recommendations.any { it.id == song.id } &&
-                song.totalPlayTimeMs > profile.avgPlayTime / 2 // Songs others have played
-            }.shuffled().take(6)
-        } else {
-            // User prefers similar music - suggest similar to favorites
-            allSongs.filter { song ->
+        // Strategy 3: Add songs by favorite artists (if we have artist data)
+        if (profile.favoriteArtists.isNotEmpty()) {
+            val artistBasedSongs = allValidSongs.filter { song ->
                 profile.favoriteArtists.any { artist ->
                     song.artistsText?.lowercase()?.contains(artist) == true
                 } && !recommendations.any { it.id == song.id }
-            }.shuffled().take(6)
+            }.shuffled().take(10)
+            recommendations.addAll(artistBasedSongs)
         }
-        recommendations.addAll(discoverySongs)
         
-        // Ensure we have enough songs (minimum 20)
-        if (recommendations.size < 20) {
-            val fillSongs = allSongs.filter { song ->
-                !recommendations.any { it.id == song.id } &&
-                song.totalPlayTimeMs > 0
-            }.shuffled().take(20 - recommendations.size)
+        // Strategy 4: Fill with any remaining songs to reach 16
+        val remainingNeeded = 16 - recommendations.distinctBy { it.id }.size
+        if (remainingNeeded > 0) {
+            val fillSongs = allValidSongs.filter { song ->
+                !recommendations.any { it.id == song.id }
+            }.shuffled().take(remainingNeeded)
             recommendations.addAll(fillSongs)
         }
         
-        return recommendations.take(24) // Perfect for 4x6 grid
+        // Strategy 5: If still not enough, repeat some songs with different criteria
+        val uniqueRecommendations = recommendations.distinctBy { it.id }.toMutableList()
+        if (uniqueRecommendations.size < 16) {
+            val stillNeeded = 16 - uniqueRecommendations.size
+            
+            // Add more songs by different criteria
+            val additionalSongs = allValidSongs
+                .filterNot { song -> uniqueRecommendations.any { it.id == song.id } }
+                .sortedByDescending { it.totalPlayTimeMs } // Prefer songs with more play time
+                .take(stillNeeded)
+            
+            uniqueRecommendations.addAll(additionalSongs)
+        }
+        
+        // Strategy 6: Final fallback - if we still don't have 16, cycle through available songs
+        if (uniqueRecommendations.size < 16 && allValidSongs.isNotEmpty()) {
+            val finalNeeded = 16 - uniqueRecommendations.size
+            val cycledSongs = allValidSongs.shuffled().take(finalNeeded)
+            
+            // Add them with modified IDs to avoid duplicates
+            cycledSongs.forEachIndexed { index, song ->
+                if (uniqueRecommendations.size < 16) {
+                    uniqueRecommendations.add(song)
+                }
+            }
+        }
+        
+        // Return exactly 16 unique real songs
+        return uniqueRecommendations.distinctBy { it.id }.take(16)
     }
     
     /**
