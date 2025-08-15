@@ -54,7 +54,12 @@ class QuickPicksViewModel : ViewModel() {
                 }
 
                 // Use first() for faster initial load
-                val song = flow.first()
+                val song = try {
+                    flow.first()
+                } catch (e: Exception) {
+                    // If database is not initialized or has no data, use fallback
+                    null
+                }
                 
                 if (shouldFetchRelatedPage(song)) {
                     val songId = song?.id ?: "fJ9rUzIMcZQ"

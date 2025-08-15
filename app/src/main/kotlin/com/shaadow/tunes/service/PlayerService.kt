@@ -73,6 +73,7 @@ import com.shaadow.innertube.requests.player
 import com.shaadow.tunes.Database
 import com.shaadow.tunes.MainActivity
 import com.shaadow.tunes.R
+import com.shaadow.tunes.suggestion.WorkingSuggestionSystem
 import com.shaadow.tunes.enums.ExoPlayerDiskCacheMaxSize
 import com.shaadow.tunes.models.Event
 import com.shaadow.tunes.models.QueuedMediaItem
@@ -138,6 +139,7 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
     private lateinit var mediaSession: MediaSession
     private lateinit var cache: SimpleCache
     private lateinit var player: ExoPlayer
+    private lateinit var behaviorTracker: WorkingSuggestionSystem
 
     private val stateBuilder
         get() = PlaybackState.Builder()
@@ -225,6 +227,9 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
 
     override fun onCreate() {
         super.onCreate()
+
+        // Initialize behavior tracking system
+        behaviorTracker = WorkingSuggestionSystem(applicationContext)
 
         bitmapProvider = BitmapProvider(
             context = applicationContext,
@@ -379,6 +384,9 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
             query {
                 Database.incrementTotalPlayTimeMs(mediaItem.mediaId, totalPlayTimeMs)
             }
+            
+            // Track behavior for recommendations
+            behaviorTracker.onSongPlayed(mediaItem, totalPlayTimeMs)
         }
 
         if (totalPlayTimeMs > 30000) {
@@ -1106,6 +1114,11 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
                 )
             }
         }
+        
+        // Track behavior for recommendations
+        if (!isLikedState.value) {
+            behaviorTracker.onSongLiked(mediaItem)
+        }
     }
 
     private fun play() {
@@ -1118,7 +1131,13 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
         override fun onPlay() = play()
         override fun onPause() = player.pause()
         override fun onSkipToPrevious() = runCatching(player::forceSeekToPrevious).let { }
-        override fun onSkipToNext() = runCatching(player::forceSeekToNext).let { }
+        override fun onSkipToNext() = runCatching {
+            // Track skip behavior before skipping
+            mediaItemState.value?.let { mediaItem ->
+                behaviorTracker.onSongSkipped(mediaItem, player.currentPosition)
+            }
+            player.forceSeekToNext()
+        }.let { }
         override fun onSeekTo(pos: Long) = player.seekTo(pos)
         override fun onStop() = player.pause()
         override fun onRewind() = player.seekToDefaultPosition()
@@ -1137,7 +1156,13 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
             when (intent.action) {
                 Action.pause.value -> player.pause()
                 Action.play.value -> play()
-                Action.next.value -> player.forceSeekToNext()
+                Action.next.value -> {
+                    // Track skip behavior before skipping
+                    mediaItemState.value?.let { mediaItem ->
+                        behaviorTracker.onSongSkipped(mediaItem, player.currentPosition)
+                    }
+                    player.forceSeekToNext()
+                }
                 Action.previous.value -> player.forceSeekToPrevious()
             }
         }

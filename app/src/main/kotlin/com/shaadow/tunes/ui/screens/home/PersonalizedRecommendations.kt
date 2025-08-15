@@ -1,159 +1,90 @@
 package com.shaadow.tunes.ui.screens.home
 
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
-import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.media3.common.MediaItem
-import com.shaadow.tunes.Database
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.shaadow.tunes.LocalPlayerServiceBinder
+import com.shaadow.tunes.R
 import com.shaadow.tunes.models.LocalMenuState
-import com.shaadow.tunes.models.Song
-import com.shaadow.tunes.suggestion.SimpleSuggestionIntegration
-import com.shaadow.tunes.ui.items.LocalSongItem
 import com.shaadow.tunes.ui.components.themed.NonQueuedMediaItemMenu
+import com.shaadow.tunes.ui.items.LocalSongItem
 import com.shaadow.tunes.ui.styling.Dimensions
-import com.shaadow.tunes.utils.SnapLayoutInfoProvider
 import com.shaadow.tunes.utils.asMediaItem
 import com.shaadow.tunes.utils.forcePlay
-import com.shaadow.tunes.utils.isLandscape
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.withContext
+import com.shaadow.tunes.viewmodels.HomeSongsViewModel
 
-@OptIn(ExperimentalFoundationApi::class, ExperimentalAnimationApi::class)
+/**
+ * Simple personalized recommendations component using the lightweight suggestion system
+ */
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun PersonalizedRecommendations(
-    modifier: Modifier = Modifier
-) {
+fun PersonalizedRecommendations() {
+    val context = LocalContext.current
     val binder = LocalPlayerServiceBinder.current
     val menuState = LocalMenuState.current
-    val context = LocalContext.current
+    val viewModel: HomeSongsViewModel = viewModel()
     
-    var recommendedSongs by remember { mutableStateOf<List<Song>>(emptyList()) }
-    var isLoading by remember { mutableStateOf(true) }
-    
-    // Initialize suggestion system
-    val suggestionIntegration = remember { SimpleSuggestionIntegration.getInstance(context) }
-    val suggestionSystem = suggestionIntegration.getSuggestionSystem()
-    
-    // Load recommendations
+    val sectionTextModifier = Modifier
+        .padding(horizontal = 16.dp)
+        .padding(bottom = 8.dp)
+
+    // Load songs for recommendations
     LaunchedEffect(Unit) {
-        try {
-            isLoading = true
-            
-            // Get recommendations from working system (currently returns empty, but can be enhanced)
-            val recommendations = withContext(Dispatchers.IO) {
-                suggestionSystem.getRecommendations(16)
-            }
-            
-            // For now, use database songs as fallback since recommendations are empty
-            recommendedSongs = Database.songsByRowIdDesc().first()
-                .filter { !it.title.isNullOrBlank() && !it.artistsText.isNullOrBlank() }
-                .take(16)
-            
-        } catch (e: Exception) {
-            // Fallback to database songs
-            recommendedSongs = try {
-                Database.songsByRowIdDesc().first()
-                    .filter { !it.title.isNullOrBlank() && !it.artistsText.isNullOrBlank() }
-                    .take(16)
-            } catch (e2: Exception) {
-                emptyList()
-            }
-        } finally {
-            isLoading = false
-        }
+        viewModel.loadSongs(
+            sortBy = com.shaadow.tunes.enums.SongSortBy.PlayTime,
+            sortOrder = com.shaadow.tunes.enums.SortOrder.Descending
+        )
     }
-    
-    // Only show if we have songs
-    if (recommendedSongs.isNotEmpty()) {
-        Column(modifier = modifier) {
-            Text(
-                text = "Personalized Recommended",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Medium,
-                modifier = Modifier
-                    .padding(horizontal = 16.dp)
-                    .padding(bottom = 8.dp)
-            )
-            
-            BoxWithConstraints {
-                val quickPicksLazyGridItemWidthFactor =
-                    if (isLandscape && maxWidth * 0.475f >= 320.dp) 0.475f else 0.9f
 
-                val density = LocalDensity.current
-                val songThumbnailSizeDp = Dimensions.thumbnails.song
-                val personalizedLazyGridState = rememberLazyGridState()
+    if (viewModel.items.isNotEmpty()) {
+        Spacer(modifier = Modifier.height(Dimensions.spacer))
+        
+        Text(
+            text = stringResource(id = R.string.recommended_for_you),
+            style = MaterialTheme.typography.titleMedium,
+            modifier = sectionTextModifier
+        )
 
-                val snapLayoutInfoProvider = remember(personalizedLazyGridState) {
-                    with(density) {
-                        SnapLayoutInfoProvider(
-                            lazyGridState = personalizedLazyGridState,
-                            positionInLayout = { layoutSize, itemSize ->
-                                (layoutSize * quickPicksLazyGridItemWidthFactor / 2f - itemSize / 2f)
-                            }
+        LazyRow(
+            contentPadding = PaddingValues(horizontal = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            items(
+                items = viewModel.items.take(10), // Show top 10 most played songs
+                key = { song -> song.id }
+            ) { song ->
+                LocalSongItem(
+                    modifier = Modifier.widthIn(max = 280.dp),
+                    song = song,
+                    onClick = {
+                        val mediaItem = song.asMediaItem
+                        binder?.stopRadio()
+                        binder?.player?.forcePlay(mediaItem)
+                        binder?.setupRadio(
+                            com.shaadow.innertube.models.NavigationEndpoint.Endpoint.Watch(videoId = mediaItem.mediaId)
                         )
+                    },
+                    onLongClick = {
+                        menuState.display {
+                            NonQueuedMediaItemMenu(
+                                onDismiss = menuState::hide,
+                                mediaItem = song.asMediaItem,
+                                onGoToAlbum = { },
+                                onGoToArtist = { }
+                            )
+                        }
                     }
-                }
-
-                val itemInHorizontalGridWidth = maxWidth * quickPicksLazyGridItemWidthFactor
-                
-                LazyHorizontalGrid(
-                    state = personalizedLazyGridState,
-                    rows = GridCells.Fixed(count = 4),
-                    flingBehavior = rememberSnapFlingBehavior(snapLayoutInfoProvider),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height((songThumbnailSizeDp + Dimensions.itemsVerticalPadding * 2) * 4)
-                ) {
-                    items(
-                        items = recommendedSongs.take(16),
-                        key = { song -> song.id }
-                    ) { song ->
-                        LocalSongItem(
-                            modifier = Modifier
-                                .animateItem()
-                                .width(itemInHorizontalGridWidth),
-                            song = song,
-                            onClick = {
-                                // Track interaction
-                                suggestionSystem.onSongPlayed(song.asMediaItem, 0L)
-                                
-                                val mediaItem = song.asMediaItem
-                                binder?.stopRadio()
-                                binder?.player?.forcePlay(mediaItem)
-                                binder?.setupRadio(
-                                    com.shaadow.innertube.models.NavigationEndpoint.Endpoint.Watch(
-                                        videoId = mediaItem.mediaId
-                                    )
-                                )
-                            },
-                            onLongClick = {
-                                menuState.display {
-                                    NonQueuedMediaItemMenu(
-                                        onDismiss = menuState::hide,
-                                        mediaItem = song.asMediaItem
-                                    )
-                                }
-                            }
-                        )
-                    }
-                }
+                )
             }
         }
     }
 }
-
-

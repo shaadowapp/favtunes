@@ -112,6 +112,22 @@ class WorkingSuggestionSystem(private val context: Context) {
     }
     
     /**
+     * Get tracking status for debugging
+     */
+    fun getTrackingStatus(): Map<String, Any> {
+        val allPrefs = preferences.all
+        return mapOf(
+            "totalTrackedSongs" to allPrefs.keys.count { it.startsWith("play_") },
+            "totalLikedSongs" to allPrefs.keys.count { key -> 
+                key.startsWith("liked_") && preferences.getBoolean(key, false) 
+            },
+            "totalSkippedSongs" to allPrefs.keys.count { it.startsWith("skip_") },
+            "isTrackingActive" to (allPrefs.isNotEmpty()),
+            "onboardingComplete" to isOnboardingComplete()
+        )
+    }
+
+    /**
      * Maintenance
      */
     fun shouldRefreshRecommendations(lastRefreshTime: Long): Boolean {
