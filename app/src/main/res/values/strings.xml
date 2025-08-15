@@ -47,7 +47,7 @@
     <string name="profile">Profile</string>
     <string name="profile_heading">Profile Page Under Development</string>
     <string name="profile_desc">We\'re working on an automated login system that will eliminate the need for personal credentials like email or phone number. Stay tuned for a seamless and hassle-free login experience, coming soon</string>
-    <string name="suggestions">Suggestions</string>
+    <string name="suggestions" translatable="false">Suggestions</string>
     <string name="image_cache">Image cache</string>
     <string name="song_cache">Song cache</string>
     <string name="max_size">Max size</string>
@@ -201,12 +201,12 @@
     <string name="list_gestures_description">Enable gestures to enqueue or delete songs</string>
     <string name="copy">Copy</string>
     <string name="error_log">Error log</string>
-    <string name="check_for_updates">Check for updates</string>
-    <string name="checking_for_updates">Checking for updates</string>
-    <string name="new_version_available">New version available</string>
-    <string name="no_updates_available">No updates available</string>
-    <string name="version">Version %s</string>
-    <string name="open_in_github">Open in GitHub</string>
-    <string name="go_back">Go back</string>
-    <string name="clear">Clear</string>
+    <string name="check_for_updates" translatable="false">Check for updates</string>
+    <string name="checking_for_updates" translatable="false">Checking for updates</string>
+    <string name="new_version_available" translatable="false">New version available</string>
+    <string name="no_updates_available" translatable="false">No updates available</string>
+    <string name="version" translatable="false">Version %s</string>
+    <string name="open_in_github" translatable="false">Open in GitHub</string>
+    <string name="go_back" translatable="false">Go back</string>
+    <string name="clear" translatable="false">Clear</string>
 </resources>

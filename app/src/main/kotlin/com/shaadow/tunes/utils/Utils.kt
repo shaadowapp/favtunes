@@ -112,7 +112,7 @@ suspend fun Result<Innertube.PlaylistOrAlbumPage>.completed(): Result<Innertube.
 }
 
 inline val isAtLeastAndroid6
-    get() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
+    get() = true // Always true since minSdk is 24 (Android 7.0)
 
 inline val isAtLeastAndroid8
     get() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.O

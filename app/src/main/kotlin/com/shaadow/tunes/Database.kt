@@ -57,7 +57,117 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface Database {
-    companion object : Database by DatabaseInitializer.Instance.database
+    @Suppress("StaticFieldLeak") // Context is always applicationContext
+    companion object {
+        private var _instance: Database? = null
+        private var _applicationContext: android.content.Context? = null
+        
+        fun initialize(context: android.content.Context) {
+            // Always use application context to avoid memory leaks
+            _applicationContext = context.applicationContext
+            _instance = DatabaseProvider.getInstance(context.applicationContext)
+        }
+        
+        private val instance: Database
+            get() = _instance ?: throw IllegalStateException("Database not initialized. Call Database.initialize(context) first.")
+        
+        private val context: android.content.Context
+            get() = _applicationContext ?: throw IllegalStateException("Database not initialized. Call Database.initialize(context) first.")
+        
+        // Delegate all methods to the instance
+        fun songsByRowIdAsc() = instance.songsByRowIdAsc()
+        fun songsByRowIdDesc() = instance.songsByRowIdDesc()
+        fun songsByTitleAsc() = instance.songsByTitleAsc()
+        fun songsByTitleDesc() = instance.songsByTitleDesc()
+        fun songsByPlayTimeAsc() = instance.songsByPlayTimeAsc()
+        fun songsByPlayTimeDesc() = instance.songsByPlayTimeDesc()
+        fun songsByArtistsAsc() = instance.songsByArtistsAsc()
+        fun songsByArtistsDesc() = instance.songsByArtistsDesc()
+        fun songs(sortBy: SongSortBy, sortOrder: SortOrder) = instance.songs(sortBy, sortOrder)
+        fun favorites() = instance.favorites()
+        fun queue() = instance.queue()
+        fun clearQueue() = instance.clearQueue()
+        fun queries(query: String) = instance.queries(query)
+        fun queriesCount() = instance.queriesCount()
+        fun clearQueries() = instance.clearQueries()
+        fun song(id: String) = instance.song(id)
+        fun likedAt(songId: String) = instance.likedAt(songId)
+        fun like(songId: String, likedAt: Long?) = instance.like(songId, likedAt)
+        fun updateDurationText(songId: String, durationText: String) = instance.updateDurationText(songId, durationText)
+        fun lyrics(songId: String) = instance.lyrics(songId)
+        fun artist(id: String) = instance.artist(id)
+        fun artistsByNameDesc() = instance.artistsByNameDesc()
+        fun artistsByNameAsc() = instance.artistsByNameAsc()
+        fun artistsByRowIdDesc() = instance.artistsByRowIdDesc()
+        fun artistsByRowIdAsc() = instance.artistsByRowIdAsc()
+        fun artists(sortBy: ArtistSortBy, sortOrder: SortOrder) = instance.artists(sortBy, sortOrder)
+        fun album(id: String) = instance.album(id)
+        fun albumTimestamp(id: String) = instance.albumTimestamp(id)
+        fun albumSongs(albumId: String) = instance.albumSongs(albumId)
+        fun albumsByTitleAsc() = instance.albumsByTitleAsc()
+        fun albumsByYearAsc() = instance.albumsByYearAsc()
+        fun albumsByRowIdAsc() = instance.albumsByRowIdAsc()
+        fun albumsByTitleDesc() = instance.albumsByTitleDesc()
+        fun albumsByYearDesc() = instance.albumsByYearDesc()
+        fun albumsByRowIdDesc() = instance.albumsByRowIdDesc()
+        fun albums(sortBy: AlbumSortBy, sortOrder: SortOrder) = instance.albums(sortBy, sortOrder)
+        fun incrementTotalPlayTimeMs(id: String, addition: Long) = instance.incrementTotalPlayTimeMs(id, addition)
+        fun playlist(id: Long) = instance.playlist(id)
+        fun playlistSongs(id: Long) = instance.playlistSongs(id)
+        fun playlistWithSongs(id: Long) = instance.playlistWithSongs(id)
+        fun playlistPreviewsByNameAsc() = instance.playlistPreviewsByNameAsc()
+        fun playlistPreviewsByDateAddedAsc() = instance.playlistPreviewsByDateAddedAsc()
+        fun playlistPreviewsByDateSongCountAsc() = instance.playlistPreviewsByDateSongCountAsc()
+        fun playlistPreviewsByNameDesc() = instance.playlistPreviewsByNameDesc()
+        fun playlistPreviewsByDateAddedDesc() = instance.playlistPreviewsByDateAddedDesc()
+        fun playlistPreviewsByDateSongCountDesc() = instance.playlistPreviewsByDateSongCountDesc()
+        fun playlistPreviews(sortBy: PlaylistSortBy, sortOrder: SortOrder) = instance.playlistPreviews(sortBy, sortOrder)
+        fun playlistThumbnailUrls(id: Long) = instance.playlistThumbnailUrls(id)
+        fun artistSongs(artistId: String) = instance.artistSongs(artistId)
+        fun format(songId: String) = instance.format(songId)
+        fun songsWithContentLength() = instance.songsWithContentLength()
+        fun move(playlistId: Long, fromPosition: Int, toPosition: Int) = instance.move(playlistId, fromPosition, toPosition)
+        fun clearPlaylist(id: Long) = instance.clearPlaylist(id)
+        fun clearAlbum(id: String) = instance.clearAlbum(id)
+        fun loudnessDb(songId: String) = instance.loudnessDb(songId)
+        fun search(query: String) = instance.search(query)
+        fun songAlbumInfo(songId: String) = instance.songAlbumInfo(songId)
+        fun songArtistInfo(songId: String) = instance.songArtistInfo(songId)
+        fun trending(now: Long = System.currentTimeMillis()) = instance.trending(now)
+        fun lastPlayed() = instance.lastPlayed()
+        fun randomSong() = instance.randomSong()
+        fun eventsCount() = instance.eventsCount()
+        fun clearEvents() = instance.clearEvents()
+        fun clearEventsFor(songId: String) = instance.clearEventsFor(songId)
+        fun insert(event: Event) = instance.insert(event)
+        fun insert(format: Format) = instance.insert(format)
+        fun insert(searchQuery: SearchQuery) = instance.insert(searchQuery)
+        fun insert(playlist: Playlist) = instance.insert(playlist)
+        fun insert(songPlaylistMap: SongPlaylistMap) = instance.insert(songPlaylistMap)
+        fun insert(songArtistMap: SongArtistMap) = instance.insert(songArtistMap)
+        fun insert(song: Song) = instance.insert(song)
+        fun insert(queuedMediaItems: List<QueuedMediaItem>) = instance.insert(queuedMediaItems)
+        fun insertSongPlaylistMaps(songPlaylistMaps: List<SongPlaylistMap>) = instance.insertSongPlaylistMaps(songPlaylistMaps)
+        fun insert(album: Album, songAlbumMap: SongAlbumMap) = instance.insert(album, songAlbumMap)
+        fun insert(artists: List<Artist>, songArtistMaps: List<SongArtistMap>) = instance.insert(artists, songArtistMaps)
+        fun insert(mediaItem: MediaItem, block: (Song) -> Song = { it }) = instance.insert(mediaItem, block)
+        fun update(artist: Artist) = instance.update(artist)
+        fun update(album: Album) = instance.update(album)
+        fun update(playlist: Playlist) = instance.update(playlist)
+        fun upsert(lyrics: Lyrics) = instance.upsert(lyrics)
+        fun upsert(album: Album, songAlbumMaps: List<SongAlbumMap>) = instance.upsert(album, songAlbumMaps)
+        fun upsert(songAlbumMap: SongAlbumMap) = instance.upsert(songAlbumMap)
+        fun upsert(artist: Artist) = instance.upsert(artist)
+        fun delete(searchQuery: SearchQuery) = instance.delete(searchQuery)
+        fun delete(playlist: Playlist) = instance.delete(playlist)
+        fun delete(songPlaylistMap: SongPlaylistMap) = instance.delete(songPlaylistMap)
+        fun raw(supportSQLiteQuery: SupportSQLiteQuery) = instance.raw(supportSQLiteQuery)
+        fun checkpoint() = instance.checkpoint()
+        
+        // Internal access for utility functions
+        internal val roomDatabase: RoomDatabase
+            get() = DatabaseProvider.getRoomDatabase(context)
+    }
 
     @Transaction
     @Query("SELECT * FROM Song WHERE totalPlayTimeMs > 0 ORDER BY ROWID ASC")
@@ -506,33 +616,12 @@ abstract class DatabaseInitializer protected constructor() : RoomDatabase() {
     abstract val database: Database
 
     companion object {
-        @Volatile
-        private var INSTANCE: DatabaseInitializer? = null
-
-        val Instance: DatabaseInitializer
-            get() = INSTANCE ?: synchronized(this) {
-                INSTANCE ?: throw IllegalStateException("Database not initialized")
-            }
-
+        // Removed problematic Instance property that caused circular dependency
+        // Database initialization is now handled by DatabaseProvider
+        
         context(Context)
-        operator fun invoke() {
-            // Double-checked locking pattern for thread safety
-            if (INSTANCE == null) {
-                synchronized(this) {
-                    if (INSTANCE == null) {
-                        INSTANCE = Room
-                            .databaseBuilder(this@Context, DatabaseInitializer::class.java, "data.db")
-                            .addMigrations(
-                                From8To9Migration(),
-                                From10To11Migration(),
-                                From14To15Migration(),
-                                From22To23Migration()
-                            )
-                            .fallbackToDestructiveMigration()
-                            .build()
-                    }
-                }
-            }
+        operator fun invoke(): Database {
+            return DatabaseProvider.getInstance(this@Context)
         }
     }
 
@@ -719,11 +808,11 @@ object Converters {
 }
 
 val internal: RoomDatabase
-    get() = DatabaseInitializer.Instance
+    get() = Database.roomDatabase
 
-fun query(block: () -> Unit) = DatabaseInitializer.Instance.queryExecutor.execute(block)
+fun query(block: () -> Unit) = Database.roomDatabase.queryExecutor.execute(block)
 
-fun transaction(block: () -> Unit) = with(DatabaseInitializer.Instance) {
+fun transaction(block: () -> Unit) = with(Database.roomDatabase) {
     transactionExecutor.execute {
         runInTransaction(block)
     }

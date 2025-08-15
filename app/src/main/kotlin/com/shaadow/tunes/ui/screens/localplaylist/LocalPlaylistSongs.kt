@@ -102,8 +102,13 @@ fun LocalPlaylistSongs(
     ) { paddingValues ->
         LazyColumn(
             state = lazyListState,
-            contentPadding = PaddingValues(top = 16.dp, bottom = 16.dp + playerPadding),
-            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(
+                top = paddingValues.calculateTopPadding() + 16.dp,
+                bottom = paddingValues.calculateBottomPadding() + 16.dp + playerPadding
+            ),
+            modifier = Modifier
+                .fillMaxSize()
+                .consumeWindowInsets(paddingValues),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             item(key = "thumbnail") {

@@ -12,7 +12,6 @@ import com.shaadow.innertube.Innertube
 import com.shaadow.innertube.requests.relatedPage
 import com.shaadow.innertube.requests.visitorData
 import com.shaadow.tunes.Database
-import com.shaadow.tunes.DatabaseInitializer
 import com.shaadow.tunes.enums.CoilDiskCacheMaxSize
 import com.shaadow.tunes.utils.coilDiskCacheMaxSizeKey
 import com.shaadow.tunes.utils.getEnum
@@ -27,10 +26,13 @@ import kotlinx.coroutines.launch
 class MainApplication : Application(), SingletonImageLoader.Factory {
     // Application-scoped coroutine scope that will be cancelled when the application is destroyed
     private val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    
+
 
     override fun onCreate() {
         super.onCreate()
-        with(this) { DatabaseInitializer() }
+        // Initialize the global Database object
+        Database.initialize(this)
 
         FirebaseApp.initializeApp(this)
 

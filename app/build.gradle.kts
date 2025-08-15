@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.kotlin)
     alias(libs.plugins.kotlin.ksp)
+    alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.google.gms.google.services)
     alias(libs.plugins.google.firebase.crashlytics)
     alias(libs.plugins.google.firebase.firebase.perf)
@@ -64,6 +65,13 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
+
+    lint {
+        htmlReport = true
+        htmlOutput = file("$buildDir/reports/lint-report.html")
+        xmlReport = true
+        xmlOutput = file("$buildDir/reports/lint-report.xml")
+    }
 }
 
 ksp {
@@ -110,4 +118,6 @@ dependencies {
     
     // Suggestion System Dependencies
     implementation(libs.gson)
+    implementation(libs.kotlin.coroutines)
+    implementation(libs.ktor.serialization.json)
 }

@@ -265,7 +265,7 @@ fun SwipeableNotificationItem(
     onDelete: () -> Unit,
     onMarkAsRead: () -> Unit
 ) {
-    var offsetX by remember { mutableStateOf(0f) }
+    var offsetX by remember { mutableFloatStateOf(0f) }
     var isDragging by remember { mutableStateOf(false) }
     val maxSwipeDistance = 150f
     val actionThreshold = 100f

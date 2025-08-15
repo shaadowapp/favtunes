@@ -55,6 +55,7 @@
     <string name="restore_information">L\'app si chiuderà automaticamente dopo il ripristino del database e i dati esistenti verranno sovrascritti.</string>
     <string name="backup_description">Esporta il database nella memoria esterna</string>
     <string name="restore_description">Importa il database dalla memoria esterna</string>
+    <string name="android_auto">Android Auto</string>
     <string name="service_lifetime">Durata del servizio</string>
     <string name="pause_search_history">Pausa cronologia ricerche</string>
     <string name="pause_search_history_description">Non salvare nuove ricerche né mostrare la cronologia</string>
@@ -75,6 +76,7 @@
     <string name="hide">Nascondi</string>
     <string name="remove_from_queue">Rimuovi dalla coda</string>
     <string name="remove_from_playlist">Rimuovi dalla playlist</string>
+    <string name="github">Github</string>
     <string name="shuffle">Mescola</string>
     <string name="quick_picks">Scelte rapide</string>
     <string name="view_all">Vedi tutto</string>
@@ -173,6 +175,8 @@
     <string name="retry">Riprova</string>
     <string name="information">Informazioni</string>
     <string name="close">Chiudi</string>
+    <string name="id">Id</string>
+    <string name="itag">Itag</string>
     <string name="bitrate">Bitrate</string>
     <string name="size">Dimensione</string>
     <string name="cached">In cache</string>

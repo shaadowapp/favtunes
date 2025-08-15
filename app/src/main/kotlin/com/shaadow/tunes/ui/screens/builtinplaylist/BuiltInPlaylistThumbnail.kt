@@ -2,7 +2,6 @@ package com.shaadow.tunes.ui.screens.builtinplaylist
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
@@ -19,27 +18,22 @@ import com.shaadow.tunes.enums.BuiltInPlaylist
 
 @Composable
 fun BuiltInPlaylistThumbnail(builtInPlaylist: BuiltInPlaylist) {
-    BoxWithConstraints(contentAlignment = Alignment.Center) {
-        //val thumbnailSizeDp = if (isLandscape) (maxHeight - 128.dp) else (maxWidth - 64.dp)
-        val thumbnailSizeDp = maxWidth - 64.dp
-
-        Box(
-            modifier = Modifier
-                .padding(all = 16.dp)
-                .clip(MaterialTheme.shapes.large)
-                .size(thumbnailSizeDp)
-                .background(MaterialTheme.colorScheme.surfaceVariant),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                imageVector = when (builtInPlaylist) {
-                    BuiltInPlaylist.Favorites -> Icons.Outlined.Bookmark
-                    BuiltInPlaylist.Offline -> Icons.Default.DownloadForOffline
-                },
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(thumbnailSizeDp / 2)
-            )
-        }
+    Box(
+        modifier = Modifier
+            .padding(all = 16.dp)
+            .clip(MaterialTheme.shapes.large)
+            .size(120.dp) // Fixed size instead of calculated size
+            .background(MaterialTheme.colorScheme.surfaceVariant),
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(
+            imageVector = when (builtInPlaylist) {
+                BuiltInPlaylist.Favorites -> Icons.Outlined.Bookmark
+                BuiltInPlaylist.Offline -> Icons.Default.DownloadForOffline
+            },
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.size(60.dp) // Half of the box size
+        )
     }
 }
