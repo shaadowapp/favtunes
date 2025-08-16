@@ -47,147 +47,118 @@ fun ProfileScreen(userViewModel: UserViewModel = viewModel()) {
     var showKey by remember { mutableStateOf(false) }
     var showPin by remember { mutableStateOf(false) }
     var showDialog by remember { mutableStateOf(false) }
-
-    var currentImage by remember { mutableIntStateOf(R.drawable.m_user_1) } // Default image
-
-
+    var currentImage by remember { mutableIntStateOf(R.drawable.m_user_1) }
     var userData by remember { mutableStateOf<UserEntity?>(null) }
 
-    // Fetch user details when the screen loads
     LaunchedEffect(Unit) {
         userViewModel.getOrCreateUser { user ->
             userData = user
         }
     }
 
-
     userData?.let { user ->
         Column(
-            modifier = Modifier.fillMaxSize().padding(16.dp),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Profile Picture (Clickable)
-            Image(
-                painter = painterResource(id = currentImage),
-                contentDescription = "Profile Picture",
+            // Profile Header Card
+            Card(
                 modifier = Modifier
-                    .size(120.dp)
-                    .clip(CircleShape)
-                //.clickable { showDialog = true } // Show dialog on click
-            )
-
-            Spacer(modifier = Modifier.height(15.dp))
-
-            // Username
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(text = user.username, fontSize = 25.sp, fontWeight = FontWeight(600))
-            }
-
-
-
-            Spacer(modifier = Modifier.height(50.dp))
-
-
-            // Public Key
-            Column(horizontalAlignment = Alignment.Start) {
-
-                Row(
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    modifier = Modifier.fillMaxWidth().padding(0.dp)
+                    .fillMaxWidth()
+                    .padding(bottom = 24.dp),
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                Column(
+                    modifier = Modifier.padding(24.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Text(text = "Public Key: ", fontSize = 15.sp)
-
+                    // Profile Picture
+                    Image(
+                        painter = painterResource(id = currentImage),
+                        contentDescription = "Profile Picture",
+                        modifier = Modifier
+                            .size(100.dp)
+                            .clip(CircleShape)
+                            .clickable { showDialog = true }
+                    )
+                    
+                    Spacer(modifier = Modifier.height(16.dp))
+                    
+                    // Username
                     Text(
-                        text = if (showKey) "Hide Key" else "Show Key",
-                        fontSize = 15.sp,
-                        color = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.clickable { showKey = !showKey }
+                        text = user.username,
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.Bold
+                    )
+                    
+                    Text(
+                        text = "Tap profile picture to change",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
-
-                Spacer(modifier = Modifier.height(1.dp))
-
-                Text(
-                    text = if (showKey) user.publicKey else "******************",
-                    fontSize = 16.sp,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(Color.LightGray, shape = RoundedCornerShape(50.dp))
-                        .border(2.dp, Color.DarkGray, shape = RoundedCornerShape(50.dp))
-                        .padding(18.dp, 6.dp),
-                    color = Color.Black
-                )
             }
 
 
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            // Private key
-            Column(horizontalAlignment = Alignment.Start) {
-                Row(
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    modifier = Modifier.fillMaxWidth().padding(0.dp)
-                ) {
-                    Text(text = "Private Key: ", fontSize = 15.sp)
-
+            // Security Keys Section
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Column(modifier = Modifier.padding(20.dp)) {
                     Text(
-                        text = if (showPin) "Hide Key" else "Show Key",
-                        fontSize = 15.sp,
-                        color = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.clickable { showPin = !showPin }
+                        text = "Security Keys",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        modifier = Modifier.padding(bottom = 16.dp)
+                    )
+                    
+                    // Public Key
+                    KeyItem(
+                        title = "Public Key",
+                        value = user.publicKey,
+                        isVisible = showKey,
+                        onToggleVisibility = { showKey = !showKey }
+                    )
+                    
+                    Spacer(modifier = Modifier.height(16.dp))
+                    
+                    // Private Key
+                    KeyItem(
+                        title = "Private Key",
+                        value = user.privateKey,
+                        isVisible = showPin,
+                        onToggleVisibility = { showPin = !showPin }
                     )
                 }
-
-                Spacer(modifier = Modifier.height(1.dp))
-
-                Text(
-                    text = if (showPin) user.privateKey else "******************",
-                    fontSize = 16.sp,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(Color.LightGray, shape = RoundedCornerShape(50.dp))
-                        .border(2.dp, Color.DarkGray, shape = RoundedCornerShape(50.dp))
-                        .padding(18.dp, 6.dp),
-                    color = Color.Black
-                )
             }
 
 
-            Spacer(modifier = Modifier.height(20.dp))
 
-            // Device details
-            Column(horizontalAlignment = Alignment.Start) {
-                Text(text = "Device details: ", fontSize = 15.sp)
-
-                Spacer(modifier = Modifier.height(1.dp))
-
-                Text(
-                    text = user.deviceModel,
-                    fontSize = 15.sp,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                )
+            // Account Information Section
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Column(modifier = Modifier.padding(20.dp)) {
+                    Text(
+                        text = "Account Information",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        modifier = Modifier.padding(bottom = 16.dp)
+                    )
+                    
+                    InfoRow("Device", user.deviceModel)
+                    Spacer(modifier = Modifier.height(12.dp))
+                    InfoRow("Created", user.getFormattedDate())
+                }
             }
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            // Account creation
-            Column(horizontalAlignment = Alignment.Start) {
-                Text(text = "Account created at: ", fontSize = 15.sp)
-
-                Spacer(modifier = Modifier.height(1.dp))
-
-                Text(
-                    text = user.getFormattedDate(),
-                    fontSize = 15.sp,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                )
-            }
-
-
-            Spacer(modifier = Modifier.height(35.dp))
 
             InfoInformation(text = "This new-age login system ensures security without passwords and emails. Your public-private key stays safe inside your device without any usage restriction and third-party interference.")
         }
@@ -202,6 +173,68 @@ fun ProfileScreen(userViewModel: UserViewModel = viewModel()) {
                 }
             )
         }
+    }
+}
+
+@Composable
+fun KeyItem(
+    title: String,
+    value: String,
+    isVisible: Boolean,
+    onToggleVisibility: () -> Unit
+) {
+    Column {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.Medium
+            )
+            
+            Text(
+                text = if (isVisible) "Hide" else "Show",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.clickable { onToggleVisibility() }
+            )
+        }
+        
+        Spacer(modifier = Modifier.height(8.dp))
+        
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(8.dp)
+        ) {
+            Text(
+                text = if (isVisible) value else "••••••••••••••••",
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.padding(12.dp),
+                fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace
+            )
+        }
+    }
+}
+
+@Composable
+fun InfoRow(label: String, value: String) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Text(
+            text = value,
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = FontWeight.Medium
+        )
     }
 }
 

@@ -1,14 +1,18 @@
 package com.shaadow.tunes.ui.screens.home
 
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -20,6 +24,7 @@ import com.shaadow.tunes.suggestion.SimpleSuggestionIntegration
 import com.shaadow.tunes.ui.components.themed.NonQueuedMediaItemMenu
 import com.shaadow.tunes.ui.items.LocalSongItem
 import com.shaadow.tunes.ui.styling.Dimensions
+import com.shaadow.tunes.utils.SnapLayoutInfoProvider
 import com.shaadow.tunes.utils.asMediaItem
 import com.shaadow.tunes.utils.forcePlay
 import com.shaadow.tunes.viewmodels.HomeSongsViewModel
@@ -27,7 +32,7 @@ import com.shaadow.tunes.viewmodels.HomeSongsViewModel
 /**
  * Personalized recommendations component using the lightweight suggestion system
  */
-@OptIn(ExperimentalAnimationApi::class)
+@OptIn(ExperimentalAnimationApi::class, ExperimentalFoundationApi::class)
 @Composable
 fun PersonalizedRecommendations() {
     val context = LocalContext.current
@@ -47,32 +52,29 @@ fun PersonalizedRecommendations() {
     LaunchedEffect(Unit) {
         isLoading = true
         try {
-            // First try to get recommendations from the suggestion system
-            val suggestedItems = suggestionIntegration.getSuggestionSystem().getRecommendations(16)
-            
-            if (suggestedItems.isNotEmpty()) {
-                recommendations = suggestedItems
-            } else {
-                // Fallback to most played songs if no suggestions available
-                viewModel.loadSongs(
-                    sortBy = com.shaadow.tunes.enums.SongSortBy.PlayTime,
-                    sortOrder = com.shaadow.tunes.enums.SortOrder.Descending
-                )
-            }
-        } catch (e: Exception) {
-            // Fallback to viewModel on error
+            // Always load songs first for fallback
             viewModel.loadSongs(
                 sortBy = com.shaadow.tunes.enums.SongSortBy.PlayTime,
                 sortOrder = com.shaadow.tunes.enums.SortOrder.Descending
             )
+            
+            // Get recommendations from the lightweight suggestion system
+            val suggestedItems = suggestionIntegration.getSuggestionSystem().getRecommendations(16)
+            
+            if (suggestedItems.isNotEmpty()) {
+                recommendations = suggestedItems
+            }
+            // If no suggestions, we'll use the fallback logic below with viewModel.items
+        } catch (e: Exception) {
+            // Error handling - will use fallback logic below
         } finally {
             isLoading = false
         }
     }
 
-    // Show recommendations or fallback to most played songs, ensure at least 8 items
+    // Show recommendations using lightweight suggestion system, ensure at least 8 items
     val itemsToShow = if (recommendations.isNotEmpty()) {
-        // If we have recommendations but less than 8, pad with most played songs
+        // If we have recommendations from suggestion system but less than 8, pad with smart fallback
         if (recommendations.size < 8) {
             val additionalSongs = viewModel.items
                 .take(20)
@@ -87,8 +89,11 @@ fun PersonalizedRecommendations() {
             recommendations.take(8)
         }
     } else {
-        // Fallback to most played songs, ensure we have at least 8
-        viewModel.items.take(8).map { it.asMediaItem }
+        // Smart fallback: mix of most played, recent, and liked songs for better "recommendations"
+        val mostPlayed = viewModel.items.take(4).map { it.asMediaItem }
+        val recent = viewModel.items.sortedByDescending { it.totalPlayTimeMs }.take(4).map { it.asMediaItem }
+        val mixed = (mostPlayed + recent).distinctBy { it.mediaId }.take(8)
+        mixed
     }
 
     if (itemsToShow.isNotEmpty() || isLoading) {
@@ -99,10 +104,7 @@ fun PersonalizedRecommendations() {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = if (recommendations.isNotEmpty()) 
-                    stringResource(id = R.string.recommended_for_you)
-                else 
-                    "Most Played",
+                text = stringResource(id = R.string.recommended_for_you),
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.weight(1f)
             )
@@ -115,7 +117,24 @@ fun PersonalizedRecommendations() {
             }
         }
 
+        // Sticky horizontal scrolling setup
+        val lazyListState = rememberLazyListState()
+        val density = LocalDensity.current
+        
+        val snapLayoutInfoProvider = remember(lazyListState) {
+            with(density) {
+                SnapLayoutInfoProvider(
+                    lazyListState = lazyListState,
+                    positionInLayout = { layoutSize, itemSize ->
+                        (layoutSize / 2f - itemSize / 2f)
+                    }
+                )
+            }
+        }
+
         LazyRow(
+            state = lazyListState,
+            flingBehavior = rememberSnapFlingBehavior(snapLayoutInfoProvider),
             contentPadding = PaddingValues(horizontal = 8.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {

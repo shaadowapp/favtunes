@@ -4,9 +4,22 @@ import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Apps
+import androidx.compose.material.icons.outlined.BugReport
+import androidx.compose.material.icons.outlined.Feedback
+import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Icon
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -16,9 +29,19 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import com.shaadow.tunes.ui.components.BugReportBottomSheet
+import com.shaadow.tunes.ui.components.FeedbackBottomSheet
+import com.shaadow.tunes.ui.components.SponsoredAppsBottomSheet
+import com.shaadow.tunes.utils.rememberShakeDetector
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.shaadow.tunes.R
 import com.shaadow.tunes.ui.components.AppIcon
@@ -36,6 +59,15 @@ fun HomeScreen(
     screenIndex: Int
 ) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
+    var showFeedbackSheet by remember { mutableStateOf(false) }
+    var showSponsoredSheet by remember { mutableStateOf(false) }
+    var showBugReportSheet by remember { mutableStateOf(false) }
+    var showDropdownMenu by remember { mutableStateOf(false) }
+    
+    // Shake detection for bug reporting
+    rememberShakeDetector {
+        showBugReportSheet = true
+    }
 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -69,18 +101,75 @@ fun HomeScreen(
                 },
                 actions = {
                     TooltipIconButton(
+                        description = R.string.more,
+                        onClick = { showSponsoredSheet = true },
+                        icon = Icons.Outlined.Apps,
+                        inTopBar = true
+                    )
+                    
+                    TooltipIconButton(
                         description = R.string.search,
                         onClick = { navController.navigate(route = "search") },
                         icon = Icons.Outlined.Search,
                         inTopBar = true
                     )
 
-                    TooltipIconButton(
-                        description = R.string.settings,
-                        onClick = { navController.navigate(route = "settings") },
-                        icon = Icons.Outlined.Settings,
-                        inTopBar = true
-                    )
+                    Box {
+                        TooltipIconButton(
+                            description = R.string.more,
+                            onClick = { showDropdownMenu = true },
+                            icon = Icons.Outlined.MoreVert,
+                            inTopBar = true
+                        )
+                        
+                        DropdownMenu(
+                            expanded = showDropdownMenu,
+                            onDismissRequest = { showDropdownMenu = false }
+                        ) {
+                            DropdownMenuItem(
+                                text = { 
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Icon(Icons.Outlined.Settings, contentDescription = null, modifier = Modifier.size(18.dp))
+                                        Spacer(Modifier.width(12.dp))
+                                        Text("Settings", style = MaterialTheme.typography.bodyLarge)
+                                    }
+                                },
+                                onClick = {
+                                    showDropdownMenu = false
+                                    navController.navigate(route = "settings")
+                                },
+                                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+                            )
+                            DropdownMenuItem(
+                                text = { 
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Icon(Icons.Outlined.Feedback, contentDescription = null, modifier = Modifier.size(18.dp))
+                                        Spacer(Modifier.width(12.dp))
+                                        Text("Feedback", style = MaterialTheme.typography.bodyLarge)
+                                    }
+                                },
+                                onClick = {
+                                    showDropdownMenu = false
+                                    showFeedbackSheet = true
+                                },
+                                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+                            )
+                            DropdownMenuItem(
+                                text = { 
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Icon(Icons.Outlined.BugReport, contentDescription = null, modifier = Modifier.size(18.dp))
+                                        Spacer(Modifier.width(12.dp))
+                                        Text("Report Bug", style = MaterialTheme.typography.bodyLarge)
+                                    }
+                                },
+                                onClick = {
+                                    showDropdownMenu = false
+                                    showBugReportSheet = true
+                                },
+                                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+                            )
+                        }
+                    }
                 },
                 scrollBehavior = scrollBehavior
             )
@@ -119,5 +208,23 @@ fun HomeScreen(
                 )
             }
         }
+    }
+    
+    if (showFeedbackSheet) {
+        FeedbackBottomSheet(
+            onDismiss = { showFeedbackSheet = false }
+        )
+    }
+    
+    if (showSponsoredSheet) {
+        SponsoredAppsBottomSheet(
+            onDismiss = { showSponsoredSheet = false }
+        )
+    }
+    
+    if (showBugReportSheet) {
+        BugReportBottomSheet(
+            onDismiss = { showBugReportSheet = false }
+        )
     }
 }

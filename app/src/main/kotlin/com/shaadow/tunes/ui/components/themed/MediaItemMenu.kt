@@ -22,6 +22,7 @@ import androidx.compose.material.icons.outlined.Album
 import androidx.compose.material.icons.outlined.ChevronRight
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.FavoriteBorder
+import androidx.compose.material.icons.outlined.Feedback
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.PlaylistRemove
 import androidx.compose.material.icons.outlined.Podcasts
@@ -561,6 +562,15 @@ fun MediaItemMenu(
                         }
                     )
                 }
+                
+                MenuEntry(
+                    icon = Icons.Outlined.Feedback,
+                    text = stringResource(id = R.string.feedback),
+                    onClick = {
+                        onDismiss()
+                        // TODO: Show feedback bottom sheet
+                    }
+                )
             }
         }
     }

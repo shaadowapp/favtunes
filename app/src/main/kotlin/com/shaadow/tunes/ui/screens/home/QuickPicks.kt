@@ -5,6 +5,7 @@ import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -44,7 +45,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.sp
+import com.shaadow.tunes.utils.CountryDetector
+import androidx.compose.material3.Card
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.times
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -60,6 +70,7 @@ import com.shaadow.tunes.ui.components.ShimmerHost
 import com.shaadow.tunes.ui.components.themed.NonQueuedMediaItemMenu
 import com.shaadow.tunes.ui.screens.home.PersonalizedRecommendations
 import com.shaadow.tunes.ui.components.themed.TextPlaceholder
+import com.shaadow.tunes.utils.TimeUtils
 import com.shaadow.tunes.ui.items.AlbumItem
 import com.shaadow.tunes.ui.items.ArtistItem
 import com.shaadow.tunes.ui.items.ItemPlaceholder
@@ -134,8 +145,57 @@ fun QuickPicks(
                 .verticalScroll(rememberScrollState())
                 .padding(top = 4.dp, bottom = 16.dp + playerPadding)
         ) {
-            // Add Personalized Recommendations section at the top
-            PersonalizedRecommendations()
+            // Time-based greeting at the top
+            Text(
+                text = TimeUtils.getTimeBasedGreeting(),
+                style = MaterialTheme.typography.displaySmall.copy(
+                    brush = Brush.horizontalGradient(
+                        colors = listOf(
+                            Color(0xFF6366F1),
+                            Color(0xFFEC4899)
+                        )
+                    )
+                ),
+                fontWeight = FontWeight.Black,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 20.dp)
+            )
+            
+            // Top 10 Trending Songs Section
+            val context = LocalContext.current
+            val countryCode = remember { CountryDetector.getCountryCode(context) }
+            val countryName = remember { CountryDetector.getCountryName(countryCode) }
+            
+            Text(
+                text = "Top 10 Trending in $countryName",
+                style = MaterialTheme.typography.titleMedium,
+                modifier = sectionTextModifier
+            )
+            
+            // Placeholder for trending songs - will be implemented with actual API
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+                    .padding(bottom = 24.dp)
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "🎵 Trending Chart",
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = "Coming Soon - Personalized for $countryName",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
             
             // Progressive loading: Show basic content first, load details gradually
             viewModel.relatedPageResult?.getOrNull()?.let { related ->
@@ -218,9 +278,14 @@ fun QuickPicks(
                         )
                     }
                 }
+                
+                // Personalized Recommendations section with sticky horizontal scrolling
+                PersonalizedRecommendations()
+                
+                Spacer(modifier = Modifier.height(32.dp))
 
                 related?.albums?.let { albums ->
-                    Spacer(modifier = Modifier.height(Dimensions.spacer))
+                    Spacer(modifier = Modifier.height(32.dp))
 
                     Text(
                         text = stringResource(id = R.string.related_albums),
@@ -245,7 +310,7 @@ fun QuickPicks(
                 }
 
                 related?.artists?.let { artists ->
-                    Spacer(modifier = Modifier.height(Dimensions.spacer))
+                    Spacer(modifier = Modifier.height(32.dp))
 
                     Text(
                         text = stringResource(id = R.string.similar_artists),
@@ -270,7 +335,7 @@ fun QuickPicks(
                 }
 
                 related?.playlists?.let { playlists ->
-                    Spacer(modifier = Modifier.height(Dimensions.spacer))
+                    Spacer(modifier = Modifier.height(32.dp))
 
                     Text(
                         text = stringResource(id = R.string.recommended_playlists),
@@ -364,6 +429,74 @@ fun QuickPicks(
                 }
             } else {
                 // Empty state
+            }
+            
+            // Footer section - moved from About screen
+            Spacer(modifier = Modifier.height(48.dp))
+            
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 18.dp)
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.Start
+                ) {
+                    Text(
+                        text = "PROUDLY",
+                        fontSize = 50.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = Color(0xFF333333)
+                    )
+                    Text(
+                        text = "INDIAN",
+                        fontSize = 50.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = Color(0xFF333333)
+                    )
+                    Text(
+                        text = "APP",
+                        fontSize = 50.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = Color(0xFF333333)
+                    )
+                    Text(
+                        text = "MADE WITH ❤️ AND SUPPORT",
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = Color(0xFF333333),
+                        modifier = Modifier.padding(top = 5.dp)
+                    )
+                    
+                    // App Version
+                    val context = LocalContext.current
+                    val versionName = remember {
+                        try {
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                                context.packageManager.getPackageInfo(
+                                    context.packageName,
+                                    android.content.pm.PackageManager.PackageInfoFlags.of(0)
+                                ).versionName
+                            } else {
+                                @Suppress("DEPRECATION")
+                                context.packageManager.getPackageInfo(
+                                    context.packageName,
+                                    0
+                                ).versionName
+                            }
+                        } catch (e: Exception) {
+                            "Unknown Version"
+                        }
+                    }
+                    
+                    Text(
+                        text = "APP VERSION: $versionName",
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Normal,
+                        color = Color(0xFF333333),
+                        modifier = Modifier.padding(top = 5.dp)
+                    )
+                }
             }
         }
     }

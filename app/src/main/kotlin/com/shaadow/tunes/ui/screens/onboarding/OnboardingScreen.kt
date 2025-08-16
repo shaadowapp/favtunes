@@ -21,9 +21,11 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowForward
-import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.Mood
 import androidx.compose.material.icons.filled.LibraryMusic
+import androidx.compose.ui.res.painterResource
+import androidx.compose.foundation.Image
+import com.shaadow.tunes.R
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -177,11 +179,10 @@ private fun WelcomeStep() {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Icon(
-            imageVector = Icons.Default.MusicNote,
+        Image(
+            painter = painterResource(id = R.drawable.ic_launcher_foreground),
             contentDescription = null,
-            modifier = Modifier.size(120.dp),
-            tint = MaterialTheme.colorScheme.primary
+            modifier = Modifier.size(120.dp)
         )
         
         Spacer(modifier = Modifier.height(32.dp))

@@ -88,19 +88,46 @@ fun SettingsScreen(
                 .padding(paddingValues)
                 .padding(bottom = playerPadding)
         ) {
-            SettingsSection.entries.forEachIndexed { index, section ->
-                ListItem(
-                    headlineContent = {
-                        Text(text = stringResource(id = section.resourceId))
-                    },
-                    modifier = Modifier.clickable { onGoToSettingsPage(index) },
-                    leadingContent = {
-                        Icon(
-                            imageVector = section.icon,
-                            contentDescription = stringResource(id = section.resourceId)
-                        )
-                    }
-                )
+            // Account Category
+            CategoryHeader("Account")
+            listOf(0).forEach { index -> // Profile
+                val section = SettingsSection.entries[index]
+                SettingsItem(section, index, onGoToSettingsPage)
+            }
+            
+            // Playback Category
+            CategoryHeader("Playback")
+            listOf(3, 4).forEach { index -> // Player, Gestures
+                val section = SettingsSection.entries[index]
+                SettingsItem(section, index, onGoToSettingsPage)
+            }
+            
+            // Personalization Category
+            CategoryHeader("Personalization")
+            listOf(1, 2).forEach { index -> // General, Suggestions
+                val section = SettingsSection.entries[index]
+                SettingsItem(section, index, onGoToSettingsPage)
+            }
+            
+            // Storage Category
+            CategoryHeader("Storage")
+            listOf(5, 6).forEach { index -> // Cache, Database
+                val section = SettingsSection.entries[index]
+                SettingsItem(section, index, onGoToSettingsPage)
+            }
+            
+            // Legal Category
+            CategoryHeader("Legal")
+            listOf(9, 10).forEach { index -> // Terms of Use, Privacy Policy
+                val section = SettingsSection.entries[index]
+                SettingsItem(section, index, onGoToSettingsPage)
+            }
+            
+            // Others Category
+            CategoryHeader("Others")
+            listOf(7, 8).forEach { index -> // Other, About
+                val section = SettingsSection.entries[index]
+                SettingsItem(section, index, onGoToSettingsPage)
             }
         }
     }
@@ -240,6 +267,32 @@ fun InfoInformation(
             style = MaterialTheme.typography.bodyMedium
         )
     }
+}
+
+@Composable
+fun CategoryHeader(title: String) {
+    Text(
+        text = title,
+        style = MaterialTheme.typography.labelMedium,
+        color = MaterialTheme.colorScheme.primary,
+        modifier = Modifier.padding(start = 16.dp, top = 16.dp, bottom = 8.dp)
+    )
+}
+
+@Composable
+fun SettingsItem(section: SettingsSection, index: Int, onGoToSettingsPage: (Int) -> Unit) {
+    ListItem(
+        headlineContent = {
+            Text(text = stringResource(id = section.resourceId))
+        },
+        modifier = Modifier.clickable { onGoToSettingsPage(index) },
+        leadingContent = {
+            Icon(
+                imageVector = section.icon,
+                contentDescription = stringResource(id = section.resourceId)
+            )
+        }
+    )
 }
 
 @Composable
