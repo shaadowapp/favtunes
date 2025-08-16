@@ -2,7 +2,10 @@ package com.shaadow.tunes.suggestion
 
 import android.content.Context
 import androidx.media3.common.MediaItem
+import com.shaadow.tunes.Database
+import com.shaadow.tunes.utils.asMediaItem
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 
 /**
@@ -14,12 +17,130 @@ class WorkingSuggestionSystem(private val context: Context) {
     private val preferences = context.getSharedPreferences("working_suggestions", Context.MODE_PRIVATE)
     
     /**
-     * Get recommendations based on user preferences
+     * Get recommendations based on user preferences and behavior
      */
     suspend fun getRecommendations(limit: Int = 16): List<MediaItem> = withContext(Dispatchers.IO) {
-        // For now, return empty list - this can be enhanced to use actual recommendation logic
-        emptyList()
+        try {
+            val userPreferences = getUserPreferences()
+            val behaviorData = getBehaviorBasedRecommendations()
+            
+            // If no preferences set, return behavior-based recommendations only
+            if (userPreferences.isNullOrEmpty()) {
+                return@withContext behaviorData.take(limit)
+            }
+            
+            // Mix preferences (80%) and behavior (20%) as per requirements
+            val preferenceWeight = 0.8
+            val behaviorWeight = 0.2
+            
+            val preferenceCount = (limit * preferenceWeight).toInt()
+            val behaviorCount = limit - preferenceCount
+            
+            val recommendations = mutableListOf<MediaItem>()
+            
+            // Add preference-based recommendations
+            recommendations.addAll(getPreferenceBasedRecommendations(preferenceCount))
+            
+            // Add behavior-based recommendations
+            recommendations.addAll(behaviorData.take(behaviorCount))
+            
+            // Remove duplicates and return
+            recommendations.distinctBy { it.mediaId }.take(limit)
+        } catch (e: Exception) {
+            // Fallback to empty list if anything fails
+            emptyList()
+        }
     }
+    
+    /**
+     * Get recommendations based on user behavior (most played, liked songs)
+     */
+    private suspend fun getBehaviorBasedRecommendations(): List<MediaItem> {
+        return try {
+            val behaviorScores = mutableMapOf<String, Double>()
+            
+            // Get all tracked songs and calculate behavior scores
+            preferences.all.forEach { (key, value) ->
+                when {
+                    key.startsWith("play_") -> {
+                        val songId = key.removePrefix("play_")
+                        val playCount = value as? Int ?: 0
+                        behaviorScores[songId] = (behaviorScores[songId] ?: 0.0) + (playCount * 1.0)
+                    }
+                    key.startsWith("liked_") && value as? Boolean == true -> {
+                        val songId = key.removePrefix("liked_")
+                        behaviorScores[songId] = (behaviorScores[songId] ?: 0.0) + 5.0 // Likes are worth 5 plays
+                    }
+                    key.startsWith("skip_") -> {
+                        val songId = key.removePrefix("skip_")
+                        val skipCount = value as? Int ?: 0
+                        behaviorScores[songId] = (behaviorScores[songId] ?: 0.0) - (skipCount * 0.5) // Skips reduce score
+                    }
+                }
+            }
+            
+            // Get actual songs from database and convert to MediaItems
+            val topSongIds = behaviorScores.entries
+                .sortedByDescending { it.value }
+                .take(20)
+                .map { it.key }
+            
+            // Fetch actual songs from database
+            val songs = mutableListOf<MediaItem>()
+            for (songId in topSongIds) {
+                try {
+                    val song = Database.song(songId).first()
+                    song?.let { songs.add(it.asMediaItem) }
+                } catch (e: Exception) {
+                    // Skip songs that can't be found
+                }
+            }
+            
+            songs
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }
+    
+    /**
+     * Get recommendations based on user preferences
+     */
+    private suspend fun getPreferenceBasedRecommendations(limit: Int): List<MediaItem> {
+        return try {
+            val userPreferences = getUserPreferences() ?: return emptyList()
+            
+            // Get a variety of songs from database for better recommendations
+            val allSongs = Database.songsByPlayTimeDesc().first().take(200) // Get top 200 most played
+            val recentSongs = Database.songsByRowIdDesc().first().take(100) // Get 100 most recent
+            val randomSongs = Database.songsByTitleAsc().first().shuffled().take(50) // Get 50 random songs
+            
+            // Combine different sources for variety
+            val combinedSongs = (allSongs + recentSongs + randomSongs).distinctBy { it.id }
+            
+            // Filter songs that might match user preferences (simplified matching)
+            val matchingSongs = combinedSongs.filter { song ->
+                userPreferences.any { preference ->
+                    // Simple matching - check if preference appears in title or artist
+                    song.title.contains(preference, ignoreCase = true) ||
+                    song.artistsText?.contains(preference, ignoreCase = true) == true
+                }
+            }
+            
+            // If we have matching songs, use them, otherwise fall back to mixed sources
+            val songsToUse = if (matchingSongs.isNotEmpty()) {
+                matchingSongs.shuffled().take(limit) // Shuffle for variety
+            } else {
+                // Fallback to mixed sources for variety
+                combinedSongs.shuffled().take(limit)
+            }
+            
+            songsToUse.map { it.asMediaItem }
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }
+    
+
     
     /**
      * Track song interactions
@@ -139,6 +260,13 @@ class WorkingSuggestionSystem(private val context: Context) {
         preferences.edit().clear().apply()
     }
     
+    /**
+     * Reset onboarding status for testing
+     */
+    fun resetOnboarding() {
+        preferences.edit().putBoolean("onboarding_complete", false).apply()
+    }
+    
     suspend fun getStorageSizeEstimate(): Long {
         return preferences.all.size * 50L // Rough estimate: 50 bytes per preference
     }
@@ -148,5 +276,31 @@ class WorkingSuggestionSystem(private val context: Context) {
         val cutoffTime = System.currentTimeMillis() - (30 * 24 * 60 * 60 * 1000L) // 30 days
         // For now, just return success
         return true
+    }
+    
+    /**
+     * Test method to verify the recommendation system is working
+     */
+    suspend fun testRecommendationSystem(): Map<String, Any> {
+        return try {
+            val preferences = getUserPreferences()
+            val recommendations = getRecommendations(5)
+            val behaviorData = getBehaviorBasedRecommendations()
+            val trackingStatus = getTrackingStatus()
+            
+            mapOf(
+                "hasPreferences" to (preferences?.isNotEmpty() == true),
+                "preferencesCount" to (preferences?.size ?: 0),
+                "recommendationsCount" to recommendations.size,
+                "behaviorRecommendationsCount" to behaviorData.size,
+                "trackingStatus" to trackingStatus,
+                "systemWorking" to true
+            )
+        } catch (e: Exception) {
+            mapOf(
+                "systemWorking" to false,
+                "error" to (e.message ?: "Unknown error")
+            )
+        }
     }
 }

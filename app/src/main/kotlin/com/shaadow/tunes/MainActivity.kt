@@ -72,6 +72,7 @@ import com.shaadow.tunes.utils.asMediaItem
 import com.shaadow.tunes.utils.forcePlay
 import com.shaadow.tunes.utils.intent
 import com.shaadow.tunes.suggestion.SimpleSuggestionIntegration
+import com.shaadow.tunes.ui.screens.onboarding.OnboardingScreen
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
@@ -166,11 +167,11 @@ class MainActivity : ComponentActivity() {
             AppTheme {
                 Box(modifier = Modifier.fillMaxSize()) {
                     if (showOnboarding) {
-                        // Auto-complete onboarding for now
-                        LaunchedEffect(Unit) {
-                            suggestionIntegration.completeOnboarding()
-                            showOnboarding = false
-                        }
+                        OnboardingScreen(
+                            onComplete = {
+                                showOnboarding = false
+                            }
+                        )
                     } else {
                         // Show main app
                         CompositionLocalProvider(value = LocalPlayerServiceBinder provides binder) {

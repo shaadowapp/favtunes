@@ -58,6 +58,7 @@ import com.shaadow.tunes.models.LocalMenuState
 import com.shaadow.tunes.query
 import com.shaadow.tunes.ui.components.ShimmerHost
 import com.shaadow.tunes.ui.components.themed.NonQueuedMediaItemMenu
+import com.shaadow.tunes.ui.screens.home.PersonalizedRecommendations
 import com.shaadow.tunes.ui.components.themed.TextPlaceholder
 import com.shaadow.tunes.ui.items.AlbumItem
 import com.shaadow.tunes.ui.items.ArtistItem
@@ -133,6 +134,9 @@ fun QuickPicks(
                 .verticalScroll(rememberScrollState())
                 .padding(top = 4.dp, bottom = 16.dp + playerPadding)
         ) {
+            // Add Personalized Recommendations section at the top
+            PersonalizedRecommendations()
+            
             // Progressive loading: Show basic content first, load details gradually
             viewModel.relatedPageResult?.getOrNull()?.let { related ->
                 Text(
@@ -214,9 +218,6 @@ fun QuickPicks(
                         )
                     }
                 }
-
-                // Add Personalized Recommendations section
-                PersonalizedRecommendations()
 
                 related?.albums?.let { albums ->
                     Spacer(modifier = Modifier.height(Dimensions.spacer))
