@@ -152,7 +152,7 @@ fun Navigation(
             )
         }
 
-        playerComposable(route = "playlists") {
+        playerComposable(route = "mytunes") {
             HomeScreen(
                 navController = navController,
                 screenIndex = 4

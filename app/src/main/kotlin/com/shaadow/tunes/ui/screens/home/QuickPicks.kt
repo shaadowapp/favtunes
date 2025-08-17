@@ -21,7 +21,9 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -53,6 +55,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.sp
 import com.shaadow.tunes.utils.CountryDetector
 import androidx.compose.material3.Card
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -168,34 +176,63 @@ fun QuickPicks(
             val countryName = remember { CountryDetector.getCountryName(countryCode) }
             
             Text(
-                text = "Top 10 Trending in $countryName",
+                text = "Top 5 Trending in $countryName",
                 style = MaterialTheme.typography.titleMedium,
                 modifier = sectionTextModifier
             )
             
-            // Placeholder for trending songs - will be implemented with actual API
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
-                    .padding(bottom = 24.dp)
-            ) {
-                Column(
-                    modifier = Modifier.padding(16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
+            // Trending songs grid
+            viewModel.relatedPageResult?.getOrNull()?.songs?.take(6)?.let { trendingSongs ->
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(3),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(200.dp)
+                        .padding(horizontal = 16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    verticalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
-                    Text(
-                        text = "🎵 Trending Chart",
-                        style = MaterialTheme.typography.bodyLarge
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = "Coming Soon - Personalized for $countryName",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    itemsIndexed(trendingSongs) { index, song ->
+                        Box {
+                            Box(
+                                modifier = Modifier
+                                    .aspectRatio(1f)
+                                    .clip(RoundedCornerShape(6.dp))
+                                    .background(MaterialTheme.colorScheme.surfaceVariant)
+                                    .clickable {
+                                        val mediaItem = song.asMediaItem
+                                        binder?.stopRadio()
+                                        binder?.player?.forcePlay(mediaItem)
+                                        binder?.setupRadio(
+                                            com.shaadow.innertube.models.NavigationEndpoint.Endpoint.Watch(videoId = mediaItem.mediaId)
+                                        )
+                                    }
+                            )
+                            
+                            // Ranking overlay
+                            Box(
+                                modifier = Modifier
+                                    .align(Alignment.TopStart)
+                                    .padding(8.dp)
+                                    .background(
+                                        Color.Black.copy(alpha = 0.6f),
+                                        RoundedCornerShape(4.dp)
+                                    )
+                                    .padding(horizontal = 4.dp, vertical = 2.dp)
+                            ) {
+                                Text(
+                                    text = "#${index + 1}",
+                                    color = Color.White,
+                                    style = MaterialTheme.typography.labelMedium,
+                                    fontWeight = FontWeight.ExtraBold
+                                )
+                            }
+                        }
+                    }
                 }
             }
+            
+            Spacer(modifier = Modifier.height(32.dp))
             
             // Progressive loading: Show basic content first, load details gradually
             viewModel.relatedPageResult?.getOrNull()?.let { related ->
@@ -278,6 +315,8 @@ fun QuickPicks(
                         )
                     }
                 }
+                
+                Spacer(modifier = Modifier.height(32.dp))
                 
                 // Personalized Recommendations section with sticky horizontal scrolling
                 PersonalizedRecommendations()

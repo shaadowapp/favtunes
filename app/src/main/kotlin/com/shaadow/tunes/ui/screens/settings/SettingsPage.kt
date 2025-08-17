@@ -47,20 +47,18 @@ fun SettingsPage(
             )
         }
     ) { paddingValues ->
-        Surface(modifier = Modifier.padding(top = paddingValues.calculateTopPadding())) {
-            when (section) {
-                SettingsSection.Profile -> ProfileScreen()
-                SettingsSection.About -> About()
-                SettingsSection.General -> GeneralSettings()
-                SettingsSection.Suggestions -> SuggestionSettings()
-                SettingsSection.Player -> PlayerSettings()
-                SettingsSection.Cache -> CacheSettings()
-                SettingsSection.Gestures -> GestureSettings()
-                SettingsSection.Database -> DatabaseSettings()
-                SettingsSection.Other -> OtherSettings()
-                SettingsSection.TermsOfUse -> TermsOfUse()
-                SettingsSection.PrivacyPolicy -> PrivacyPolicy()
-            }
+        when (section) {
+            SettingsSection.Profile -> ProfileScreen()
+            SettingsSection.About -> About()
+            SettingsSection.General -> GeneralSettings()
+            SettingsSection.Suggestions -> SuggestionSettings(paddingValues)
+            SettingsSection.Player -> PlayerSettings()
+            SettingsSection.Cache -> CacheSettings()
+            SettingsSection.Gestures -> GestureSettings()
+            SettingsSection.Database -> DatabaseSettings()
+            SettingsSection.Other -> OtherSettings()
+            SettingsSection.TermsOfUse -> TermsOfUse()
+            SettingsSection.PrivacyPolicy -> PrivacyPolicy()
         }
     }
 }

@@ -210,4 +210,5 @@
     <string name="open_in_github" translatable="false">Open in GitHub</string>
     <string name="go_back" translatable="false">Go back</string>
     <string name="clear" translatable="false">Clear</string>
+    <string name="my_tunes">My Tunes</string>
 </resources>

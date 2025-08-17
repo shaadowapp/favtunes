@@ -15,6 +15,7 @@ import androidx.compose.material.icons.outlined.Apps
 import androidx.compose.material.icons.outlined.BugReport
 import androidx.compose.material.icons.outlined.Feedback
 import androidx.compose.material.icons.outlined.MoreVert
+import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.DropdownMenu
@@ -88,7 +89,7 @@ fun HomeScreen(
                         }
                         4 -> {
                             Text(
-                                text = "Playlists",
+                                text = "My Tunes",
                                 style = MaterialTheme.typography.headlineSmall,
                                 fontWeight = FontWeight.SemiBold
                             )
@@ -168,6 +169,20 @@ fun HomeScreen(
                                 },
                                 contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
                             )
+                            DropdownMenuItem(
+                                text = { 
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Icon(Icons.Outlined.Notifications, contentDescription = null, modifier = Modifier.size(18.dp))
+                                        Spacer(Modifier.width(12.dp))
+                                        Text("Inbox", style = MaterialTheme.typography.bodyLarge)
+                                    }
+                                },
+                                onClick = {
+                                    showDropdownMenu = false
+                                    navController.navigate("inbox")
+                                },
+                                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+                            )
                         }
                     }
                 },
@@ -201,11 +216,7 @@ fun HomeScreen(
                     onAlbumClick = { album -> navController.navigate(route = "album/${album.id}") }
                 )
 
-                4 -> HomePlaylists(
-                    onBuiltInPlaylist = { playlistIndex -> navController.navigate(route = "builtInPlaylist/$playlistIndex") },
-                    onPlaylistClick = { playlist -> navController.navigate(route = "localPlaylist/${playlist.id}") },
-                    onYouTubePlaylistClick = { browseId -> navController.navigate(route = "playlist/$browseId") }
-                )
+                4 -> com.shaadow.tunes.ui.screens.mytunes.MyTunesScreen()
             }
         }
     }

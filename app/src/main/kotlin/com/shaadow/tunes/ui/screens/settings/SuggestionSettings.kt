@@ -22,7 +22,7 @@ import kotlinx.coroutines.launch
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SuggestionSettings() {
+fun SuggestionSettings(paddingValues: androidx.compose.foundation.layout.PaddingValues = androidx.compose.foundation.layout.PaddingValues()) {
     val context = LocalContext.current
     val suggestionIntegration = remember { SimpleSuggestionIntegration.getInstance(context) }
     val suggestionSystem = suggestionIntegration.getSuggestionSystem()
@@ -39,9 +39,13 @@ fun SuggestionSettings() {
     }
     
     LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = androidx.compose.foundation.layout.PaddingValues(
+            start = 16.dp,
+            end = 16.dp,
+            top = paddingValues.calculateTopPadding() + 16.dp,
+            bottom = 16.dp
+        ),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         item {
