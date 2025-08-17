@@ -135,6 +135,7 @@ interface Database {
         fun songArtistInfo(songId: String) = instance.songArtistInfo(songId)
         fun trending(now: Long = System.currentTimeMillis()) = instance.trending(now)
         fun lastPlayed() = instance.lastPlayed()
+        fun recentlyPlayedSongs() = instance.recentlyPlayedSongs()
         fun randomSong() = instance.randomSong()
         fun eventsCount() = instance.eventsCount()
         fun clearEvents() = instance.clearEvents()
@@ -449,6 +450,11 @@ interface Database {
     @Transaction
     @Query("SELECT Song.* FROM Event JOIN Song ON Song.id = songId GROUP BY songId ORDER BY timestamp DESC LIMIT 1")
     fun lastPlayed(): Flow<Song?>
+
+    @Transaction
+    @Query("SELECT Song.* FROM Event JOIN Song ON Song.id = songId GROUP BY songId ORDER BY MAX(timestamp) DESC LIMIT 50")
+    @RewriteQueriesToDropUnusedColumns
+    fun recentlyPlayedSongs(): Flow<List<Song>>
 
     @Transaction
     @Query("SELECT * FROM Song ORDER BY RANDOM() LIMIT 1")

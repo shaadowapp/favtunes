@@ -5,21 +5,21 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.shaadow.tunes.Database
 import com.shaadow.tunes.suggestion.SimpleSuggestionIntegration
+import com.shaadow.tunes.data.OnboardingData
 import kotlinx.coroutines.launch
 
-/**
- * Interactive suggestion settings screen for the lightweight system
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SuggestionSettings(paddingValues: androidx.compose.foundation.layout.PaddingValues = androidx.compose.foundation.layout.PaddingValues()) {
@@ -27,6 +27,11 @@ fun SuggestionSettings(paddingValues: androidx.compose.foundation.layout.Padding
     val suggestionIntegration = remember { SimpleSuggestionIntegration.getInstance(context) }
     val suggestionSystem = suggestionIntegration.getSuggestionSystem()
     val scope = rememberCoroutineScope()
+    
+    // Get actual user data from Room database
+    val totalSongs by Database.songs(com.shaadow.tunes.enums.SongSortBy.DateAdded, com.shaadow.tunes.enums.SortOrder.Descending).collectAsState(initial = emptyList())
+    val likedSongs by Database.favorites().collectAsState(initial = emptyList())
+    val recentSongs by Database.recentlyPlayedSongs().collectAsState(initial = emptyList())
     
     var currentPreferences by remember { mutableStateOf(setOf<String>()) }
     var trackingStats by remember { mutableStateOf(mapOf<String, Any>()) }
@@ -44,132 +49,139 @@ fun SuggestionSettings(paddingValues: androidx.compose.foundation.layout.Padding
             start = 16.dp,
             end = 16.dp,
             top = paddingValues.calculateTopPadding() + 16.dp,
-            bottom = 16.dp
+            bottom = paddingValues.calculateBottomPadding() + 80.dp
         ),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        item {
-            Text(
-                text = "Music Suggestions",
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold
-            )
-        }
+
         
+        // User Music Statistics from Database
         item {
             Card {
                 Column(
                     modifier = Modifier.padding(16.dp)
                 ) {
                     Text(
-                        text = "System Status",
+                        text = "Your Music Library",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold
                     )
                     
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(12.dp))
                     
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Text("Onboarding Complete:")
-                        Text(
-                            text = if (suggestionSystem.isOnboardingComplete()) "Yes" else "No",
-                            color = if (suggestionSystem.isOnboardingComplete()) 
-                                MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
-                        )
-                    }
-                    
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text("Tracked Songs:")
-                        Text("${trackingStats["totalTrackedSongs"] ?: 0}")
-                    }
-                    
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text("Liked Songs:")
-                        Text("${trackingStats["totalLikedSongs"] ?: 0}")
+                        Column {
+                            Text(
+                                text = "${totalSongs.size}",
+                                style = MaterialTheme.typography.headlineSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                            Text(
+                                text = "Total Songs",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        Column {
+                            Text(
+                                text = "${likedSongs.size}",
+                                style = MaterialTheme.typography.headlineSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.error
+                            )
+                            Text(
+                                text = "Liked Songs",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        Column {
+                            Text(
+                                text = "${recentSongs.size}",
+                                style = MaterialTheme.typography.headlineSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.tertiary
+                            )
+                            Text(
+                                text = "Recently Played",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                     }
                 }
             }
         }
         
+
+        
+        // Music Preferences
         item {
             Card {
                 Column(
                     modifier = Modifier.padding(16.dp)
                 ) {
                     Text(
-                        text = "Your Preferences",
+                        text = "Music Preferences",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold
                     )
                     
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(12.dp))
                     
-                    if (currentPreferences.isNotEmpty()) {
-                        LazyRow(
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            items(currentPreferences.toList()) { preference ->
-                                AssistChip(
-                                    onClick = { },
-                                    label = { Text(preference) }
-                                )
+                    // Show all available genres with current preferences highlighted
+                    LazyRow(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        items(OnboardingData.genres.take(15)) { genre ->
+                            val isSelected = currentPreferences.contains(genre.name)
+                            FilterChip(
+                                onClick = { },
+                                label = { 
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Text(genre.emoji)
+                                        Spacer(modifier = Modifier.width(4.dp))
+                                        Text(genre.name)
+                                    }
+                                },
+                                selected = isSelected
+                            )
+                        }
+                    }
+                    
+                    Spacer(modifier = Modifier.height(12.dp))
+                    
+                    OutlinedButton(
+                        onClick = {
+                            scope.launch {
+                                suggestionSystem.resetOnboarding()
+                                trackingStats = suggestionSystem.getTrackingStatus()
                             }
-                        }
-                        
-                        Spacer(modifier = Modifier.height(12.dp))
-                        
-                        OutlinedButton(
-                            onClick = {
-                                // Reset onboarding to allow re-selection
-                                scope.launch {
-                                    suggestionSystem.clearAllData()
-                                    currentPreferences = emptySet()
-                                    trackingStats = suggestionSystem.getTrackingStatus()
-                                }
-                            },
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Icon(Icons.Default.Refresh, contentDescription = null)
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text("Update Preferences")
-                        }
-                    } else {
-                        Text(
-                            text = "No preferences set. Complete onboarding to set your preferences.",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Icon(Icons.Outlined.Edit, contentDescription = null)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Update Music Preferences")
                     }
                 }
             }
         }
         
+        // Advanced Settings
         item {
             Card {
                 Column(
                     modifier = Modifier.padding(16.dp)
                 ) {
                     Text(
-                        text = "Data Management",
+                        text = "Advanced Settings",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold
-                    )
-                    
-                    Spacer(modifier = Modifier.height(8.dp))
-                    
-                    Text(
-                        text = "Manage your suggestion data and preferences",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     
                     Spacer(modifier = Modifier.height(12.dp))
@@ -180,26 +192,28 @@ fun SuggestionSettings(paddingValues: androidx.compose.foundation.layout.Padding
                         OutlinedButton(
                             onClick = {
                                 scope.launch {
-                                    val testResults = suggestionSystem.testRecommendationSystem()
-                                    // Update tracking stats to show test results
-                                    trackingStats = trackingStats + ("testResults" to testResults)
-                                }
-                            },
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Text("Test Recommendation System")
-                        }
-                        
-                        OutlinedButton(
-                            onClick = {
-                                scope.launch {
-                                    suggestionSystem.resetOnboarding()
+                                    // Refresh recommendations
                                     trackingStats = suggestionSystem.getTrackingStatus()
                                 }
                             },
                             modifier = Modifier.fillMaxWidth()
                         ) {
-                            Text("Reset Onboarding (for testing)")
+                            Icon(Icons.Outlined.Refresh, contentDescription = null)
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text("Refresh Recommendations")
+                        }
+                        
+                        OutlinedButton(
+                            onClick = {
+                                scope.launch {
+                                    // Export listening data
+                                }
+                            },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Icon(Icons.Outlined.Download, contentDescription = null)
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text("Export Listening Data")
                         }
                         
                         OutlinedButton(
@@ -209,47 +223,82 @@ fun SuggestionSettings(paddingValues: androidx.compose.foundation.layout.Padding
                                 contentColor = MaterialTheme.colorScheme.error
                             )
                         ) {
-                            Icon(Icons.Default.Delete, contentDescription = null)
+                            Icon(Icons.Outlined.Delete, contentDescription = null)
                             Spacer(modifier = Modifier.width(8.dp))
-                            Text("Clear All Data")
+                            Text("Reset All Data")
                         }
                     }
                 }
             }
         }
         
+        // Listening Insights from Database
         item {
             Card {
                 Column(
                     modifier = Modifier.padding(16.dp)
                 ) {
                     Text(
-                        text = "How It Works",
+                        text = "Listening Insights",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold
                     )
                     
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(12.dp))
                     
-                    Text(
-                        text = "• Tracks your listening behavior (plays, likes, skips)\n" +
-                                "• Uses 80% preferences + 20% behavior for recommendations\n" +
-                                "• Falls back to YouTube's system when needed\n" +
-                                "• All data stored locally on your device",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    if (recentSongs.isNotEmpty()) {
+                        Text(
+                            text = "Most Recent Artists",
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.Medium
+                        )
+                        
+                        Spacer(modifier = Modifier.height(8.dp))
+                        
+                        LazyRow(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            items(recentSongs.take(10).mapNotNull { it.artistsText }.distinct().take(5)) { artist ->
+                                AssistChip(
+                                    onClick = { },
+                                    label = { Text(artist) },
+                                    leadingIcon = {
+                                        Icon(
+                                            Icons.Outlined.Person,
+                                            contentDescription = null,
+                                            modifier = Modifier.size(16.dp)
+                                        )
+                                    }
+                                )
+                            }
+                        }
+                    } else {
+                        Text(
+                            text = "Start listening to music to see your insights here",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 }
             }
         }
     }
     
-    // Clear data confirmation dialog
+    // Reset data confirmation dialog
     if (showClearDataDialog) {
         AlertDialog(
             onDismissRequest = { showClearDataDialog = false },
-            title = { Text("Clear All Data") },
-            text = { Text("This will remove all your preferences and listening history. This action cannot be undone.") },
+            icon = {
+                Icon(
+                    Icons.Outlined.Warning,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.error
+                )
+            },
+            title = { Text("Reset All Data?") },
+            text = { 
+                Text("This will remove all your music preferences, listening history, and suggestion data. You'll need to set up your preferences again.")
+            },
             confirmButton = {
                 TextButton(
                     onClick = {
@@ -259,9 +308,12 @@ fun SuggestionSettings(paddingValues: androidx.compose.foundation.layout.Padding
                             trackingStats = suggestionSystem.getTrackingStatus()
                             showClearDataDialog = false
                         }
-                    }
+                    },
+                    colors = ButtonDefaults.textButtonColors(
+                        contentColor = MaterialTheme.colorScheme.error
+                    )
                 ) {
-                    Text("Clear")
+                    Text("Reset")
                 }
             },
             dismissButton = {

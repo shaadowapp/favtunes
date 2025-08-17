@@ -85,8 +85,12 @@ fun SettingsScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
-                .padding(paddingValues)
-                .padding(bottom = playerPadding)
+                .padding(
+                    top = paddingValues.calculateTopPadding(),
+                    bottom = paddingValues.calculateBottomPadding() + playerPadding,
+                    start = 0.dp,
+                    end = 0.dp
+                )
         ) {
             // Account Category
             CategoryHeader("Account")

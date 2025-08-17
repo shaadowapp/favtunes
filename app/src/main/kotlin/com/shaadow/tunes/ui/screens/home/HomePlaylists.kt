@@ -12,7 +12,9 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.DownloadForOffline
-import androidx.compose.material.icons.outlined.Bookmark
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.ui.Alignment
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -24,7 +26,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.shaadow.tunes.Database
-import com.shaadow.tunes.LocalPlayerPadding
 import com.shaadow.tunes.R
 import com.shaadow.tunes.enums.BuiltInPlaylist
 import com.shaadow.tunes.enums.PlaylistSortBy
@@ -36,6 +37,7 @@ import com.shaadow.tunes.ui.components.themed.TextFieldDialog
 import com.shaadow.tunes.ui.items.BuiltInPlaylistItem
 import com.shaadow.tunes.ui.items.LocalPlaylistItem
 import com.shaadow.tunes.ui.items.PlaylistItem
+import com.shaadow.tunes.utils.PlaylistTracker
 import com.shaadow.tunes.utils.playlistSortByKey
 import com.shaadow.tunes.utils.playlistSortOrderKey
 import com.shaadow.tunes.utils.rememberPreference
@@ -49,8 +51,6 @@ fun HomePlaylists(
     onPlaylistClick: (Playlist) -> Unit,
     onYouTubePlaylistClick: (String) -> Unit = {}
 ) {
-    val playerPadding = LocalPlayerPadding.current
-
     var isCreatingANewPlaylist by rememberSaveable { mutableStateOf(false) }
     var sortBy by rememberPreference(playlistSortByKey, PlaylistSortBy.Name)
     var sortOrder by rememberPreference(playlistSortOrderKey, SortOrder.Ascending)
@@ -58,10 +58,7 @@ fun HomePlaylists(
     val viewModel: HomePlaylistsViewModel = viewModel()
 
     LaunchedEffect(sortBy, sortOrder) {
-        viewModel.loadArtists(
-            sortBy = sortBy,
-            sortOrder = sortOrder
-        )
+        viewModel.loadArtists(sortBy, sortOrder)
     }
 
     if (isCreatingANewPlaylist) {
@@ -75,55 +72,79 @@ fun HomePlaylists(
                 query {
                     Database.insert(Playlist(name = text))
                 }
+                PlaylistTracker.trackPlaylistCreated(text)
             }
         )
     }
 
-    LazyVerticalGrid(
-        columns = GridCells.Adaptive(minSize = 150.dp),
-        contentPadding = PaddingValues(start = 8.dp, end = 8.dp, bottom = 16.dp + playerPadding),
-        verticalArrangement = Arrangement.spacedBy(4.dp),
-        modifier = Modifier.fillMaxSize()
-    ) {
-        item(
-            key = "header",
-            span = { GridItemSpan(maxLineSpan) }
+    if (viewModel.isLoading && viewModel.items.isEmpty()) {
+        androidx.compose.foundation.layout.Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
         ) {
+            CircularProgressIndicator()
+        }
+    } else {
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(2),
+            contentPadding = PaddingValues(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            modifier = Modifier.fillMaxSize()
+        ) {
+        item(span = { GridItemSpan(2) }) {
             SortingHeader(
                 sortBy = sortBy,
                 changeSortBy = { sortBy = it },
-                sortByEntries = PlaylistSortBy.entries.toList(),
+                sortByEntries = PlaylistSortBy.entries,
                 sortOrder = sortOrder,
-                toggleSortOrder = { sortOrder = !sortOrder },
-                size = viewModel.items.size,
+                toggleSortOrder = { sortOrder = it },
+                size = viewModel.items.size + 2, // +2 for built-in playlists
                 itemCountText = R.plurals.number_of_playlists
             )
         }
 
-        item(key = "favorites") {
+        // Create new playlist button
+        item {
             BuiltInPlaylistItem(
-                icon = Icons.Outlined.Bookmark,
-                name = stringResource(id = R.string.favorites),
-                onClick = { onBuiltInPlaylist(BuiltInPlaylist.Favorites.ordinal) }
+                modifier = Modifier.animateItem(),
+                icon = Icons.Filled.Add,
+                name = stringResource(R.string.new_playlist),
+                onClick = {
+                    isCreatingANewPlaylist = true
+                    PlaylistTracker.trackCreatePlaylistButtonClicked()
+                }
             )
         }
 
-        item(key = "offline") {
+        // Built-in playlists
+        item {
             BuiltInPlaylistItem(
-                icon = Icons.Default.DownloadForOffline,
-                name = stringResource(id = R.string.offline),
-                onClick = { onBuiltInPlaylist(BuiltInPlaylist.Offline.ordinal) }
+                modifier = Modifier.animateItem(),
+                icon = Icons.Filled.Favorite,
+                name = stringResource(R.string.favorites),
+                onClick = {
+                    onBuiltInPlaylist(BuiltInPlaylist.Favorites.ordinal)
+                    PlaylistTracker.trackBuiltInPlaylistClicked("favorites")
+                }
             )
         }
 
-        item(key = "new") {
+        item {
             BuiltInPlaylistItem(
-                icon = Icons.Default.Add,
-                name = stringResource(id = R.string.new_playlist),
-                onClick = { isCreatingANewPlaylist = true }
+                modifier = Modifier.animateItem(),
+                icon = Icons.Filled.DownloadForOffline,
+                name = stringResource(R.string.offline),
+                onClick = {
+                    onBuiltInPlaylist(BuiltInPlaylist.Offline.ordinal)
+                    PlaylistTracker.trackBuiltInPlaylistClicked("offline")
+                }
             )
         }
 
+        // YouTube playlists - removed for faster loading
+
+        // User playlists
         items(
             items = viewModel.items,
             key = { it.playlist.id }
@@ -131,24 +152,12 @@ fun HomePlaylists(
             LocalPlaylistItem(
                 modifier = Modifier.animateItem(),
                 playlist = playlistPreview,
-                onClick = { onPlaylistClick(playlistPreview.playlist) }
-            )
-        }
-
-        items(
-            items = viewModel.youtubePlaylists,
-            key = { "youtube_${it.key}" }
-        ) { youtubePlaylist ->
-            PlaylistItem(
-                modifier = Modifier.animateItem(),
-                playlist = youtubePlaylist,
                 onClick = {
-                    val browseId = youtubePlaylist.info?.endpoint?.browseId
-                    if (browseId != null) {
-                        onYouTubePlaylistClick(browseId)
-                    }
+                    onPlaylistClick(playlistPreview.playlist)
+                    PlaylistTracker.trackUserPlaylistClicked(playlistPreview.playlist.id.toString())
                 }
             )
+        }
         }
     }
 }

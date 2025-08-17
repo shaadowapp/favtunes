@@ -6,6 +6,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -43,7 +44,10 @@ import com.shaadow.tunes.database.UserEntity
 
 
 @Composable
-fun ProfileScreen(userViewModel: UserViewModel = viewModel()) {
+fun ProfileScreen(
+    paddingValues: PaddingValues = PaddingValues(),
+    userViewModel: UserViewModel = viewModel()
+) {
     var showKey by remember { mutableStateOf(false) }
     var showPin by remember { mutableStateOf(false) }
     var showDialog by remember { mutableStateOf(false) }
@@ -60,7 +64,12 @@ fun ProfileScreen(userViewModel: UserViewModel = viewModel()) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(24.dp),
+                .padding(
+                    top = paddingValues.calculateTopPadding() + 24.dp,
+                    bottom = paddingValues.calculateBottomPadding() + 24.dp,
+                    start = 24.dp,
+                    end = 24.dp
+                ),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             // Profile Header Card

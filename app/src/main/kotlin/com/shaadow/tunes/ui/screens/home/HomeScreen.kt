@@ -87,6 +87,13 @@ fun HomeScreen(
                                 fontWeight = FontWeight.SemiBold
                             )
                         }
+                        3 -> {
+                            Text(
+                                text = "Playlists",
+                                style = MaterialTheme.typography.headlineSmall,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                        }
                         4 -> {
                             Text(
                                 text = "My Tunes",
@@ -212,8 +219,10 @@ fun HomeScreen(
                     onArtistClick = { artist -> navController.navigate(route = "artist/${artist.id}") }
                 )
 
-                3 -> HomeAlbums(
-                    onAlbumClick = { album -> navController.navigate(route = "album/${album.id}") }
+                3 -> HomePlaylists(
+                    onBuiltInPlaylist = { index -> navController.navigate(route = "builtInPlaylist/$index") },
+                    onPlaylistClick = { playlist -> navController.navigate(route = "localPlaylist/${playlist.id}") },
+                    onYouTubePlaylistClick = { browseId -> navController.navigate(route = "playlist/$browseId") }
                 )
 
                 4 -> com.shaadow.tunes.ui.screens.mytunes.MyTunesScreen()

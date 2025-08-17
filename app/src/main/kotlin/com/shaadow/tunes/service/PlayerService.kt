@@ -382,6 +382,8 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
 
         if (totalPlayTimeMs > 5000) {
             query {
+                // Ensure song is in database first
+                Database.insert(mediaItem)
                 Database.incrementTotalPlayTimeMs(mediaItem.mediaId, totalPlayTimeMs)
             }
             
@@ -389,17 +391,22 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
             behaviorTracker.onSongPlayed(mediaItem, totalPlayTimeMs)
         }
 
-        if (totalPlayTimeMs > 30000) {
+        if (totalPlayTimeMs > 5000) {
             query {
                 try {
-                    Database.insert(
-                        Event(
-                            songId = mediaItem.mediaId,
-                            timestamp = System.currentTimeMillis(),
-                            playTime = totalPlayTimeMs
-                        )
+                    // Ensure song is in database first
+                    Database.insert(mediaItem)
+                    
+                    val event = Event(
+                        songId = mediaItem.mediaId,
+                        timestamp = System.currentTimeMillis(),
+                        playTime = totalPlayTimeMs
                     )
-                } catch (_: SQLException) {
+                    Database.insert(event)
+                    
+                    android.util.Log.d("PlayerService", "Event inserted: ${mediaItem.mediaId}, playTime: $totalPlayTimeMs")
+                } catch (e: SQLException) {
+                    android.util.Log.e("PlayerService", "Failed to insert event: ${e.message}")
                 }
             }
         }

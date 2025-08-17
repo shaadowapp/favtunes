@@ -53,7 +53,12 @@ fun GeneralSettings() {
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .padding(bottom = 16.dp + playerPadding)
+            .padding(
+                top = 16.dp,
+                bottom = 16.dp + playerPadding,
+                start = 0.dp,
+                end = 0.dp
+            )
     ) {
         EnumValueSelectorSettingsEntry(
             title = stringResource(id = R.string.navigation_bar_label_visibility),

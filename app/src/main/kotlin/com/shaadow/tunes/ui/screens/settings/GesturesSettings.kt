@@ -34,7 +34,12 @@ fun GestureSettings() {
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .padding(bottom = 16.dp + playerPadding)
+            .padding(
+                top = 16.dp,
+                bottom = 16.dp + playerPadding,
+                start = 0.dp,
+                end = 0.dp
+            )
     ) {
         SwitchSettingEntry(
             title = stringResource(id = R.string.list_gestures),

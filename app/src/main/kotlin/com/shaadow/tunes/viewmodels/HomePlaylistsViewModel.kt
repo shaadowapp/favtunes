@@ -6,8 +6,6 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.shaadow.innertube.Innertube
-import com.shaadow.innertube.requests.searchPage
-import com.shaadow.innertube.utils.from
 import com.shaadow.tunes.Database
 import com.shaadow.tunes.enums.PlaylistSortBy
 import com.shaadow.tunes.enums.SortOrder
@@ -15,39 +13,35 @@ import com.shaadow.tunes.models.PlaylistPreview
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 class HomePlaylistsViewModel : ViewModel() {
     var items: List<PlaylistPreview> by mutableStateOf(emptyList())
     var youtubePlaylists: List<Innertube.PlaylistItem> by mutableStateOf(emptyList())
+    var isLoading: Boolean by mutableStateOf(true)
 
     init {
-        loadYoutubePlaylists()
+        loadLocalPlaylists()
     }
 
-    private fun loadYoutubePlaylists() {
+    private fun loadLocalPlaylists() {
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                val result = Innertube.searchPage(
-                    query = "popular playlists",
-                    params = Innertube.SearchFilter.FeaturedPlaylist.value,
-                    fromMusicShelfRendererContent = Innertube.PlaylistItem::from
-                )
-                youtubePlaylists = result?.getOrNull()?.items?.take(6) ?: emptyList()
+                items = Database.playlistPreviews(PlaylistSortBy.Name, SortOrder.Ascending).first().take(20)
+                isLoading = false
             } catch (e: Exception) {
-                youtubePlaylists = emptyList()
+                items = emptyList()
+                isLoading = false
             }
         }
     }
 
-    suspend fun loadArtists(
-        sortBy: PlaylistSortBy,
-        sortOrder: SortOrder
-    ) {
-        try {
-            items = Database.playlistPreviews(sortBy, sortOrder).first().take(10) // Limit to 10 playlists
-        } catch (e: Exception) {
-            items = emptyList()
+    fun loadArtists(sortBy: PlaylistSortBy, sortOrder: SortOrder) {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                items = Database.playlistPreviews(sortBy, sortOrder).first().take(20)
+            } catch (e: Exception) {
+                items = emptyList()
+            }
         }
     }
 }

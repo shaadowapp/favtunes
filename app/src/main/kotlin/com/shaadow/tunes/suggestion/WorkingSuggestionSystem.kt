@@ -57,46 +57,17 @@ class WorkingSuggestionSystem(private val context: Context) {
      */
     private suspend fun getBehaviorBasedRecommendations(): List<MediaItem> {
         return try {
-            val behaviorScores = mutableMapOf<String, Double>()
+            // Get songs from database directly
+            val recentSongs = Database.recentlyPlayedSongs().first().take(10)
+            val likedSongs = Database.favorites().first().take(10)
+            val allSongs = Database.songsByPlayTimeDesc().first().take(20)
             
-            // Get all tracked songs and calculate behavior scores
-            preferences.all.forEach { (key, value) ->
-                when {
-                    key.startsWith("play_") -> {
-                        val songId = key.removePrefix("play_")
-                        val playCount = value as? Int ?: 0
-                        behaviorScores[songId] = (behaviorScores[songId] ?: 0.0) + (playCount * 1.0)
-                    }
-                    key.startsWith("liked_") && value as? Boolean == true -> {
-                        val songId = key.removePrefix("liked_")
-                        behaviorScores[songId] = (behaviorScores[songId] ?: 0.0) + 5.0 // Likes are worth 5 plays
-                    }
-                    key.startsWith("skip_") -> {
-                        val songId = key.removePrefix("skip_")
-                        val skipCount = value as? Int ?: 0
-                        behaviorScores[songId] = (behaviorScores[songId] ?: 0.0) - (skipCount * 0.5) // Skips reduce score
-                    }
-                }
-            }
+            // Combine and convert to MediaItems
+            val combinedSongs = (recentSongs + likedSongs + allSongs)
+                .distinctBy { it.id }
+                .take(16)
             
-            // Get actual songs from database and convert to MediaItems
-            val topSongIds = behaviorScores.entries
-                .sortedByDescending { it.value }
-                .take(20)
-                .map { it.key }
-            
-            // Fetch actual songs from database
-            val songs = mutableListOf<MediaItem>()
-            for (songId in topSongIds) {
-                try {
-                    val song = Database.song(songId).first()
-                    song?.let { songs.add(it.asMediaItem) }
-                } catch (e: Exception) {
-                    // Skip songs that can't be found
-                }
-            }
-            
-            songs
+            combinedSongs.map { it.asMediaItem }
         } catch (e: Exception) {
             emptyList()
         }

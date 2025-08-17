@@ -170,69 +170,7 @@ fun QuickPicks(
                     .padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 20.dp)
             )
             
-            // Top 10 Trending Songs Section
-            val context = LocalContext.current
-            val countryCode = remember { CountryDetector.getCountryCode(context) }
-            val countryName = remember { CountryDetector.getCountryName(countryCode) }
-            
-            Text(
-                text = "Top 5 Trending in $countryName",
-                style = MaterialTheme.typography.titleMedium,
-                modifier = sectionTextModifier
-            )
-            
-            // Trending songs grid
-            viewModel.relatedPageResult?.getOrNull()?.songs?.take(6)?.let { trendingSongs ->
-                LazyVerticalGrid(
-                    columns = GridCells.Fixed(3),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(200.dp)
-                        .padding(horizontal = 16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(6.dp),
-                    verticalArrangement = Arrangement.spacedBy(6.dp)
-                ) {
-                    itemsIndexed(trendingSongs) { index, song ->
-                        Box {
-                            Box(
-                                modifier = Modifier
-                                    .aspectRatio(1f)
-                                    .clip(RoundedCornerShape(6.dp))
-                                    .background(MaterialTheme.colorScheme.surfaceVariant)
-                                    .clickable {
-                                        val mediaItem = song.asMediaItem
-                                        binder?.stopRadio()
-                                        binder?.player?.forcePlay(mediaItem)
-                                        binder?.setupRadio(
-                                            com.shaadow.innertube.models.NavigationEndpoint.Endpoint.Watch(videoId = mediaItem.mediaId)
-                                        )
-                                    }
-                            )
-                            
-                            // Ranking overlay
-                            Box(
-                                modifier = Modifier
-                                    .align(Alignment.TopStart)
-                                    .padding(8.dp)
-                                    .background(
-                                        Color.Black.copy(alpha = 0.6f),
-                                        RoundedCornerShape(4.dp)
-                                    )
-                                    .padding(horizontal = 4.dp, vertical = 2.dp)
-                            ) {
-                                Text(
-                                    text = "#${index + 1}",
-                                    color = Color.White,
-                                    style = MaterialTheme.typography.labelMedium,
-                                    fontWeight = FontWeight.ExtraBold
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-            
-            Spacer(modifier = Modifier.height(32.dp))
+
             
             // Progressive loading: Show basic content first, load details gradually
             viewModel.relatedPageResult?.getOrNull()?.let { related ->

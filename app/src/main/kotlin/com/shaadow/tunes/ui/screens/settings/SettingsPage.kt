@@ -48,11 +48,11 @@ fun SettingsPage(
         }
     ) { paddingValues ->
         when (section) {
-            SettingsSection.Profile -> ProfileScreen()
+            SettingsSection.Profile -> ProfileScreen(paddingValues)
             SettingsSection.About -> About()
             SettingsSection.General -> GeneralSettings()
             SettingsSection.Suggestions -> SuggestionSettings(paddingValues)
-            SettingsSection.Player -> PlayerSettings()
+            SettingsSection.Player -> PlayerSettings(paddingValues)
             SettingsSection.Cache -> CacheSettings()
             SettingsSection.Gestures -> GestureSettings()
             SettingsSection.Database -> DatabaseSettings()

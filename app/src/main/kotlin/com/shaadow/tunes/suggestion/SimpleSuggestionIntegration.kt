@@ -25,7 +25,9 @@ class SimpleSuggestionIntegration(private val context: Context) {
      */
     fun completeOnboarding() {
         // Set default preferences if none selected
-        suggestionSystem.setInitialPreferences(listOf("pop", "rock"))
+        if (!suggestionSystem.isOnboardingComplete()) {
+            suggestionSystem.setInitialPreferences(listOf("Pop", "Rock", "Electronic"))
+        }
     }
     
     /**

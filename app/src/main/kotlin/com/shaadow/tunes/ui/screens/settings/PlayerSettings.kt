@@ -38,7 +38,7 @@ import com.shaadow.tunes.utils.volumeNormalizationKey
 @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
 @ExperimentalAnimationApi
 @Composable
-fun PlayerSettings() {
+fun PlayerSettings(paddingValues: androidx.compose.foundation.layout.PaddingValues = androidx.compose.foundation.layout.PaddingValues()) {
     val context = LocalContext.current
     val binder = LocalPlayerServiceBinder.current
     val playerPadding = LocalPlayerPadding.current
@@ -57,7 +57,12 @@ fun PlayerSettings() {
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .padding(bottom = 16.dp + playerPadding)
+            .padding(
+                top = paddingValues.calculateTopPadding() + 16.dp,
+                bottom = paddingValues.calculateBottomPadding() + playerPadding + 16.dp,
+                start = 0.dp,
+                end = 0.dp
+            )
     ) {
         SwitchSettingEntry(
             title = stringResource(id = R.string.persistent_queue),

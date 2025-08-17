@@ -260,6 +260,13 @@ fun Navigation(
         playerComposable(route = "explore") {
             ExploreSearch(navController)
         }
+        
+        playerComposable(route = "playlists") {
+            HomeScreen(
+                navController = navController,
+                screenIndex = 3
+            )
+        }
 
         playerComposable(
             route = "search?initialQuery={initialQuery}",
