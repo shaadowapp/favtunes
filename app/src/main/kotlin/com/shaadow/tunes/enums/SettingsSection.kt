@@ -4,6 +4,8 @@ import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.More
 import androidx.compose.material.icons.outlined.AttachFile
+import androidx.compose.material.icons.outlined.BugReport
+import androidx.compose.material.icons.outlined.Feedback
 import androidx.compose.material.icons.outlined.History
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.PersonOutline
@@ -55,6 +57,14 @@ enum class SettingsSection(
     About(
         resourceId = R.string.about,
         icon = Icons.Outlined.Info
+    ),
+    BugReport(
+        resourceId = R.string.bug_report,
+        icon = Icons.Outlined.BugReport
+    ),
+    Feedback(
+        resourceId = R.string.feedback,
+        icon = Icons.Outlined.Feedback
     ),
     TermsOfUse(
         resourceId = R.string.TermsOfUse,

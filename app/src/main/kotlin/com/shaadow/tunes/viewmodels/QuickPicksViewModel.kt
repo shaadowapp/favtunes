@@ -1,5 +1,6 @@
 package com.shaadow.tunes.viewmodels
 
+import android.content.Context
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -11,6 +12,7 @@ import com.shaadow.innertube.requests.relatedPage
 import com.shaadow.tunes.Database
 import com.shaadow.tunes.enums.QuickPicksSource
 import com.shaadow.tunes.models.Song
+
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -29,11 +31,21 @@ class QuickPicksViewModel : ViewModel() {
     private val relatedPageCache = ConcurrentHashMap<String, Innertube.RelatedPage>()
     private val cacheExpiry = ConcurrentHashMap<String, Long>()
     private val cacheTimeout = 5 * 60 * 1000L // 5 minutes
+    private var context: Context? = null
 
-    init {
-        // Start loading immediately when ViewModel is created
+    fun initialize(context: Context) {
+        this.context = context
+        // Start loading immediately when ViewModel is initialized
         viewModelScope.launch {
-            loadQuickPicks(QuickPicksSource.Trending)
+            try {
+                loadQuickPicks(QuickPicksSource.Trending)
+            } catch (e: Exception) {
+                // Handle initialization errors gracefully
+                withContext(Dispatchers.Main) {
+                    relatedPageResult = Result.failure(e)
+                    isLoading = false
+                }
+            }
         }
     }
 
@@ -61,33 +73,31 @@ class QuickPicksViewModel : ViewModel() {
                     null
                 }
                 
-                if (shouldFetchRelatedPage(song)) {
-                    val songId = song?.id ?: "fJ9rUzIMcZQ"
-                    relatedPageResult = getCachedOrFetchRelatedPage(songId)
-                }
+                // Always ensure content is loaded
+                relatedPageResult = getCachedOrFetchRelatedPage(song?.id ?: "fJ9rUzIMcZQ")
 
                 withContext(Dispatchers.Main) {
                     trending = song
                 }
                 
-                // Continue collecting for updates in background
+                // Continue collecting for updates in background (simplified)
                 flow.distinctUntilChanged().drop(1).collect { updatedSong ->
-                    if (quickPicksSource == QuickPicksSource.Random && updatedSong != null && trending != null) return@collect
-
-                    if (shouldFetchRelatedPage(updatedSong)) {
-                        val songId = updatedSong?.id ?: "fJ9rUzIMcZQ"
-                        relatedPageResult = getCachedOrFetchRelatedPage(songId)
-                    }
-
                     withContext(Dispatchers.Main) {
                         trending = updatedSong
                     }
                 }
             } catch (e: Exception) {
-                // Handle errors gracefully
+                // Handle errors gracefully - always try to show some content
                 withContext(Dispatchers.Main) {
                     if (relatedPageResult == null) {
-                        relatedPageResult = Result.failure(e)
+                        // Try fallback content as last resort
+                        viewModelScope.launch(Dispatchers.IO) {
+                            try {
+                                relatedPageResult = getCachedOrFetchRelatedPage("fJ9rUzIMcZQ")
+                            } catch (fallbackError: Exception) {
+                                relatedPageResult = Result.failure(e)
+                            }
+                        }
                     }
                 }
             } finally {
@@ -124,6 +134,8 @@ class QuickPicksViewModel : ViewModel() {
             }
         }
     }
+
+
 
     override fun onCleared() {
         super.onCleared()

@@ -41,7 +41,6 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
@@ -72,7 +71,16 @@ import com.shaadow.tunes.utils.asMediaItem
 import com.shaadow.tunes.utils.forcePlay
 import com.shaadow.tunes.utils.intent
 import com.shaadow.tunes.suggestion.SimpleSuggestionIntegration
+import com.shaadow.tunes.Database
 import com.shaadow.tunes.ui.screens.onboarding.OnboardingScreen
+import com.shaadow.tunes.notification.FavTunesNotificationManager
+import com.google.firebase.messaging.FirebaseMessaging
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
@@ -113,10 +121,17 @@ class MainActivity : ComponentActivity() {
 
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
-        installSplashScreen()
+        try {
+            installSplashScreen()
 
-        super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
+            super.onCreate(savedInstanceState)
+            enableEdgeToEdge()
+            
+            Log.d("MainActivity", "MainActivity created successfully")
+        } catch (e: Exception) {
+            Log.e("MainActivity", "Error creating MainActivity", e)
+            throw e
+        }
         
         // Initialize suggestion system
         suggestionIntegration = SimpleSuggestionIntegration.getInstance(this)
@@ -137,6 +152,19 @@ class MainActivity : ComponentActivity() {
 
         val launchedFromNotification = intent?.extras?.getBoolean("expandPlayerBottomSheet") == true
         data = intent?.data ?: intent?.getStringExtra(Intent.EXTRA_TEXT)?.toUri()
+        
+        // Track app usage for notifications
+        val notificationManager = FavTunesNotificationManager(this)
+        notificationManager.updateLastAppOpen()
+        
+        // Check notification permissions
+        checkNotificationPermissions()
+        
+        // Get and log FCM token
+        getFCMToken()
+        
+        // Handle notification intents
+        handleNotificationIntent(intent)
 
         // Preload content immediately on IO thread
         lifecycleScope.launch(Dispatchers.IO) {
@@ -144,7 +172,7 @@ class MainActivity : ComponentActivity() {
                 // Preload database connections
                 Database.trending().first()
             } catch (e: Exception) {
-                // Silently handle errors
+                Log.e("MainActivity", "Error during initialization", e)
             }
         }
 
@@ -294,6 +322,29 @@ class MainActivity : ComponentActivity() {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         data = intent.data ?: intent.getStringExtra(Intent.EXTRA_TEXT)?.toUri()
+        handleNotificationIntent(intent)
+    }
+    
+    private fun handleNotificationIntent(intent: Intent?) {
+        intent?.let {
+            val songId = it.getStringExtra("songId")
+            val playlistId = it.getStringExtra("playlistId")
+            val autoPlay = it.getBooleanExtra("autoPlay", false)
+            
+            if (songId != null) {
+                lifecycleScope.launch(Dispatchers.IO) {
+                    try {
+                        Innertube.song(songId)?.getOrNull()?.let { song ->
+                            withContext(Dispatchers.Main) {
+                                binder?.player?.forcePlay(song.asMediaItem)
+                            }
+                        }
+                    } catch (e: Exception) {
+                        Log.e("MainActivity", "Error playing song from notification", e)
+                    }
+                }
+            }
+        }
     }
 
     override fun onStop() {
@@ -360,6 +411,32 @@ class MainActivity : ComponentActivity() {
     override fun onDestroy() {
         super.onDestroy()
         // Service unbinding is handled in onStop()
+    }
+    
+    private fun checkNotificationPermissions() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) 
+                != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.POST_NOTIFICATIONS), 1)
+            }
+        }
+    }
+    
+    private fun getFCMToken() {
+        FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
+            if (!task.isSuccessful) {
+                Log.w("FCM_TOKEN", "Fetching FCM registration token failed", task.exception)
+                return@addOnCompleteListener
+            }
+            
+            val token = task.result
+            Log.d("FCM_TOKEN", "Registration Token: $token")
+            
+            // Also log to make it easier to find
+            println("=== FCM TOKEN ===")
+            println(token)
+            println("=================")
+        }
     }
 }
 

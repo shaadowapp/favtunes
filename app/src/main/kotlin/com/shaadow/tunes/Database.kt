@@ -53,6 +53,9 @@ import com.shaadow.tunes.models.SongArtistMap
 import com.shaadow.tunes.models.SongPlaylistMap
 import com.shaadow.tunes.models.SongWithContentLength
 import com.shaadow.tunes.models.SortedSongPlaylistMap
+import com.shaadow.tunes.models.PendingBugReportEntity
+import com.shaadow.tunes.models.PendingFeedbackEntity
+import com.shaadow.tunes.database.BugReportDao
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -164,6 +167,9 @@ interface Database {
         fun delete(songPlaylistMap: SongPlaylistMap) = instance.delete(songPlaylistMap)
         fun raw(supportSQLiteQuery: SupportSQLiteQuery) = instance.raw(supportSQLiteQuery)
         fun checkpoint() = instance.checkpoint()
+        
+        // Bug report and feedback methods
+        fun bugReportDao() = instance.bugReportDao()
         
         // Internal access for utility functions
         internal val roomDatabase: RoomDatabase
@@ -574,6 +580,11 @@ interface Database {
     fun checkpoint() {
         raw(SimpleSQLiteQuery("PRAGMA wal_checkpoint(FULL)"))
     }
+    
+    // Bug report and feedback DAO
+    fun bugReportDao(): BugReportDao {
+        return DatabaseProvider.getRoomDatabase(context).bugReportDao()
+    }
 }
 
 @androidx.room.Database(
@@ -590,11 +601,13 @@ interface Database {
         Format::class,
         Event::class,
         Lyrics::class,
+        PendingBugReportEntity::class,
+        PendingFeedbackEntity::class,
     ],
     views = [
         SortedSongPlaylistMap::class
     ],
-    version = 23,
+    version = 24,
     exportSchema = true,
     autoMigrations = [
         AutoMigration(from = 1, to = 2),
@@ -615,11 +628,13 @@ interface Database {
         AutoMigration(from = 19, to = 20),
         AutoMigration(from = 20, to = 21, spec = DatabaseInitializer.From20To21Migration::class),
         AutoMigration(from = 21, to = 22, spec = DatabaseInitializer.From21To22Migration::class),
+        AutoMigration(from = 23, to = 24),
     ],
 )
 @TypeConverters(Converters::class)
 abstract class DatabaseInitializer protected constructor() : RoomDatabase() {
     abstract val database: Database
+    abstract fun bugReportDao(): BugReportDao
 
     companion object {
         // Removed problematic Instance property that caused circular dependency

@@ -18,6 +18,9 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.Info
+
+import androidx.compose.ui.platform.LocalContext
+
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -56,9 +59,12 @@ import com.shaadow.tunes.ui.styling.Dimensions
 @Composable
 fun SettingsScreen(
     pop: () -> Unit,
-    onGoToSettingsPage: (Int) -> Unit
+    onGoToSettingsPage: (Int) -> Unit,
+    onNavigateToBugReport: () -> Unit = {},
+    onNavigateToFeedback: () -> Unit = {}
 ) {
     val playerPadding = LocalPlayerPadding.current
+    val context = LocalContext.current
 
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
 
@@ -122,10 +128,43 @@ fun SettingsScreen(
             
             // Legal Category
             CategoryHeader("Legal")
-            listOf(9, 10).forEach { index -> // Terms of Use, Privacy Policy
+            listOf(11, 12).forEach { index -> // Terms of Use, Privacy Policy
                 val section = SettingsSection.entries[index]
                 SettingsItem(section, index, onGoToSettingsPage)
             }
+            
+            // Support Category
+            CategoryHeader("Support")
+            
+            // Bug Report
+            ListItem(
+                headlineContent = {
+                    Text(text = stringResource(id = R.string.bug_report))
+                },
+                modifier = Modifier.clickable { onNavigateToBugReport() },
+                leadingContent = {
+                    Icon(
+                        imageVector = SettingsSection.BugReport.icon,
+                        contentDescription = stringResource(id = R.string.bug_report)
+                    )
+                }
+            )
+            
+            // Feedback
+            ListItem(
+                headlineContent = {
+                    Text(text = stringResource(id = R.string.feedback))
+                },
+                modifier = Modifier.clickable { onNavigateToFeedback() },
+                leadingContent = {
+                    Icon(
+                        imageVector = SettingsSection.Feedback.icon,
+                        contentDescription = stringResource(id = R.string.feedback)
+                    )
+                }
+            )
+            
+
             
             // Others Category
             CategoryHeader("Others")

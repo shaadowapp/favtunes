@@ -53,7 +53,6 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.sp
-import com.shaadow.tunes.utils.CountryDetector
 import androidx.compose.material3.Card
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -110,9 +109,15 @@ fun QuickPicks(
     val menuState = LocalMenuState.current
     val playerPadding = LocalPlayerPadding.current
 
+    val context = LocalContext.current
     val viewModel: QuickPicksViewModel = viewModel()
     val quickPicksSource by rememberPreference(quickPicksSourceKey, QuickPicksSource.Trending)
     val scope = rememberCoroutineScope()
+    
+    // Initialize ViewModel with context
+    LaunchedEffect(Unit) {
+        viewModel.initialize(context)
+    }
 
     val songThumbnailSizeDp = Dimensions.thumbnails.song
     val itemSize = 108.dp + 2 * 8.dp

@@ -1,3 +1,17 @@
+# Keep Activity classes to prevent "activity class not exist" errors
+-keep public class * extends android.app.Activity
+-keep public class * extends androidx.activity.ComponentActivity
+-keep public class * extends androidx.appcompat.app.AppCompatActivity
+
+# Keep Application class
+-keep public class * extends android.app.Application
+
+# Keep Service classes
+-keep public class * extends android.app.Service
+
+# Keep BroadcastReceiver classes
+-keep public class * extends android.content.BroadcastReceiver
+
 -keep,allowobfuscation,allowshrinking class kotlin.coroutines.Continuation
 
 -if @kotlinx.serialization.Serializable class **

@@ -573,9 +573,15 @@ fun InboxTabWithBadge(
 
 class HomeInbox : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContent {
-            HomeInboxScreen()
+        try {
+            super.onCreate(savedInstanceState)
+            Log.d("HomeInbox", "HomeInbox activity created successfully")
+            setContent {
+                HomeInboxScreen()
+            }
+        } catch (e: Exception) {
+            Log.e("HomeInbox", "Error creating HomeInbox activity", e)
+            throw e
         }
     }
 }

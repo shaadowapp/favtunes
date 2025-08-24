@@ -59,6 +59,14 @@ fun SettingsPage(
             SettingsSection.Other -> OtherSettings()
             SettingsSection.TermsOfUse -> TermsOfUse()
             SettingsSection.PrivacyPolicy -> PrivacyPolicy()
+            SettingsSection.BugReport -> {
+                // Bug report is handled via navigation, not as a settings page
+                Text("Bug Report - This should be handled via navigation")
+            }
+            SettingsSection.Feedback -> {
+                // Feedback is handled via navigation, not as a settings page
+                Text("Feedback - This should be handled via navigation")
+            }
         }
     }
 }

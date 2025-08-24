@@ -830,8 +830,7 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
             .setAutoCancel(false)
             .setOnlyAlertOnce(true)
             .setShowWhen(false)
-            .setSmallIcon(player.playerError?.let { R.drawable.alert_circle }
-                ?: R.drawable.app_icon)
+            .setSmallIcon(R.drawable.ic_stat_name)
             .setOngoing(false)
             .setContentIntent(activityPendingIntent<MainActivity>(
                 flags = PendingIntent.FLAG_UPDATE_CURRENT
@@ -854,7 +853,8 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
 
         bitmapProvider.load(mediaMetadata.artworkUri) { bitmap ->
             maybeShowSongCoverInLockScreen()
-            notificationManager?.notify(NOTIFICATION_ID, builder.setLargeIcon(bitmap).build())
+            builder.setLargeIcon(bitmap)
+            notificationManager?.notify(NOTIFICATION_ID, builder.build())
         }
 
         return builder.build()
@@ -1062,7 +1062,7 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
                     .setAutoCancel(true)
                     .setOnlyAlertOnce(true)
                     .setShowWhen(true)
-                    .setSmallIcon(R.drawable.app_icon)
+                    .setSmallIcon(R.drawable.ic_stat_name)
                     .build()
 
                 notificationManager?.notify(SLEEP_TIMER_NOTIFICATION_ID, notification)

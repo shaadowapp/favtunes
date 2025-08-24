@@ -25,9 +25,9 @@ import com.shaadow.tunes.utils.thumbnail
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MyTunesScreen() {
-    val likedSongs by Database.favorites().distinctUntilChanged().collectAsState(initial = emptyList())
-    val recentSongs by Database.recentlyPlayedSongs().distinctUntilChanged().collectAsState(initial = emptyList())
-    val fallbackSongs by Database.songsByRowIdDesc().distinctUntilChanged().collectAsState(initial = emptyList())
+    val likedSongs by Database.favorites().collectAsState(initial = emptyList())
+    val recentSongs by Database.recentlyPlayedSongs().collectAsState(initial = emptyList())
+    val fallbackSongs by Database.songsByRowIdDesc().collectAsState(initial = emptyList())
     
     // Use fallback if no recent songs available
     val displayRecentSongs = if (recentSongs.isEmpty()) fallbackSongs.take(10) else recentSongs.take(10)

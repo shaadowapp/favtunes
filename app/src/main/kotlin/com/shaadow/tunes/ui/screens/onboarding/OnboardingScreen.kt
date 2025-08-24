@@ -100,14 +100,19 @@ fun OnboardingScreen(
                 ) { step ->
                     when (step) {
                         0 -> WelcomeStep()
-                        1 -> GenreStep(
+                        1 -> LanguageStep(
+                            selectedLanguage = viewModel.selectedLanguage,
+                            languages = viewModel.supportedLanguages,
+                            onLanguageSelect = viewModel::updateLanguage
+                        )
+                        2 -> GenreStep(
                             selectedGenres = viewModel.selectedGenres,
                             genres = viewModel.genres,
                             onGenreToggle = viewModel::updateGenres,
                             canSelectMore = viewModel.canSelectMoreGenres(),
                             selectionText = viewModel.getGenreSelectionText()
                         )
-                        2 -> MoodStep(
+                        3 -> MoodStep(
                             selectedMoods = viewModel.selectedMoods,
                             moods = viewModel.moods,
                             onMoodToggle = viewModel::updateMoods,
@@ -232,6 +237,77 @@ private fun WelcomeStep() {
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.padding(vertical = 4.dp)
                 )
+            }
+        }
+    }
+}
+
+@Composable
+private fun LanguageStep(
+    selectedLanguage: String,
+    languages: List<Pair<String, String>>,
+    onLanguageSelect: (String) -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState()),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = "🌍",
+            style = MaterialTheme.typography.displayLarge,
+            modifier = Modifier.padding(bottom = 24.dp)
+        )
+        
+        Text(
+            text = "Choose Your Language",
+            style = MaterialTheme.typography.headlineMedium,
+            fontWeight = FontWeight.Bold,
+            textAlign = TextAlign.Center
+        )
+        
+        Text(
+            text = "Select your preferred language for music content",
+            style = MaterialTheme.typography.bodyLarge,
+            textAlign = TextAlign.Center,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(top = 8.dp, bottom = 32.dp)
+        )
+        
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(1),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.height(400.dp)
+        ) {
+            items(languages) { (code, name) ->
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = { onLanguageSelect(code) },
+                    colors = CardDefaults.cardColors(
+                        containerColor = if (selectedLanguage == code) 
+                            MaterialTheme.colorScheme.primaryContainer 
+                        else MaterialTheme.colorScheme.surface
+                    )
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        RadioButton(
+                            selected = selectedLanguage == code,
+                            onClick = { onLanguageSelect(code) }
+                        )
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Text(
+                            text = name,
+                            style = MaterialTheme.typography.bodyLarge,
+                            fontWeight = if (selectedLanguage == code) FontWeight.SemiBold else FontWeight.Normal
+                        )
+                    }
+                }
             }
         }
     }

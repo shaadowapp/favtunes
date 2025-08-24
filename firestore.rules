@@ -1,0 +1,25 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Notifications Collection - Allow all access
+    match /notifications/{document} {
+      allow read, write: if true;
+    }
+    
+    // Bug Reports Collection - Allow anonymous submissions for testing
+    match /bug_reports/{document} {
+      allow read, write: if true;
+    }
+    
+    // User Feedback Collection - Allow anonymous submissions for testing  
+    match /user_feedback/{document} {
+      allow read, write: if true;
+    }
+    
+    // Admin Users Collection - Allow creation and management
+    match /admin_users/{userId} {
+      allow read, write: if true;
+    }
+  }
+}

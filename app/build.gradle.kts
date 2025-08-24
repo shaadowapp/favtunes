@@ -39,7 +39,7 @@ android {
 
     buildTypes {
         debug {
-            applicationIdSuffix = ".debug"
+            // applicationIdSuffix removed; debug build will use main applicationId
         }
 
         release {
@@ -58,6 +58,7 @@ android {
 
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 
     compileOptions {
@@ -120,4 +121,10 @@ dependencies {
     implementation(libs.gson)
     implementation(libs.kotlin.coroutines)
     implementation(libs.ktor.serialization.json)
+    
+    // Notification System Dependencies
+    implementation("androidx.work:work-runtime-ktx:2.9.1")
+    implementation("androidx.preference:preference-ktx:1.2.1")
+    implementation("com.onesignal:OneSignal:[5.1.6, 5.1.99]")
+
 }

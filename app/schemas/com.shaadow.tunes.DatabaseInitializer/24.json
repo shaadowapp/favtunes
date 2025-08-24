@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 24,
-    "identityHash": "454501500a0c81a7f3c4f3a73f808133",
+    "identityHash": "92bdf4eea1b65073169f7a37657fd330",
     "entities": [
       {
         "tableName": "Song",
@@ -619,18 +619,30 @@
         ]
       },
       {
-        "tableName": "RecentSong",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`songId` TEXT NOT NULL, `lastPlayedAt` INTEGER NOT NULL, PRIMARY KEY(`songId`))",
+        "tableName": "pending_bug_reports",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`localId` TEXT NOT NULL, `reportData` TEXT NOT NULL, `createdAt` INTEGER NOT NULL, `retryCount` INTEGER NOT NULL, PRIMARY KEY(`localId`))",
         "fields": [
           {
-            "fieldPath": "songId",
-            "columnName": "songId",
+            "fieldPath": "localId",
+            "columnName": "localId",
             "affinity": "TEXT",
             "notNull": true
           },
           {
-            "fieldPath": "lastPlayedAt",
-            "columnName": "lastPlayedAt",
+            "fieldPath": "reportData",
+            "columnName": "reportData",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "createdAt",
+            "columnName": "createdAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "retryCount",
+            "columnName": "retryCount",
             "affinity": "INTEGER",
             "notNull": true
           }
@@ -638,7 +650,43 @@
         "primaryKey": {
           "autoGenerate": false,
           "columnNames": [
-            "songId"
+            "localId"
+          ]
+        }
+      },
+      {
+        "tableName": "pending_feedback",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`localId` TEXT NOT NULL, `feedbackData` TEXT NOT NULL, `createdAt` INTEGER NOT NULL, `retryCount` INTEGER NOT NULL, PRIMARY KEY(`localId`))",
+        "fields": [
+          {
+            "fieldPath": "localId",
+            "columnName": "localId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "feedbackData",
+            "columnName": "feedbackData",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "createdAt",
+            "columnName": "createdAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "retryCount",
+            "columnName": "retryCount",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "localId"
           ]
         }
       }
@@ -651,7 +699,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '454501500a0c81a7f3c4f3a73f808133')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '92bdf4eea1b65073169f7a37657fd330')"
     ]
   }
 }

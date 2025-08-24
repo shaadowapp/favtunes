@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.shaadow.tunes.data.OnboardingData
 import com.shaadow.tunes.suggestion.SimpleSuggestionIntegration
+import com.shaadow.tunes.utils.LanguagePreference
 import kotlinx.coroutines.launch
 
 class OnboardingViewModel(private val context: Context) : ViewModel() {
@@ -16,12 +17,16 @@ class OnboardingViewModel(private val context: Context) : ViewModel() {
     
     // Step management
     var currentStep by mutableStateOf(0)
-    val totalSteps = 3
+    val totalSteps = 4
     
     // Selection states
+    var selectedLanguage by mutableStateOf(LanguagePreference.getLanguageCode(context))
     var selectedGenres by mutableStateOf(setOf<String>())
     var selectedMoods by mutableStateOf(setOf<String>())
     var isLoading by mutableStateOf(false)
+    
+    // Language options
+    val supportedLanguages = LanguagePreference.getSupportedLanguages()
     
     // Data from OnboardingData
     val genres = OnboardingData.genres
@@ -51,13 +56,18 @@ class OnboardingViewModel(private val context: Context) : ViewModel() {
     fun canProceedFromCurrentStep(): Boolean {
         return when (currentStep) {
             0 -> true // Welcome step, always can proceed
-            1 -> selectedGenres.size >= MIN_GENRES // Genre step, need minimum genres
-            2 -> selectedMoods.size >= MIN_MOODS // Mood step, need minimum moods
+            1 -> selectedLanguage.isNotEmpty() // Language step, need language selected
+            2 -> selectedGenres.size >= MIN_GENRES // Genre step, need minimum genres
+            3 -> selectedMoods.size >= MIN_MOODS // Mood step, need minimum moods
             else -> false
         }
     }
     
     // Selection updates with limits
+    fun updateLanguage(languageCode: String) {
+        selectedLanguage = languageCode
+    }
+    
     fun updateGenres(genreId: String) {
         selectedGenres = if (selectedGenres.contains(genreId)) {
             selectedGenres - genreId
@@ -99,6 +109,10 @@ class OnboardingViewModel(private val context: Context) : ViewModel() {
         viewModelScope.launch {
             isLoading = true
             try {
+                // Save language preference
+                val sharedPrefs = context.getSharedPreferences("language_prefs", Context.MODE_PRIVATE)
+                sharedPrefs.edit().putString("selected_language", selectedLanguage).apply()
+                
                 // Combine all preferences
                 val allPreferences = selectedGenres + selectedMoods
                 

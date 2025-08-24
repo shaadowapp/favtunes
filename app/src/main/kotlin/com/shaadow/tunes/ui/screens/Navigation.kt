@@ -36,6 +36,8 @@ import com.shaadow.tunes.ui.screens.settings.SettingsPage
 import com.shaadow.tunes.ui.screens.settings.SettingsScreen
 import com.shaadow.tunes.ui.screens.settings.legal.PrivacyPolicy
 import com.shaadow.tunes.ui.screens.settings.legal.TermsOfUse
+import com.shaadow.tunes.ui.screens.bugreport.BugReportScreen
+import com.shaadow.tunes.ui.screens.feedback.FeedbackScreen
 import com.shaadow.tunes.utils.homeScreenTabIndexKey
 import com.shaadow.tunes.utils.rememberPreference
 import kotlinx.coroutines.launch
@@ -227,7 +229,9 @@ fun Navigation(
         playerComposable(route = "settings") {
             SettingsScreen(
                 pop = popDestination,
-                onGoToSettingsPage = { index -> navController.navigate("settingsPage/$index") }
+                onGoToSettingsPage = { index -> navController.navigate("settingsPage/$index") },
+                onNavigateToBugReport = { navController.navigate("bugreport") },
+                onNavigateToFeedback = { navController.navigate("feedback") }
             )
         }
 
@@ -327,6 +331,18 @@ fun Navigation(
                 pop = popDestination,
                 onGoToAlbum = navigateToAlbum,
                 onGoToArtist = navigateToArtist
+            )
+        }
+
+        playerComposable(route = "bugreport") {
+            BugReportScreen(
+                onNavigateBack = popDestination
+            )
+        }
+
+        playerComposable(route = "feedback") {
+            FeedbackScreen(
+                onNavigateBack = popDestination
             )
         }
     }

@@ -139,7 +139,7 @@ class PlayerMediaBrowserService : MediaBrowserService(), ServiceConnection {
             BrowserMediaDescription.Builder()
                 .setMediaId(MediaId.SONGS)
                 .setTitle(getString(R.string.songs))
-                .setIconUri(uriFor(R.drawable.musical_notes))
+                .setIconUri(uriFor(R.drawable.ic_stat_name))
                 .build(),
             BrowserMediaItem.FLAG_BROWSABLE
         )
