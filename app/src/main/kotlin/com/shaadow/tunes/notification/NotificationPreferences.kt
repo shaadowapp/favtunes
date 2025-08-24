@@ -41,9 +41,7 @@ fun NotificationPreferencesScreen(
     }
     
     var marketingNotificationsEnabled by remember {
-        mutableStateOf(
-            preferences.getBoolean(FavTunesNotificationManager.PREF_MARKETING_NOTIFICATIONS, true)
-        )
+        mutableStateOf(true)
     }
 
     LazyColumn(
@@ -153,7 +151,7 @@ fun NotificationPreferencesScreen(
                         onToggle = { enabled ->
                             marketingNotificationsEnabled = enabled
                             preferences.edit()
-                                .putBoolean(FavTunesNotificationManager.PREF_MARKETING_NOTIFICATIONS, enabled)
+                                .putBoolean("marketing_notifications_enabled", enabled)
                                 .apply()
                         }
                     )

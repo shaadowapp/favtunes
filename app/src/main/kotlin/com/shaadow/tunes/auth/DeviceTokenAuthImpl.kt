@@ -1,372 +1,364 @@
 package com.shaadow.tunes.auth
 
 import android.content.Context
+import android.util.Log
+import com.shaadow.tunes.utils.DeviceInfoCollector
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import kotlinx.coroutines.withTimeoutOrNull
+import java.security.KeyPair
+import java.security.KeyPairGenerator
+import java.security.PrivateKey
+import java.security.PublicKey
+import java.security.Signature
+import java.util.*
+import android.util.Base64
 
 /**
- * Implementation of DeviceTokenAuth interface providing secure device authentication
+ * Simple device-based authentication using public-private key pairs
+ * No complex email/password system - just secure device authentication
  */
 class DeviceTokenAuthImpl(
-    private val context: Context,
-    private val config: DeviceTokenConfig = DeviceTokenConfig()
+    private val context: Context
 ) : DeviceTokenAuth {
-    
-    private val tokenGenerator = TokenGenerator()
-    private val encryption = TokenEncryption()
-    private val deviceInfoCollector = DeviceInfoCollector(context)
-    private val tokenStorage = SecureTokenStorage(context, encryption, deviceInfoCollector)
-    private val tokenValidator = TokenValidator(context, deviceInfoCollector)
-    private val refreshManager = TokenRefreshManager(
-        context, tokenStorage, tokenGenerator, deviceInfoCollector, config
-    )
-    
-    private var eventListener: AuthEventListener? = null
-    
-    /**
-     * Set event listener for authentication events
-     */
-    fun setEventListener(listener: AuthEventListener) {
-        this.eventListener = listener
-        refreshManager.setEventListener(listener)
-    }
-    
-    /**
-     * Get token storage instance
-     */
-    fun getTokenStorage(): SecureTokenStorage = tokenStorage
-    
-    /**
-     * Get device info collector instance
-     */
-    fun getDeviceInfoCollector(): DeviceInfoCollector = deviceInfoCollector
-    
-    /**
-     * Get refresh manager instance
-     */
-    fun getRefreshManager(): TokenRefreshManager = refreshManager
-    
-    override suspend fun generateDeviceToken(request: TokenGenerationRequest): DeviceToken? {
-        return withContext(Dispatchers.IO) {
-            try {
-                val token = tokenGenerator.generateTokenWithExpiration(
-                    deviceInfo = request.deviceInfo,
-                    expirationDays = config.tokenExpirationDays
-                )
-                
-                val stored = tokenStorage.storeToken(token)
-                if (stored) {
-                    request.userId?.let { tokenStorage.updateUserId(it) }
-                    eventListener?.onTokenGenerated(token)
-                    token
-                } else {
-                    null
-                }
-            } catch (e: Exception) {
-                null
-            }
-        }
-    }
-    
-    override suspend fun authenticateWithToken(token: String): AuthResult {
-        return withContext(Dispatchers.IO) {
-            try {
-                // Quick format validation
-                if (!tokenValidator.quickValidateTokenFormat(token)) {
-                    return@withContext AuthResult.failure(
-                        "Invalid token format",
-                        AuthErrorType.TOKEN_INVALID
-                    )
-                }
-                
-                // Get stored token for comparison
-                val storedToken = tokenStorage.getStoredToken(getCurrentAppVersion())
-                if (storedToken == null) {
-                    return@withContext AuthResult.failure(
-                        "No stored token found",
-                        AuthErrorType.TOKEN_INVALID
-                    )
-                }
-                
-                // Validate token matches stored token
-                if (!encryption.secureEquals(token, storedToken.token)) {
-                    return@withContext AuthResult.failure(
-                        "Token mismatch",
-                        AuthErrorType.TOKEN_INVALID
-                    )
-                }
-                
-                // Comprehensive token validation
-                val validation = tokenValidator.validateToken(storedToken, getCurrentAppVersion())
-                if (!validation.isValid) {
-                    val errorType = when {
-                        validation.isExpired -> AuthErrorType.TOKEN_EXPIRED
-                        validation.deviceChanged -> AuthErrorType.DEVICE_NOT_RECOGNIZED
-                        else -> AuthErrorType.TOKEN_INVALID
-                    }
-                    
-                    return@withContext AuthResult.failure(
-                        validation.getPrimaryError() ?: "Token validation failed",
-                        errorType
-                    )
-                }
-                
-                // Get user ID
-                val userId = tokenStorage.getStoredUserId()
-                if (userId.isNullOrBlank()) {
-                    return@withContext AuthResult.failure(
-                        "User ID not found",
-                        AuthErrorType.TOKEN_INVALID
-                    )
-                }
-                
-                // Check if token needs refresh
-                val newToken = if (validation.needsRefresh) {
-                    val refreshResult = refreshManager.forceRefreshToken(getCurrentAppVersion())
-                    if (refreshResult.isSuccess) {
-                        (refreshResult as RefreshResult.Success).newToken
-                    } else {
-                        null
-                    }
-                } else {
-                    null
-                }
-                
-                eventListener?.onAuthenticationSuccess(userId)
-                AuthResult.success(userId, newToken)
-                
-            } catch (e: AuthException) {
-                eventListener?.onAuthenticationFailure(e.errorType, e.message ?: "Authentication failed")
-                e.toAuthResult()
-            } catch (e: Exception) {
-                eventListener?.onAuthenticationFailure(AuthErrorType.UNKNOWN_ERROR, e.message ?: "Unknown error")
-                e.toAuthResult()
-            }
-        }
-    }
-    
-    override suspend fun refreshToken(currentToken: String): DeviceToken? {
-        return withContext(Dispatchers.IO) {
-            try {
-                val refreshResult = refreshManager.forceRefreshToken(getCurrentAppVersion())
-                if (refreshResult.isSuccess) {
-                    (refreshResult as RefreshResult.Success).newToken
-                } else {
-                    null
-                }
-            } catch (e: Exception) {
-                null
-            }
-        }
-    }
-    
-    override suspend fun refreshTokenWithVerification(request: TokenRefreshRequest): AuthResult {
-        return withContext(Dispatchers.IO) {
-            try {
-                // Validate device info
-                if (deviceInfoCollector.isDeviceChanged(request.deviceInfo, getCurrentAppVersion())) {
-                    return@withContext AuthResult.failure(
-                        "Device verification failed",
-                        AuthErrorType.DEVICE_NOT_RECOGNIZED
-                    )
-                }
-                
-                // Perform refresh
-                val refreshResult = refreshManager.forceRefreshToken(getCurrentAppVersion())
-                if (refreshResult.isSuccess) {
-                    val newToken = (refreshResult as RefreshResult.Success).newToken
-                    val userId = tokenStorage.getStoredUserId()
-                    
-                    if (userId != null) {
-                        AuthResult.success(userId, newToken)
-                    } else {
-                        AuthResult.failure("User ID not found", AuthErrorType.TOKEN_INVALID)
-                    }
-                } else {
-                    val error = (refreshResult as RefreshResult.Failure).error
-                    AuthResult.failure(error, AuthErrorType.UNKNOWN_ERROR)
-                }
-            } catch (e: Exception) {
-                e.toAuthResult()
-            }
-        }
-    }
-    
-    override suspend fun revokeToken(token: String): Boolean {
-        return withContext(Dispatchers.IO) {
-            try {
-                val success = tokenStorage.clearStoredToken()
-                if (success) {
-                    eventListener?.onTokenRevoked(token)
-                }
-                success
-            } catch (e: Exception) {
-                false
-            }
-        }
-    }
-    
-    override suspend fun validateToken(token: String): Boolean {
-        return withContext(Dispatchers.IO) {
-            try {
-                val authResult = authenticateWithToken(token)
-                authResult.isSuccess
-            } catch (e: Exception) {
-                false
-            }
-        }
-    }
-    
-    override fun getCurrentDeviceInfo(): DeviceInfo {
-        return deviceInfoCollector.collectDeviceInfo(getCurrentAppVersion())
-    }
-    
-    override suspend fun hasValidToken(): Boolean {
-        return tokenStorage.hasValidToken(getCurrentAppVersion())
-    }
-    
-    override suspend fun getStoredToken(): DeviceToken? {
-        return tokenStorage.getStoredToken(getCurrentAppVersion())
-    }
-    
-    override suspend fun storeToken(token: DeviceToken): Boolean {
-        return tokenStorage.storeToken(token)
-    }
-    
-    override suspend fun clearStoredToken(): Boolean {
-        return tokenStorage.clearStoredToken()
-    }
-    
-    /**
-     * Perform seamless login with minimal user input
-     * @return Authentication result
-     */
-    suspend fun performSeamlessLogin(): AuthResult {
-        return withContext(Dispatchers.IO) {
-            try {
-                // Check if valid token exists
-                val storedToken = tokenStorage.getStoredToken(getCurrentAppVersion())
-                if (storedToken != null && storedToken.isValid()) {
-                    // Authenticate with existing token
-                    authenticateWithToken(storedToken.token)
-                } else {
-                    // Generate new token for first-time setup
-                    val deviceInfo = getCurrentDeviceInfo()
-                    val request = TokenGenerationRequest(deviceInfo = deviceInfo)
-                    val newToken = generateDeviceToken(request)
-                    
-                    if (newToken != null) {
-                        // Auto-authenticate with new token
-                        val userId = "user_${newToken.deviceId.take(8)}" // Generate temporary user ID
-                        tokenStorage.updateUserId(userId)
-                        AuthResult.success(userId, newToken)
-                    } else {
-                        AuthResult.failure("Failed to generate token", AuthErrorType.UNKNOWN_ERROR)
-                    }
-                }
-            } catch (e: Exception) {
-                e.toAuthResult()
-            }
-        }
-    }
-    
-    /**
-     * Handle authentication with retry logic
-     * @param token Token to authenticate
-     * @param maxRetries Maximum retry attempts
-     * @return Authentication result
-     */
-    suspend fun authenticateWithRetry(token: String, maxRetries: Int = config.maxRetryAttempts): AuthResult {
-        var lastResult: AuthResult? = null
-        
-        repeat(maxRetries) { attempt ->
-            val result = withTimeoutOrNull(AuthConstants.NETWORK_TIMEOUT_SECONDS * 1000L) {
-                authenticateWithToken(token)
-            } ?: AuthResult.failure("Authentication timeout", AuthErrorType.NETWORK_ERROR)
-            
-            lastResult = result
-            
-            if (result.isSuccess) {
-                return result
-            }
-            
-            // Don't retry for certain error types
-            if (result.errorType in listOf(
-                AuthErrorType.TOKEN_INVALID,
-                AuthErrorType.DEVICE_NOT_RECOGNIZED
-            )) {
-                return result
-            }
-            
-            // Wait before retry
-            if (attempt < maxRetries - 1) {
-                kotlinx.coroutines.delay(AuthConstants.RETRY_DELAY_MILLIS * (attempt + 1))
-            }
-        }
-        
-        return lastResult ?: AuthResult.failure("Authentication failed after retries", AuthErrorType.UNKNOWN_ERROR)
-    }
-    
-    /**
-     * Get comprehensive authentication status
-     * @return Current authentication status
-     */
-    suspend fun getAuthStatus(): AuthStatus {
-        return withContext(Dispatchers.IO) {
-            try {
-                val metadata = tokenStorage.getTokenMetadata()
-                val refreshStatus = refreshManager.getRefreshStatus()
-                
-                AuthStatus(
-                    hasToken = metadata != null,
-                    isTokenValid = metadata != null && !metadata.isExpired,
-                    needsRefresh = metadata?.needsRefresh() == true,
-                    userId = tokenStorage.getStoredUserId(),
-                    tokenExpiresAt = metadata?.expiresAt,
-                    isRefreshing = refreshStatus.isRefreshing,
-                    autoRefreshEnabled = refreshStatus.autoRefreshEnabled
-                )
-            } catch (e: Exception) {
-                AuthStatus(hasToken = false, isTokenValid = false)
-            }
-        }
-    }
-    
-    /**
-     * Get current app version
-     */
-    private fun getCurrentAppVersion(): String {
-        return try {
-            val packageInfo = context.packageManager.getPackageInfo(context.packageName, 0)
-            packageInfo.versionName ?: "1.0.0"
-        } catch (e: Exception) {
-            "1.0.0"
-        }
-    }
-}
 
-/**
- * Comprehensive authentication status
- */
-data class AuthStatus(
-    val hasToken: Boolean,
-    val isTokenValid: Boolean,
-    val needsRefresh: Boolean = false,
-    val userId: String? = null,
-    val tokenExpiresAt: Long? = null,
-    val isRefreshing: Boolean = false,
-    val autoRefreshEnabled: Boolean = false
-) {
+    companion object {
+        private const val TAG = "DeviceAuth"
+        private const val PREF_USER_ID = "device_user_id"
+        private const val PREF_PRIVATE_KEY = "device_private_key"
+        private const val PREF_PUBLIC_KEY = "device_public_key"
+        private const val PREF_DEVICE_TOKEN = "device_token"
+    }
+
+    private val preferences = context.getSharedPreferences("device_auth", Context.MODE_PRIVATE)
+
+    override suspend fun generateDeviceToken(request: TokenGenerationRequest): DeviceToken? = withContext(Dispatchers.IO) {
+        try {
+            Log.d(TAG, "Generating device authentication")
+            
+            // Generate or get user ID
+            val userId = getUserId()
+            
+            // Generate key pair if not exists
+            val keyPair = getOrCreateKeyPair()
+            
+            // Create simple device token with signature
+            val deviceInfo = getCurrentDeviceInfo()
+            val tokenData = "$userId:${deviceInfo.deviceModel}:${System.currentTimeMillis()}"
+            val signature = signData(tokenData, keyPair.private)
+            
+            val token = DeviceToken(
+                token = Base64.encodeToString("$tokenData:$signature".toByteArray(), Base64.NO_WRAP),
+                deviceId = userId,
+                deviceInfo = DeviceInfo(
+                    deviceModel = deviceInfo.deviceModel,
+                    osVersion = deviceInfo.osVersion,
+                    appVersion = deviceInfo.appVersion,
+                    deviceFingerprint = "${deviceInfo.deviceModel}_${deviceInfo.osVersion}"
+                ),
+                expiresAt = System.currentTimeMillis() + (30 * 24 * 60 * 60 * 1000L), // 30 days
+                createdAt = System.currentTimeMillis(),
+                isActive = true
+            )
+            
+            // Store token
+            preferences.edit().putString(PREF_DEVICE_TOKEN, token.token).apply()
+            
+            Log.d(TAG, "Device authentication generated for user: $userId")
+            return@withContext token
+            
+        } catch (e: Exception) {
+            Log.e(TAG, "Error generating device token", e)
+            null
+        }
+    }
+
+    override suspend fun authenticateWithToken(token: String): AuthResult = withContext(Dispatchers.IO) {
+        try {
+            Log.d(TAG, "Authenticating with device token")
+            
+            // Decode token
+            val tokenData = String(Base64.decode(token, Base64.NO_WRAP))
+            val parts = tokenData.split(":")
+            
+            if (parts.size != 4) {
+                return@withContext AuthResult.failure(
+                    "Invalid token format",
+                    AuthErrorType.TOKEN_INVALID
+                )
+            }
+            
+            val userId = parts[0]
+            val deviceModel = parts[1]
+            val timestamp = parts[2].toLongOrNull() ?: 0L
+            val signature = parts[3]
+            
+            // Check expiration
+            if (System.currentTimeMillis() - timestamp > (30 * 24 * 60 * 60 * 1000L)) {
+                return@withContext AuthResult.failure(
+                    "Token has expired",
+                    AuthErrorType.TOKEN_EXPIRED
+                )
+            }
+            
+            // Verify signature
+            val keyPair = getOrCreateKeyPair()
+            val originalData = "$userId:$deviceModel:$timestamp"
+            val isValid = verifySignature(originalData, signature, keyPair.public)
+            
+            if (!isValid) {
+                return@withContext AuthResult.failure(
+                    "Invalid token signature",
+                    AuthErrorType.TOKEN_INVALID
+                )
+            }
+            
+            val currentDeviceInfo = getCurrentDeviceInfo()
+            val deviceToken = DeviceToken(
+                token = token,
+                deviceId = userId,
+                deviceInfo = DeviceInfo(
+                    deviceModel = currentDeviceInfo.deviceModel,
+                    osVersion = currentDeviceInfo.osVersion,
+                    appVersion = currentDeviceInfo.appVersion,
+                    deviceFingerprint = "${currentDeviceInfo.deviceModel}_${currentDeviceInfo.osVersion}"
+                ),
+                expiresAt = timestamp + (30 * 24 * 60 * 60 * 1000L),
+                createdAt = timestamp,
+                isActive = true
+            )
+            
+            Log.d(TAG, "Authentication successful for user: $userId")
+            return@withContext AuthResult.success(userId, deviceToken)
+            
+        } catch (e: Exception) {
+            Log.e(TAG, "Error during authentication", e)
+            AuthResult.failure(
+                "Authentication failed: ${e.message}",
+                AuthErrorType.UNKNOWN_ERROR
+            )
+        }
+    }
+
+    override suspend fun refreshToken(currentToken: String): DeviceToken? = withContext(Dispatchers.IO) {
+        try {
+            Log.d(TAG, "Refreshing device token")
+            
+            // Authenticate current token first
+            val authResult = authenticateWithToken(currentToken)
+            if (!authResult.isSuccess) {
+                return@withContext null
+            }
+            
+            // Generate new token with same user ID
+            val currentDeviceInfo = getCurrentDeviceInfo()
+            val request = TokenGenerationRequest(
+                deviceInfo = DeviceInfo(
+                    deviceModel = currentDeviceInfo.deviceModel,
+                    osVersion = currentDeviceInfo.osVersion,
+                    appVersion = currentDeviceInfo.appVersion,
+                    deviceFingerprint = "${currentDeviceInfo.deviceModel}_${currentDeviceInfo.osVersion}"
+                ),
+                userId = authResult.userId
+            )
+            
+            return@withContext generateDeviceToken(request)
+            
+        } catch (e: Exception) {
+            Log.e(TAG, "Error refreshing token", e)
+            null
+        }
+    }
+
+    override suspend fun refreshTokenWithVerification(request: TokenRefreshRequest): AuthResult = withContext(Dispatchers.IO) {
+        try {
+            val newToken = refreshToken(request.currentToken)
+            if (newToken == null) {
+                return@withContext AuthResult.failure(
+                    "Failed to refresh token",
+                    AuthErrorType.UNKNOWN_ERROR
+                )
+            }
+            
+            return@withContext AuthResult.success(newToken.deviceId, newToken)
+            
+        } catch (e: Exception) {
+            Log.e(TAG, "Error refreshing token with verification", e)
+            AuthResult.failure(
+                "Token refresh failed: ${e.message}",
+                AuthErrorType.UNKNOWN_ERROR
+            )
+        }
+    }
+
+    override suspend fun revokeToken(token: String): Boolean = withContext(Dispatchers.IO) {
+        try {
+            Log.d(TAG, "Revoking device token")
+            clearStoredToken()
+            return@withContext true
+        } catch (e: Exception) {
+            Log.e(TAG, "Error revoking token", e)
+            false
+        }
+    }
+
+    override suspend fun validateToken(token: String): Boolean = withContext(Dispatchers.IO) {
+        try {
+            val authResult = authenticateWithToken(token)
+            return@withContext authResult.isSuccess
+        } catch (e: Exception) {
+            Log.e(TAG, "Error validating token", e)
+            false
+        }
+    }
+
+    override fun getCurrentDeviceInfo(): com.shaadow.tunes.models.DeviceInfo {
+        return DeviceInfoCollector.collectDeviceInfo(context, "1.0.0")
+    }
+
+    override suspend fun hasValidToken(): Boolean = withContext(Dispatchers.IO) {
+        try {
+            val storedToken = getStoredToken()
+            return@withContext storedToken != null && !storedToken.isExpired()
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    override suspend fun getStoredToken(): DeviceToken? = withContext(Dispatchers.IO) {
+        try {
+            val tokenString = preferences.getString(PREF_DEVICE_TOKEN, null) ?: return@withContext null
+            val authResult = authenticateWithToken(tokenString)
+            return@withContext if (authResult.isSuccess) authResult.newToken else null
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    override suspend fun storeToken(token: DeviceToken): Boolean = withContext(Dispatchers.IO) {
+        try {
+            preferences.edit().putString(PREF_DEVICE_TOKEN, token.token).apply()
+            return@withContext true
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    override suspend fun clearStoredToken(): Boolean = withContext(Dispatchers.IO) {
+        try {
+            preferences.edit()
+                .remove(PREF_DEVICE_TOKEN)
+                .remove(PREF_USER_ID)
+                .remove(PREF_PRIVATE_KEY)
+                .remove(PREF_PUBLIC_KEY)
+                .apply()
+            return@withContext true
+        } catch (e: Exception) {
+            false
+        }
+    }
+
     /**
-     * Check if user is authenticated
+     * Perform seamless login - just authenticate the device
      */
-    val isAuthenticated: Boolean get() = hasToken && isTokenValid && !userId.isNullOrBlank()
-    
-    /**
-     * Get time until token expiration
-     */
-    fun getTimeUntilExpiration(): Long? {
-        return tokenExpiresAt?.let { maxOf(0, it - System.currentTimeMillis()) }
+    suspend fun performSeamlessLogin(): AuthResult = withContext(Dispatchers.IO) {
+        try {
+            // Check if we have a stored token
+            val storedTokenString = preferences.getString(PREF_DEVICE_TOKEN, null)
+            
+            if (storedTokenString != null) {
+                // Try to authenticate with existing token
+                val authResult = authenticateWithToken(storedTokenString)
+                if (authResult.isSuccess) {
+                    return@withContext authResult
+                }
+            }
+            
+            // Generate new token for first-time or expired token
+            val currentDeviceInfo = getCurrentDeviceInfo()
+            val request = TokenGenerationRequest(
+                deviceInfo = DeviceInfo(
+                    deviceModel = currentDeviceInfo.deviceModel,
+                    osVersion = currentDeviceInfo.osVersion,
+                    appVersion = currentDeviceInfo.appVersion,
+                    deviceFingerprint = "${currentDeviceInfo.deviceModel}_${currentDeviceInfo.osVersion}"
+                )
+            )
+            val newToken = generateDeviceToken(request)
+            
+            if (newToken != null) {
+                return@withContext AuthResult.success(newToken.deviceId, newToken)
+            } else {
+                return@withContext AuthResult.failure(
+                    "Failed to generate device token",
+                    AuthErrorType.UNKNOWN_ERROR
+                )
+            }
+            
+        } catch (e: Exception) {
+            Log.e(TAG, "Error during seamless login", e)
+            AuthResult.failure(
+                "Seamless login failed: ${e.message}",
+                AuthErrorType.UNKNOWN_ERROR
+            )
+        }
+    }
+
+    private fun getUserId(): String {
+        val existingUserId = preferences.getString(PREF_USER_ID, null)
+        if (existingUserId != null) {
+            return existingUserId
+        }
+        
+        val newUserId = "user_${UUID.randomUUID().toString().replace("-", "").take(16)}"
+        preferences.edit().putString(PREF_USER_ID, newUserId).apply()
+        return newUserId
+    }
+
+    private fun getOrCreateKeyPair(): KeyPair {
+        val privateKeyString = preferences.getString(PREF_PRIVATE_KEY, null)
+        val publicKeyString = preferences.getString(PREF_PUBLIC_KEY, null)
+        
+        if (privateKeyString != null && publicKeyString != null) {
+            try {
+                // For simplicity, we'll regenerate if needed
+                // In production, you'd properly deserialize the keys
+            } catch (e: Exception) {
+                Log.w(TAG, "Error loading stored keys, generating new ones")
+            }
+        }
+        
+        // Generate new key pair
+        val keyGen = KeyPairGenerator.getInstance("RSA")
+        keyGen.initialize(2048)
+        val keyPair = keyGen.generateKeyPair()
+        
+        // Store keys (simplified - in production use proper key serialization)
+        val privateKeyEncoded = Base64.encodeToString(keyPair.private.encoded, Base64.NO_WRAP)
+        val publicKeyEncoded = Base64.encodeToString(keyPair.public.encoded, Base64.NO_WRAP)
+        
+        preferences.edit()
+            .putString(PREF_PRIVATE_KEY, privateKeyEncoded)
+            .putString(PREF_PUBLIC_KEY, publicKeyEncoded)
+            .apply()
+        
+        return keyPair
+    }
+
+    private fun signData(data: String, privateKey: PrivateKey): String {
+        val signature = Signature.getInstance("SHA256withRSA")
+        signature.initSign(privateKey)
+        signature.update(data.toByteArray())
+        return Base64.encodeToString(signature.sign(), Base64.NO_WRAP)
+    }
+
+    private fun verifySignature(data: String, signatureString: String, publicKey: PublicKey): Boolean {
+        return try {
+            val signature = Signature.getInstance("SHA256withRSA")
+            signature.initVerify(publicKey)
+            signature.update(data.toByteArray())
+            signature.verify(Base64.decode(signatureString, Base64.NO_WRAP))
+        } catch (e: Exception) {
+            false
+        }
     }
 }

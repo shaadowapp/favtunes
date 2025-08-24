@@ -19,7 +19,7 @@ import com.shaadow.tunes.utils.getEnum
 import com.shaadow.tunes.utils.preferences
 import com.shaadow.tunes.notification.FavTunesNotificationManager
 import com.shaadow.tunes.notification.NotificationService
-import com.shaadow.tunes.notification.NotificationThrottleMonitor
+
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -73,13 +73,10 @@ class MainApplication : Application(), SingletonImageLoader.Factory {
         // Create notification channels first
         createNotificationChannels()
         
-        // Initialize notification system with throttling
+        // Initialize simple notification system
         val notificationManager = FavTunesNotificationManager(this)
-        val throttleMonitor = NotificationThrottleMonitor(this)
         
         applicationScope.launch {
-            // Log current throttle status for debugging
-            throttleMonitor.logThrottleStatus()
             
             // ONLY SCHEDULE workers, don't deliver notifications immediately on app start
             notificationManager.scheduleEngagementNotifications()
@@ -87,7 +84,7 @@ class MainApplication : Application(), SingletonImageLoader.Factory {
             // Don't call scheduleMarketingNotification() here as it can deliver immediately
             
             // Log summary after scheduling
-            android.util.Log.d("MainApplication", throttleMonitor.getThrottleSummary())
+            android.util.Log.d("MainApplication", "Notification system initialized")
         }
 
         // Preload critical data immediately

@@ -53,59 +53,104 @@ class WorkingSuggestionSystem(private val context: Context) {
     }
     
     /**
-     * Get recommendations based on user behavior (most played, liked songs)
+     * Get recommendations based on user behavior and preferences
+     * This analyzes what the user actually likes and suggests similar content
      */
     private suspend fun getBehaviorBasedRecommendations(): List<MediaItem> {
         return try {
-            // Get songs from database directly
+            // Get user's most played songs (shows what they actually like)
+            val mostPlayedSongs = Database.songsByPlayTimeDesc().first().take(20)
+            
+            // Get recently liked songs (recent preferences)
+            val likedSongs = Database.favorites().first().take(15)
+            
+            // Get recently played songs (current listening habits)
             val recentSongs = Database.recentlyPlayedSongs().first().take(10)
-            val likedSongs = Database.favorites().first().take(10)
-            val allSongs = Database.songsByPlayTimeDesc().first().take(20)
             
-            // Combine and convert to MediaItems
-            val combinedSongs = (recentSongs + likedSongs + allSongs)
-                .distinctBy { it.id }
-                .take(16)
+            // Analyze user preferences from their behavior
+            val userPreferredArtists = (mostPlayedSongs + likedSongs)
+                .mapNotNull { it.artistsText }
+                .flatMap { it.split(",", "&", "feat.", "ft.") }
+                .map { it.trim() }
+                .groupBy { it }
+                .mapValues { it.value.size }
+                .toList()
+                .sortedByDescending { it.second }
+                .take(10)
+                .map { it.first }
             
-            combinedSongs.map { it.asMediaItem }
+            // Get all songs and find recommendations based on user's preferred artists
+            val allSongs = Database.songsByTitleAsc().first()
+            val recommendedSongs = allSongs.filter { song ->
+                // Recommend songs by artists the user likes but hasn't played much
+                userPreferredArtists.any { preferredArtist ->
+                    song.artistsText?.contains(preferredArtist, ignoreCase = true) == true
+                } && !mostPlayedSongs.contains(song) && !recentSongs.contains(song)
+            }.shuffled().take(12)
+            
+            // Mix recommendations with some variety
+            val finalRecommendations = mutableListOf<MediaItem>()
+            
+            // Add artist-based recommendations (60%)
+            finalRecommendations.addAll(recommendedSongs.take(7).map { it.asMediaItem })
+            
+            // Add some variety from less played songs (40%)
+            val varietySongs = allSongs
+                .filterNot { mostPlayedSongs.contains(it) || recentSongs.contains(it) }
+                .shuffled()
+                .take(5)
+            finalRecommendations.addAll(varietySongs.map { it.asMediaItem })
+            
+            finalRecommendations.distinctBy { it.mediaId }.shuffled()
         } catch (e: Exception) {
             emptyList()
         }
     }
     
     /**
-     * Get recommendations based on user preferences
+     * Get recommendations based on user's stated preferences from onboarding
      */
     private suspend fun getPreferenceBasedRecommendations(limit: Int): List<MediaItem> {
         return try {
             val userPreferences = getUserPreferences() ?: return emptyList()
             
-            // Get a variety of songs from database for better recommendations
-            val allSongs = Database.songsByPlayTimeDesc().first().take(200) // Get top 200 most played
-            val recentSongs = Database.songsByRowIdDesc().first().take(100) // Get 100 most recent
-            val randomSongs = Database.songsByTitleAsc().first().shuffled().take(50) // Get 50 random songs
+            // Get all available songs
+            val allSongs = Database.songsByTitleAsc().first()
             
-            // Combine different sources for variety
-            val combinedSongs = (allSongs + recentSongs + randomSongs).distinctBy { it.id }
-            
-            // Filter songs that might match user preferences (simplified matching)
-            val matchingSongs = combinedSongs.filter { song ->
+            // Find songs that match user's preferred genres/artists
+            val matchingSongs = allSongs.filter { song ->
                 userPreferences.any { preference ->
-                    // Simple matching - check if preference appears in title or artist
+                    // Match against title, artist, or album
                     song.title.contains(preference, ignoreCase = true) ||
                     song.artistsText?.contains(preference, ignoreCase = true) == true
                 }
             }
             
-            // If we have matching songs, use them, otherwise fall back to mixed sources
-            val songsToUse = if (matchingSongs.isNotEmpty()) {
-                matchingSongs.shuffled().take(limit) // Shuffle for variety
+            // If we have direct matches, prioritize them
+            if (matchingSongs.isNotEmpty()) {
+                matchingSongs.shuffled().take(limit).map { it.asMediaItem }
             } else {
-                // Fallback to mixed sources for variety
-                combinedSongs.shuffled().take(limit)
+                // If no direct matches, use intelligent fallback
+                // Get songs from artists that are similar to user preferences
+                val similarSongs = allSongs.filter { song ->
+                    userPreferences.any { preference ->
+                        // Fuzzy matching for similar artists/genres
+                        val words = preference.split(" ")
+                        words.any { word ->
+                            song.artistsText?.contains(word, ignoreCase = true) == true ||
+                            song.title.contains(word, ignoreCase = true)
+                        }
+                    }
+                }
+                
+                if (similarSongs.isNotEmpty()) {
+                    similarSongs.shuffled().take(limit).map { it.asMediaItem }
+                } else {
+                    // Final fallback - return a diverse selection
+                    allSongs.shuffled().take(limit).map { it.asMediaItem }
+                }
             }
             
-            songsToUse.map { it.asMediaItem }
         } catch (e: Exception) {
             emptyList()
         }
@@ -121,13 +166,13 @@ class WorkingSuggestionSystem(private val context: Context) {
         preferences.edit().putInt("play_${mediaItem.mediaId}", playCount + 1).apply()
     }
     
-    fun onSongLiked(mediaItem: MediaItem) {
-        preferences.edit().putBoolean("liked_${mediaItem.mediaId}", true).apply()
-    }
-    
     fun onSongSkipped(mediaItem: MediaItem, playDuration: Long = 0L) {
         val skipCount = preferences.getInt("skip_${mediaItem.mediaId}", 0)
         preferences.edit().putInt("skip_${mediaItem.mediaId}", skipCount + 1).apply()
+    }
+    
+    fun onSongLiked(mediaItem: MediaItem) {
+        preferences.edit().putBoolean("liked_${mediaItem.mediaId}", true).apply()
     }
     
     fun onSongAddedToPlaylist(mediaItem: MediaItem, playlistName: String) {
@@ -155,6 +200,36 @@ class WorkingSuggestionSystem(private val context: Context) {
         } catch (e: Exception) {
             false
         }
+    }
+    
+    /**
+     * Reset onboarding status for testing
+     */
+    fun resetOnboarding() {
+        preferences.edit().putBoolean("onboarding_complete", false).apply()
+    }
+    
+    /**
+     * Clear all suggestion data
+     */
+    suspend fun clearAllData() {
+        preferences.edit().clear().apply()
+    }
+    
+    /**
+     * Get tracking status for debugging
+     */
+    fun getTrackingStatus(): Map<String, Any> {
+        val allPrefs = preferences.all
+        return mapOf(
+            "totalTrackedSongs" to allPrefs.keys.count { it.startsWith("play_") },
+            "totalLikedSongs" to allPrefs.keys.count { key -> 
+                key.startsWith("liked_") && preferences.getBoolean(key, false) 
+            },
+            "totalSkippedSongs" to allPrefs.keys.count { it.startsWith("skip_") },
+            "isTrackingActive" to (allPrefs.isNotEmpty()),
+            "onboardingComplete" to isOnboardingComplete()
+        )
     }
     
     fun getUserPreferences(): Set<String>? {
@@ -204,38 +279,11 @@ class WorkingSuggestionSystem(private val context: Context) {
     }
     
     /**
-     * Get tracking status for debugging
-     */
-    fun getTrackingStatus(): Map<String, Any> {
-        val allPrefs = preferences.all
-        return mapOf(
-            "totalTrackedSongs" to allPrefs.keys.count { it.startsWith("play_") },
-            "totalLikedSongs" to allPrefs.keys.count { key -> 
-                key.startsWith("liked_") && preferences.getBoolean(key, false) 
-            },
-            "totalSkippedSongs" to allPrefs.keys.count { it.startsWith("skip_") },
-            "isTrackingActive" to (allPrefs.isNotEmpty()),
-            "onboardingComplete" to isOnboardingComplete()
-        )
-    }
-
-    /**
      * Maintenance
      */
     fun shouldRefreshRecommendations(lastRefreshTime: Long): Boolean {
         val refreshInterval = 2 * 60 * 60 * 1000L // 2 hours
         return (System.currentTimeMillis() - lastRefreshTime) > refreshInterval
-    }
-    
-    suspend fun clearAllData() {
-        preferences.edit().clear().apply()
-    }
-    
-    /**
-     * Reset onboarding status for testing
-     */
-    fun resetOnboarding() {
-        preferences.edit().putBoolean("onboarding_complete", false).apply()
     }
     
     suspend fun getStorageSizeEstimate(): Long {

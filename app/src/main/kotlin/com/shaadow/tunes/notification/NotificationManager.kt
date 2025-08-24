@@ -14,15 +14,13 @@ import java.util.concurrent.TimeUnit
 import kotlin.random.Random
 
 /**
- * Refactored NotificationManager using new architecture with proper separation of concerns
- * Delegates notification delivery to NotificationDelivery interface implementations
+ * Simple and smart notification manager
+ * Sends helpful notifications without being spammy
  */
 class FavTunesNotificationManager(
     private val context: Context,
     private val notificationDelivery: NotificationDelivery = LocalNotificationHelper(context),
-    private val contentGenerator: NotificationContentGenerator = NotificationContentGenerator(),
-    private val scheduler: IntelligentNotificationScheduler = IntelligentNotificationScheduler(context),
-    private val preferences: NotificationPreferencesService = NotificationPreferencesService(context)
+    private val contentGenerator: NotificationContentGenerator = NotificationContentGenerator()
 ) {
     
     companion object {
@@ -30,133 +28,65 @@ class FavTunesNotificationManager(
         const val PREF_NOTIFICATIONS_ENABLED = "notifications_enabled"
         const val PREF_MUSIC_SUGGESTIONS = "music_suggestions_enabled"
         const val PREF_ENGAGEMENT_REMINDERS = "engagement_reminders_enabled"
-        const val PREF_MARKETING_NOTIFICATIONS = "marketing_notifications_enabled"
+        const val PREF_LAST_NOTIFICATION = "last_notification_time"
         
         private const val ENGAGEMENT_WORK_TAG = "engagement_notifications"
         private const val DAILY_SUGGESTION_WORK_TAG = "daily_suggestions"
+        private const val MIN_NOTIFICATION_GAP_HOURS = 6 // Minimum 6 hours between notifications
     }
 
     /**
-     * Schedule engagement notifications using intelligent scheduling with proper throttling
+     * Schedule smart engagement notifications
      */
     suspend fun scheduleEngagementNotifications() {
-        // Check master notification switch first
-        if (!getPreferences().getBoolean(PREF_NOTIFICATIONS_ENABLED, false)) return
-        if (!preferences.isNotificationTypeEnabled(NotificationType.ENGAGEMENT)) return
-        
-        // Check if we can schedule based on throttling rules
-        val timeUntilNext = scheduler.getTimeUntilNextLocalNotification()
-        val initialDelay = maxOf(timeUntilNext / (1000 * 60 * 60), 4L) // At least 4 hours to prevent spam
+        if (!getPreferences().getBoolean(PREF_NOTIFICATIONS_ENABLED, true)) return
+        if (!getPreferences().getBoolean(PREF_ENGAGEMENT_REMINDERS, true)) return
         
         val constraints = Constraints.Builder()
             .setRequiredNetworkType(NetworkType.CONNECTED)
             .build()
 
         val engagementWork = PeriodicWorkRequestBuilder<EngagementNotificationWorker>(
-            24, TimeUnit.HOURS // Check every 24 hours instead of 12 to reduce frequency
+            1, TimeUnit.DAYS // Check daily, but won't send if user was active recently
         )
             .setConstraints(constraints)
             .addTag(ENGAGEMENT_WORK_TAG)
-            .setInitialDelay(initialDelay, TimeUnit.HOURS)
+            .setInitialDelay(8, TimeUnit.HOURS) // Start after 8 hours
             .build()
 
         WorkManager.getInstance(context)
             .enqueueUniquePeriodicWork(
                 ENGAGEMENT_WORK_TAG,
-                ExistingPeriodicWorkPolicy.KEEP, // Keep existing work to prevent duplicate scheduling
+                ExistingPeriodicWorkPolicy.REPLACE,
                 engagementWork
             )
     }
 
     /**
-     * Schedule daily music suggestions with intelligent timing and proper throttling
+     * Schedule smart music suggestions
      */
     suspend fun scheduleDailySuggestions() {
-        // Check master notification switch first
-        if (!getPreferences().getBoolean(PREF_NOTIFICATIONS_ENABLED, false)) return
-        if (!preferences.isNotificationTypeEnabled(NotificationType.MUSIC_SUGGESTIONS)) return
-        
-        // Ensure proper spacing between notifications
-        val timeUntilNext = scheduler.getTimeUntilNextLocalNotification()
-        val baseDelay = getRandomDelay() // 8-20 hours
-        val adjustedDelay = maxOf(baseDelay, timeUntilNext / (1000 * 60 * 60) + 3L) // At least 3 hours after next available slot
+        if (!getPreferences().getBoolean(PREF_NOTIFICATIONS_ENABLED, true)) return
+        if (!getPreferences().getBoolean(PREF_MUSIC_SUGGESTIONS, true)) return
         
         val constraints = Constraints.Builder()
             .setRequiredNetworkType(NetworkType.CONNECTED)
             .build()
 
         val suggestionWork = PeriodicWorkRequestBuilder<DailySuggestionWorker>(
-            2, TimeUnit.DAYS // Reduce frequency to every 2 days instead of daily
+            1, TimeUnit.DAYS // Check daily for new music suggestions
         )
             .setConstraints(constraints)
             .addTag(DAILY_SUGGESTION_WORK_TAG)
-            .setInitialDelay(adjustedDelay, TimeUnit.HOURS)
+            .setInitialDelay(getRandomDelay(), TimeUnit.HOURS)
             .build()
 
         WorkManager.getInstance(context)
             .enqueueUniquePeriodicWork(
                 DAILY_SUGGESTION_WORK_TAG,
-                ExistingPeriodicWorkPolicy.KEEP, // Keep existing work to prevent duplicate scheduling
+                ExistingPeriodicWorkPolicy.REPLACE,
                 suggestionWork
             )
-    }
-
-    /**
-     * Schedule marketing notifications with user preference respect
-     * This method only schedules workers, it doesn't deliver notifications immediately
-     */
-    suspend fun scheduleMarketingNotification() {
-        // Check master notification switch first
-        if (!getPreferences().getBoolean(PREF_NOTIFICATIONS_ENABLED, false)) return
-        if (!preferences.isNotificationTypeEnabled(NotificationType.MARKETING)) return
-        
-        // Schedule a marketing worker for later, don't deliver immediately
-        val delay = getRandomMarketingDelay() // 1-7 days
-        val marketingWork = PeriodicWorkRequestBuilder<MarketingNotificationWorker>(
-            14, TimeUnit.DAYS // Check bi-weekly instead of weekly to reduce frequency
-        )
-            .setInitialDelay(delay, TimeUnit.HOURS)
-            .addTag("marketing_notifications")
-            .build()
-        
-        WorkManager.getInstance(context)
-            .enqueueUniquePeriodicWork(
-                "marketing_notifications",
-                ExistingPeriodicWorkPolicy.KEEP, // Keep existing work to prevent duplicate scheduling
-                marketingWork
-            )
-        
-        android.util.Log.d("FavTunesNotificationManager", 
-            "Marketing notifications scheduled with ${delay}h initial delay")
-    }
-    
-    /**
-     * Send marketing notification (called by worker, not on app startup)
-     */
-    suspend fun sendMarketingNotification() {
-        // Check master notification switch first
-        if (!getPreferences().getBoolean(PREF_NOTIFICATIONS_ENABLED, false)) return
-        if (!preferences.isNotificationTypeEnabled(NotificationType.MARKETING)) return
-        
-        val content = contentGenerator.generateMarketingContent()
-        val result = scheduler.scheduleNotification(
-            content = content,
-            priority = NotificationPriority.LOW,
-            deliveryWindow = DeliveryWindow(startHour = 10, endHour = 20)
-        )
-        
-        when (result) {
-            is ScheduleResult.DeliveredImmediately -> {
-                notificationDelivery.showMarketingNotification(content)
-            }
-            is ScheduleResult.ScheduledForLater -> {
-                scheduleDelayedMarketingNotification(content, result.deliveryTime)
-            }
-            is ScheduleResult.Blocked -> {
-                android.util.Log.d("FavTunesNotificationManager", 
-                    "Marketing notification blocked: ${result.reason}")
-            }
-        }
     }
 
     fun updateLastAppOpen() {
@@ -170,124 +100,51 @@ class FavTunesNotificationManager(
         return (System.currentTimeMillis() - lastOpen) / (1000 * 60 * 60)
     }
 
+    private fun canSendNotification(): Boolean {
+        val lastNotification = getPreferences().getLong(PREF_LAST_NOTIFICATION, 0)
+        val hoursSinceLastNotification = (System.currentTimeMillis() - lastNotification) / (1000 * 60 * 60)
+        return hoursSinceLastNotification >= MIN_NOTIFICATION_GAP_HOURS
+    }
+
+    private fun recordNotificationSent() {
+        getPreferences().edit()
+            .putLong(PREF_LAST_NOTIFICATION, System.currentTimeMillis())
+            .apply()
+    }
+
     /**
-     * Send immediate engagement notification with intelligent content
+     * Send engagement notification if appropriate
      */
     suspend fun sendEngagementNotification(hoursSinceLastOpen: Long) {
-        // Check master notification switch first
-        if (!getPreferences().getBoolean(PREF_NOTIFICATIONS_ENABLED, false)) return
-        if (!preferences.isNotificationTypeEnabled(NotificationType.ENGAGEMENT)) return
+        if (!getPreferences().getBoolean(PREF_NOTIFICATIONS_ENABLED, true)) return
+        if (!getPreferences().getBoolean(PREF_ENGAGEMENT_REMINDERS, true)) return
+        if (!canSendNotification()) return
         
         val content = contentGenerator.generateEngagementContent(hoursSinceLastOpen)
-        val result = scheduler.scheduleNotification(
-            content = content,
-            priority = NotificationPriority.NORMAL
-        )
-        
-        when (result) {
-            is ScheduleResult.DeliveredImmediately -> {
-                notificationDelivery.showEngagementNotification(content)
-            }
-            is ScheduleResult.ScheduledForLater -> {
-                // Will be delivered later by scheduler
-            }
-            is ScheduleResult.Blocked -> {
-                // Respect user preferences and constraints
-            }
-        }
+        notificationDelivery.showEngagementNotification(content)
+        recordNotificationSent()
     }
     
     /**
-     * Send music suggestion with personalization
+     * Send music suggestion notification
      */
     suspend fun sendMusicSuggestion(songs: List<Song>) {
-        // Check master notification switch first
-        if (!getPreferences().getBoolean(PREF_NOTIFICATIONS_ENABLED, false)) return
-        if (!preferences.isNotificationTypeEnabled(NotificationType.MUSIC_SUGGESTIONS)) return
+        if (!getPreferences().getBoolean(PREF_NOTIFICATIONS_ENABLED, true)) return
+        if (!getPreferences().getBoolean(PREF_MUSIC_SUGGESTIONS, true)) return
+        if (!canSendNotification()) return
+        if (songs.isEmpty()) return
         
         val content = contentGenerator.generateMusicSuggestionContent(songs)
-        val result = scheduler.scheduleNotification(
-            content = content,
-            priority = NotificationPriority.NORMAL,
-            deliveryWindow = DeliveryWindow(startHour = 8, endHour = 22)
-        )
-        
-        when (result) {
-            is ScheduleResult.DeliveredImmediately -> {
-                notificationDelivery.showMusicSuggestion(content)
-            }
-            is ScheduleResult.ScheduledForLater -> {
-                // Will be delivered at optimal time
-            }
-            is ScheduleResult.Blocked -> {
-                // Respect constraints
-            }
-        }
+        notificationDelivery.showMusicSuggestion(content)
+        recordNotificationSent()
     }
 
     fun cancelAllNotifications() {
         WorkManager.getInstance(context).cancelAllWorkByTag(ENGAGEMENT_WORK_TAG)
         WorkManager.getInstance(context).cancelAllWorkByTag(DAILY_SUGGESTION_WORK_TAG)
     }
-
-    /**
-     * Record user interaction for learning
-     */
-    fun recordNotificationInteraction(
-        contentType: String,
-        deliveryTime: Long,
-        interactionType: NotificationInteraction
-    ) {
-        scheduler.recordNotificationInteraction(contentType, deliveryTime, interactionType)
-    }
     
-    /**
-     * Record app usage for behavior learning
-     */
-    fun recordAppUsage(startTime: Long, endTime: Long, activityType: String) {
-        scheduler.recordAppUsage(startTime, endTime, activityType)
-    }
-    
-    /**
-     * Handle push notification delivery (Firebase/OneSignal) - bypasses local notification throttling
-     */
-    fun handlePushNotification(notificationId: String, contentType: String, title: String, body: String) {
-        // Record push notification (doesn't affect local notification timing)
-        scheduler.recordPushNotificationDelivery(notificationId, contentType)
-        
-        // Push notifications can be delivered immediately as they don't count toward local notification limits
-        android.util.Log.d("FavTunesNotificationManager", 
-            "Push notification received: $contentType - $title")
-    }
-    
-    /**
-     * Get status of notification throttling
-     */
-    fun getNotificationThrottleStatus(): NotificationThrottleStatus {
-        val timeUntilNext = scheduler.getTimeUntilNextLocalNotification()
-        val pendingCount = scheduler.checkPendingNotifications().size
-        
-        return NotificationThrottleStatus(
-            canDeliverNow = timeUntilNext == 0L,
-            timeUntilNextSlot = timeUntilNext,
-            pendingNotifications = pendingCount,
-            nextAvailableTime = System.currentTimeMillis() + timeUntilNext
-        )
-    }
-    
-    private fun getRandomDelay(): Long = Random.nextLong(8, 20) // 8-20 hours
-
-    private fun getRandomMarketingDelay(): Long = Random.nextLong(24, 168) // 1-7 days
-    
-    private fun scheduleDelayedMarketingNotification(content: NotificationContent, deliveryTime: Long) {
-        val delay = deliveryTime - System.currentTimeMillis()
-        val marketingWork = OneTimeWorkRequestBuilder<DelayedMarketingWorker>()
-            .setInitialDelay(delay, TimeUnit.MILLISECONDS)
-            .setInputData(workDataOf("content_title" to content.title, "content_body" to content.body))
-            .build()
-        
-        WorkManager.getInstance(context).enqueue(marketingWork)
-    }
+    private fun getRandomDelay(): Long = Random.nextLong(4, 12) // 4-12 hours
     
     private fun getPreferences(): SharedPreferences {
         return PreferenceManager.getDefaultSharedPreferences(context)
@@ -295,7 +152,7 @@ class FavTunesNotificationManager(
 }
 
 /**
- * Refactored worker using new architecture with throttling respect
+ * Simple engagement notification worker
  */
 class EngagementNotificationWorker(
     context: Context,
@@ -306,37 +163,17 @@ class EngagementNotificationWorker(
         val notificationManager = FavTunesNotificationManager(applicationContext)
         val hoursSinceLastOpen = notificationManager.getHoursSinceLastOpen()
         
-        // Only send engagement notifications if user has been away for at least 48 hours (increased from 24)
-        if (hoursSinceLastOpen < 48) {
-            android.util.Log.d("EngagementWorker", "User was active recently ($hoursSinceLastOpen hours ago). Skipping engagement notification.")
-            return Result.success()
+        // Only send if user has been away for at least 2 days
+        if (hoursSinceLastOpen >= 48) {
+            notificationManager.sendEngagementNotification(hoursSinceLastOpen)
         }
-        
-        // Check throttling status before attempting to send
-        val throttleStatus = notificationManager.getNotificationThrottleStatus()
-        
-        if (!throttleStatus.canDeliverNow) {
-            // If we can't deliver now, skip this attempt and let the next periodic run handle it
-            android.util.Log.d("EngagementWorker", 
-                "Notification throttled. Next slot in: ${throttleStatus.getFormattedTimeUntilNext()}. Skipping this attempt.")
-            return Result.success() // Don't retry immediately, wait for next periodic run
-        }
-        
-        // Additional check: don't send if we've already sent too many notifications today
-        if (throttleStatus.pendingNotifications > 2) {
-            android.util.Log.d("EngagementWorker", "Too many pending notifications (${throttleStatus.pendingNotifications}). Skipping.")
-            return Result.success()
-        }
-        
-        // Use new architecture with intelligent scheduling
-        notificationManager.sendEngagementNotification(hoursSinceLastOpen)
         
         return Result.success()
     }
 }
 
 /**
- * Refactored worker using new architecture with throttling respect
+ * Simple music suggestion worker
  */
 class DailySuggestionWorker(
     context: Context,
@@ -347,125 +184,19 @@ class DailySuggestionWorker(
         try {
             val notificationManager = FavTunesNotificationManager(applicationContext)
             
-            // Check throttling status before attempting to send
-            val throttleStatus = notificationManager.getNotificationThrottleStatus()
-            
-            if (!throttleStatus.canDeliverNow) {
-                // If we can't deliver now, skip this attempt and let the next periodic run handle it
-                android.util.Log.d("DailySuggestionWorker", 
-                    "Notification throttled. Next slot in: ${throttleStatus.getFormattedTimeUntilNext()}. Skipping this attempt.")
-                return Result.success() // Don't retry immediately, wait for next periodic run
-            }
-            
-            // Additional check: don't send if we've already sent too many notifications today
-            if (throttleStatus.pendingNotifications > 1) {
-                android.util.Log.d("DailySuggestionWorker", "Too many pending notifications (${throttleStatus.pendingNotifications}). Skipping.")
-                return Result.success()
-            }
-            
+            // Get some recent songs for suggestions
             val recentSongs = Database.songs(
                 sortBy = com.shaadow.tunes.enums.SongSortBy.DateAdded, 
                 sortOrder = com.shaadow.tunes.enums.SortOrder.Descending
-            ).first().take(10)
+            ).first().take(5)
             
-            // Only send if we have songs to suggest
-            if (recentSongs.isEmpty()) {
-                android.util.Log.d("DailySuggestionWorker", "No songs available for suggestion. Skipping.")
-                return Result.success()
+            if (recentSongs.isNotEmpty()) {
+                notificationManager.sendMusicSuggestion(recentSongs)
             }
-            
-            // Use new architecture with intelligent scheduling
-            notificationManager.sendMusicSuggestion(recentSongs)
             
             return Result.success()
         } catch (e: Exception) {
-            android.util.Log.e("DailySuggestionWorker", "Error in daily suggestion worker", e)
-            return Result.failure() // Changed from retry to failure to prevent endless retries
-        }
-    }
-}
-
-/**
- * Refactored marketing worker using new architecture with throttling respect
- */
-class MarketingNotificationWorker(
-    context: Context,
-    params: WorkerParameters
-) : CoroutineWorker(context, params) {
-
-    override suspend fun doWork(): Result {
-        val notificationManager = FavTunesNotificationManager(applicationContext)
-        
-        // Check throttling status before attempting to send
-        val throttleStatus = notificationManager.getNotificationThrottleStatus()
-        
-        if (!throttleStatus.canDeliverNow) {
-            // If we can't deliver now, reschedule for the next available slot
-            android.util.Log.d("MarketingWorker", 
-                "Notification throttled. Next slot in: ${throttleStatus.getFormattedTimeUntilNext()}")
-            return Result.retry()
-        }
-        
-        // Use new architecture with intelligent scheduling
-        notificationManager.sendMarketingNotification()
-        
-        return Result.success()
-    }
-}
-
-/**
- * Worker for delayed marketing notifications scheduled by intelligent scheduler
- */
-class DelayedMarketingWorker(
-    context: Context,
-    params: WorkerParameters
-) : CoroutineWorker(context, params) {
-
-    override suspend fun doWork(): Result {
-        val title = inputData.getString("content_title") ?: return Result.failure()
-        val body = inputData.getString("content_body") ?: return Result.failure()
-        
-        val content = NotificationContent(
-            title = title,
-            body = body,
-            emoji = "📢",
-            actionText = "Check It Out",
-            contentType = "marketing"
-        )
-        
-        // Check throttling before delivering
-        val scheduler = IntelligentNotificationScheduler(applicationContext)
-        val timeUntilNext = scheduler.getTimeUntilNextLocalNotification()
-        
-        if (timeUntilNext > 0) {
-            // Reschedule for later if we're in cooldown
-            return Result.retry()
-        }
-        
-        val notificationDelivery = LocalNotificationHelper(applicationContext)
-        notificationDelivery.showMarketingNotification(content)
-        
-        return Result.success()
-    }
-}
-
-/**
- * Data class for notification throttle status
- */
-data class NotificationThrottleStatus(
-    val canDeliverNow: Boolean,
-    val timeUntilNextSlot: Long,
-    val pendingNotifications: Int,
-    val nextAvailableTime: Long
-) {
-    fun getFormattedTimeUntilNext(): String {
-        val hours = timeUntilNextSlot / (1000 * 60 * 60)
-        val minutes = (timeUntilNextSlot % (1000 * 60 * 60)) / (1000 * 60)
-        
-        return when {
-            hours > 0 -> "${hours}h ${minutes}m"
-            minutes > 0 -> "${minutes}m"
-            else -> "Now"
+            return Result.failure()
         }
     }
 }

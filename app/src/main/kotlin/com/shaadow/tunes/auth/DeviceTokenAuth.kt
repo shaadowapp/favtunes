@@ -52,7 +52,7 @@ interface DeviceTokenAuth {
      * Get device info for current device
      * @return DeviceInfo object with current device details
      */
-    fun getCurrentDeviceInfo(): DeviceInfo
+    fun getCurrentDeviceInfo(): com.shaadow.tunes.models.DeviceInfo
     
     /**
      * Check if device token exists locally
