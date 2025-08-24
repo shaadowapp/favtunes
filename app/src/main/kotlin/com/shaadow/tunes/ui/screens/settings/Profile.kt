@@ -51,7 +51,7 @@ fun ProfileScreen(
     var showKey by remember { mutableStateOf(false) }
     var showPin by remember { mutableStateOf(false) }
     var showDialog by remember { mutableStateOf(false) }
-    var currentImage by remember { mutableIntStateOf(R.drawable.m_user_1) }
+    var currentImage by remember { mutableIntStateOf(R.drawable.app_icon) }
     var userData by remember { mutableStateOf<UserEntity?>(null) }
 
     LaunchedEffect(Unit) {
@@ -250,12 +250,10 @@ fun InfoRow(label: String, value: String) {
 @Composable
 fun ProfilePictureDialog(onDismiss: () -> Unit, onImageSelected: (Int) -> Unit) {
     val images = listOf(
-        R.drawable.m_user_1, // Default
-        R.drawable.m_user_2,
-        R.drawable.m_user_3,
-        R.drawable.f_user_1,
-        R.drawable.f_user_2,
-        R.drawable.f_user_3,
+        R.drawable.app_icon, // Default
+        R.drawable.ic_launcher_foreground,
+        R.drawable.logo_dark,
+        R.drawable.logo_light,
     )
 
     Dialog(onDismissRequest = onDismiss) {
@@ -271,8 +269,8 @@ fun ProfilePictureDialog(onDismiss: () -> Unit, onImageSelected: (Int) -> Unit) 
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                // Display images in 2 rows, 3 per row
-                images.chunked(3).forEach { rowImages ->
+                // Display images in 2 rows, 2 per row
+                images.chunked(2).forEach { rowImages ->
                     Row {
                         rowImages.forEach { imageRes ->
                             Image(

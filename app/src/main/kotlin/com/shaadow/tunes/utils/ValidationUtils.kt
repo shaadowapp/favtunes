@@ -29,6 +29,7 @@ object ValidationUtils {
     private val SCRIPT_PATTERN = Pattern.compile("(?i)<script[^>]*>.*?</script>")
     private val JAVASCRIPT_PATTERN = Pattern.compile("(?i)javascript:")
     private val SQL_INJECTION_PATTERN = Pattern.compile("(?i)(union|select|insert|update|delete|drop|create|alter|exec|execute)")
+    private val EMAIL_PATTERN = Pattern.compile("^[A-Za-z0-9+_.-]+@([A-Za-z0-9.-]+\\.[A-Za-z]{2,})$")
     
     /**
      * Validate a bug report
@@ -83,6 +84,13 @@ object ValidationUtils {
         val messageValidation = validateMessage(feedback.message)
         if (!messageValidation.isValid) {
             errors.addAll(messageValidation.errors)
+        }
+        
+        // Validate email if provided
+        feedback.email?.let { email ->
+            if (email.isNotBlank() && !isValidEmail(email)) {
+                errors.add("Please enter a valid email address")
+            }
         }
         
         // Validate app version
@@ -230,19 +238,33 @@ object ValidationUtils {
      */
     fun sanitizeText(text: String): String {
         return try {
+            // Log input for debugging
+            Log.d(TAG, "sanitizeText INPUT: '$text'")
+            Log.d(TAG, "sanitizeText INPUT contains spaces: ${text.contains(' ')}")
+            
             var sanitized = text
             
-            // Remove HTML tags
+            // Test each regex pattern individually to find the culprit
+            Log.d(TAG, "Before HTML_TAG_PATTERN: '$sanitized'")
             sanitized = HTML_TAG_PATTERN.matcher(sanitized).replaceAll("")
+            Log.d(TAG, "After HTML_TAG_PATTERN: '$sanitized'")
             
-            // Remove script tags
+            Log.d(TAG, "Before SCRIPT_PATTERN: '$sanitized'")
             sanitized = SCRIPT_PATTERN.matcher(sanitized).replaceAll("")
+            Log.d(TAG, "After SCRIPT_PATTERN: '$sanitized'")
             
-            // Remove javascript: protocols
+            Log.d(TAG, "Before JAVASCRIPT_PATTERN: '$sanitized'")
             sanitized = JAVASCRIPT_PATTERN.matcher(sanitized).replaceAll("")
+            Log.d(TAG, "After JAVASCRIPT_PATTERN: '$sanitized'")
             
-            // Trim whitespace
+            Log.d(TAG, "Before trim: '$sanitized'")
+            // Only trim leading/trailing whitespace, preserve internal spaces
             sanitized = sanitized.trim()
+            Log.d(TAG, "After trim: '$sanitized'")
+            
+            // Final log for debugging space issues
+            Log.d(TAG, "sanitizeText FINAL: '$text' -> '$sanitized'")
+            Log.d(TAG, "sanitizeText FINAL contains spaces: ${sanitized.contains(' ')}")
             
             sanitized
         } catch (e: Exception) {
@@ -267,8 +289,21 @@ object ValidationUtils {
      */
     fun sanitizeUserFeedback(feedback: UserFeedback): UserFeedback {
         return feedback.copy(
-            message = sanitizeText(feedback.message)
+            message = sanitizeText(feedback.message),
+            email = feedback.email?.trim()?.takeIf { it.isNotBlank() }
         )
+    }
+    
+    /**
+     * Validate email format
+     */
+    fun isValidEmail(email: String): Boolean {
+        return try {
+            EMAIL_PATTERN.matcher(email.trim()).matches()
+        } catch (e: Exception) {
+            Log.w(TAG, "Error validating email", e)
+            false
+        }
     }
 }
 

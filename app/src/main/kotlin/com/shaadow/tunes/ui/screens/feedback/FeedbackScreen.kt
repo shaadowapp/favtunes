@@ -5,6 +5,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
@@ -13,6 +14,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.shaadow.tunes.viewmodels.FeedbackViewModel
@@ -309,47 +311,22 @@ fun FeedbackScreen(
                     .padding(bottom = 24.dp)
             )
             
-            // Anonymous Submission Toggle
-            Card(
+            // Optional Email Field
+            OutlinedTextField(
+                value = uiState.email ?: "",
+                onValueChange = viewModel::updateEmail,
+                label = { Text("Email (optional)") },
+                placeholder = { Text("Get updates on your feedback") },
+                isError = uiState.emailError != null,
+                supportingText = uiState.emailError?.let { { Text(it) } },
+                keyboardOptions = KeyboardOptions.Default.copy(
+                    keyboardType = KeyboardType.Email
+                ),
+                singleLine = true,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 16.dp)
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable { viewModel.toggleAnonymous(!uiState.isAnonymous) }
-                        .padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        if (uiState.isAnonymous) Icons.Default.VisibilityOff else Icons.Default.Visibility,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                    Spacer(Modifier.width(12.dp))
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = "Submit Anonymously",
-                            style = MaterialTheme.typography.bodyMedium,
-                            fontWeight = FontWeight.Medium
-                        )
-                        Text(
-                            text = if (uiState.isAnonymous) {
-                                "Your feedback will be submitted without personal identification"
-                            } else {
-                                "Your feedback will be linked to your account"
-                            },
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                    Switch(
-                        checked = uiState.isAnonymous,
-                        onCheckedChange = viewModel::toggleAnonymous
-                    )
-                }
-            }
+            )
             
             // Device Info Section
             Text(

@@ -38,12 +38,16 @@ class BugReportViewModel(application: Application) : AndroidViewModel(applicatio
      * Update the bug report title
      */
     fun updateTitle(title: String) {
-        val sanitizedTitle = validationUtils.sanitizeText(title)
-        val validation = validationUtils.validateTitle(sanitizedTitle)
+        // Temporarily bypass sanitization to test space issue
+        Log.d(TAG, "updateTitle input: '$title'")
+        Log.d(TAG, "updateTitle contains spaces: ${title.contains(' ')}")
+        
+        val sanitizedTitle = title // validationUtils.sanitizeText(title)
+        // Skip validation temporarily
         
         _uiState.value = _uiState.value.copy(
             title = sanitizedTitle,
-            titleError = if (validation.isValid) null else validation.errorMessage
+            titleError = null
         )
     }
     
@@ -51,12 +55,19 @@ class BugReportViewModel(application: Application) : AndroidViewModel(applicatio
      * Update the bug report description
      */
     fun updateDescription(description: String) {
-        val sanitizedDescription = validationUtils.sanitizeText(description)
-        val validation = validationUtils.validateDescription(sanitizedDescription)
+        // Log the input to debug space issues
+        Log.d(TAG, "updateDescription input: '$description'")
+        Log.d(TAG, "updateDescription input length: ${description.length}")
+        Log.d(TAG, "updateDescription contains spaces: ${description.contains(' ')}")
         
+        // Temporarily bypass sanitization to test space issue
+        val sanitizedDescription = description
+        Log.d(TAG, "updateDescription sanitized: '$sanitizedDescription'")
+        
+        // Skip validation temporarily to isolate the space issue
         _uiState.value = _uiState.value.copy(
             description = sanitizedDescription,
-            descriptionError = if (validation.isValid) null else validation.errorMessage
+            descriptionError = null
         )
     }
     

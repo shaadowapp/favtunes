@@ -61,20 +61,32 @@ class FeedbackViewModel(application: Application) : AndroidViewModel(application
      * Update the feedback message
      */
     fun updateMessage(message: String) {
-        val sanitizedMessage = validationUtils.sanitizeText(message)
-        val validation = validationUtils.validateMessage(sanitizedMessage)
+        // Temporarily bypass sanitization to test space issue
+        Log.d(TAG, "updateMessage input: '$message'")
+        Log.d(TAG, "updateMessage contains spaces: ${message.contains(' ')}")
+        
+        val sanitizedMessage = message // validationUtils.sanitizeText(message)
+        // Skip validation temporarily
         
         _uiState.value = _uiState.value.copy(
             message = sanitizedMessage,
-            messageError = if (validation.isValid) null else validation.errorMessage
+            messageError = null
         )
     }
     
     /**
-     * Toggle anonymous submission
+     * Update the optional email field
      */
-    fun toggleAnonymous(isAnonymous: Boolean) {
-        _uiState.value = _uiState.value.copy(isAnonymous = isAnonymous)
+    fun updateEmail(email: String) {
+        val trimmedEmail = email.trim()
+        val emailError = if (trimmedEmail.isNotEmpty() && !validationUtils.isValidEmail(trimmedEmail)) {
+            "Please enter a valid email address"
+        } else null
+        
+        _uiState.value = _uiState.value.copy(
+            email = if (trimmedEmail.isEmpty()) null else trimmedEmail,
+            emailError = emailError
+        )
     }
     
     /**
@@ -100,9 +112,9 @@ class FeedbackViewModel(application: Application) : AndroidViewModel(application
                     rating = currentState.rating,
                     category = currentState.category,
                     message = currentState.message,
+                    email = currentState.email,
                     deviceInfo = currentState.deviceInfo,
-                    appVersion = getAppVersion(),
-                    isAnonymous = currentState.isAnonymous
+                    appVersion = getAppVersion()
                 )
                 
                 // Validate the complete feedback
@@ -172,7 +184,8 @@ class FeedbackViewModel(application: Application) : AndroidViewModel(application
         return state.rating in 1..5 &&
                 state.message.isNotBlank() &&
                 state.ratingError == null &&
-                state.messageError == null
+                state.messageError == null &&
+                state.emailError == null
     }
     
     /**
@@ -218,12 +231,13 @@ data class FeedbackUiState(
     val rating: Int = 0,
     val category: FeedbackCategory = FeedbackCategory.GENERAL,
     val message: String = "",
-    val isAnonymous: Boolean = true,
+    val email: String? = null,
     val deviceInfo: DeviceInfo = DeviceInfo("", "", "", "", "", 0, ""),
     val isLoading: Boolean = false,
     val isSubmitted: Boolean = false,
     val submissionId: String? = null,
     val error: String? = null,
     val ratingError: String? = null,
-    val messageError: String? = null
+    val messageError: String? = null,
+    val emailError: String? = null
 )

@@ -1,30 +1,24 @@
 package com.shaadow.tunes.ui.components
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.clickable
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.IconButton
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.StarBorder
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.Feedback
-import com.shaadow.tunes.utils.ScreenDetector
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.shaadow.tunes.viewmodels.FeedbackViewModel
-import com.shaadow.tunes.models.FeedbackCategory
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -35,10 +29,6 @@ fun FeedbackBottomSheet(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     
-    var showCategoryDropdown by remember { mutableStateOf(false) }
-    
-    val categories = viewModel.getFeedbackCategories()
-    
     // Handle successful submission
     LaunchedEffect(uiState.isSubmitted) {
         if (uiState.isSubmitted) {
@@ -48,7 +38,18 @@ fun FeedbackBottomSheet(
     
     ModalBottomSheet(
         onDismissRequest = onDismiss,
-        dragHandle = null
+        dragHandle = {
+            Surface(
+                modifier = Modifier.padding(vertical = 8.dp),
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
+                shape = MaterialTheme.shapes.extraLarge
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(width = 32.dp, height = 4.dp)
+                )
+            }
+        }
     ) {
         Column(
             modifier = Modifier
@@ -105,19 +106,21 @@ fun FeedbackBottomSheet(
             
             // Rating Section
             Text(
-                text = "How would you rate your experience?",
-                style = MaterialTheme.typography.labelMedium,
-                modifier = Modifier.padding(bottom = 8.dp)
+                text = "Rate your experience",
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = FontWeight.Medium,
+                modifier = Modifier.padding(bottom = 12.dp)
             )
             
             Row(
-                modifier = Modifier.padding(bottom = 8.dp),
-                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                modifier = Modifier.padding(bottom = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 repeat(5) { index ->
                     val starIndex = index + 1
                     IconButton(
-                        onClick = { viewModel.updateRating(starIndex) }
+                        onClick = { viewModel.updateRating(starIndex) },
+                        modifier = Modifier.size(40.dp)
                     ) {
                         Icon(
                             if (starIndex <= uiState.rating) Icons.Default.Star else Icons.Default.StarBorder,
@@ -125,7 +128,8 @@ fun FeedbackBottomSheet(
                             tint = if (starIndex <= uiState.rating) 
                                 MaterialTheme.colorScheme.primary 
                             else 
-                                MaterialTheme.colorScheme.outline
+                                MaterialTheme.colorScheme.outline,
+                            modifier = Modifier.size(28.dp)
                         )
                     }
                 }
@@ -134,9 +138,10 @@ fun FeedbackBottomSheet(
             if (uiState.rating > 0) {
                 Text(
                     text = viewModel.getRatingDescription(uiState.rating),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(bottom = 12.dp)
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.padding(bottom = 16.dp)
                 )
             }
             
@@ -149,109 +154,105 @@ fun FeedbackBottomSheet(
                 )
             }
             
-            // Category Selection
-            Box {
-                OutlinedTextField(
-                    value = uiState.category.name.replace("_", " "),
-                    onValueChange = { },
-                    label = { Text("Category") },
-                    readOnly = true,
-                    trailingIcon = {
-                        IconButton(onClick = { showCategoryDropdown = true }) {
-                            Icon(Icons.Default.ArrowDropDown, contentDescription = null)
-                        }
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 12.dp)
-                )
-                
-                DropdownMenu(
-                    expanded = showCategoryDropdown,
-                    onDismissRequest = { showCategoryDropdown = false }
-                ) {
-                    categories.forEach { category ->
-                        DropdownMenuItem(
-                            text = { Text(category.name.replace("_", " ")) },
-                            onClick = {
-                                viewModel.updateCategory(category)
-                                showCategoryDropdown = false
-                            }
-                        )
-                    }
-                }
-            }
-            
-            // Message Field
+            // Message Field - Fixed for space input
             OutlinedTextField(
                 value = uiState.message,
-                onValueChange = viewModel::updateMessage,
-                label = { Text("Your feedback") },
-                placeholder = { Text("Tell us what you think, suggest improvements, or report issues...") },
-                minLines = 4,
-                maxLines = 6,
+                onValueChange = { newValue ->
+                    // Debug logging for space input
+                    android.util.Log.d("FeedbackBottomSheet", "Message onValueChange: '$newValue'")
+                    android.util.Log.d("FeedbackBottomSheet", "Message contains spaces: ${newValue.contains(' ')}")
+                    viewModel.updateMessage(newValue)
+                },
+                label = { Text("Tell us what you think") },
+                placeholder = { Text("Share your feedback, suggestions, or report any issues...") },
+                minLines = 3,
+                maxLines = 5,
                 isError = uiState.messageError != null,
                 supportingText = uiState.messageError?.let { { Text(it) } },
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Text,
+                    imeAction = ImeAction.Next,
+                    autoCorrectEnabled = true
+                ),
+                singleLine = false,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp)
+            )
+            
+            // Optional Email Field - Fixed for space input
+            OutlinedTextField(
+                value = uiState.email ?: "",
+                onValueChange = { newValue ->
+                    // Debug logging for space input
+                    android.util.Log.d("FeedbackBottomSheet", "Email onValueChange: '$newValue'")
+                    android.util.Log.d("FeedbackBottomSheet", "Email contains spaces: ${newValue.contains(' ')}")
+                    viewModel.updateEmail(newValue)
+                },
+                label = { Text("Email (optional)") },
+                placeholder = { Text("Get updates on your feedback") },
+                isError = uiState.emailError != null,
+                supportingText = uiState.emailError?.let { { Text(it) } },
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Email,
+                    imeAction = ImeAction.Done,
+                    autoCorrectEnabled = false
+                ),
+                singleLine = true,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 12.dp)
             )
             
-            // Anonymous Toggle
             Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { viewModel.toggleAnonymous(!uiState.isAnonymous) }
-                    .padding(vertical = 8.dp)
+                modifier = Modifier.padding(bottom = 20.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Checkbox(
-                    checked = uiState.isAnonymous,
-                    onCheckedChange = viewModel::toggleAnonymous
-                )
-                Spacer(Modifier.width(8.dp))
                 Text(
-                    text = "Submit anonymously",
-                    style = MaterialTheme.typography.bodyMedium
+                    text = "📱",
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(end = 8.dp)
+                )
+                Text(
+                    text = "Device info will be automatically included to help us improve the app",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
             
-            Text(
-                text = if (uiState.isAnonymous) 
-                    "Your feedback will be submitted without any identifying information." 
-                else 
-                    "Device information will be included to help us improve the app.",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(bottom = 16.dp)
-            )
-            
             // Submit Button
             Button(
-                onClick = {
-                    viewModel.submitFeedback()
-                },
+                onClick = { viewModel.submitFeedback() },
                 enabled = viewModel.isFormValid() && !uiState.isLoading,
-                modifier = Modifier.align(Alignment.End)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(48.dp)
             ) {
                 if (uiState.isLoading) {
                     CircularProgressIndicator(
-                        modifier = Modifier.size(16.dp),
-                        strokeWidth = 2.dp
+                        modifier = Modifier.size(20.dp),
+                        strokeWidth = 2.dp,
+                        color = MaterialTheme.colorScheme.onPrimary
                     )
+                    Spacer(Modifier.width(8.dp))
+                    Text("Sending...")
                 } else if (uiState.isSubmitted) {
-                    Icon(Icons.Default.Check, contentDescription = null)
+                    Icon(
+                        Icons.Default.Check, 
+                        contentDescription = null,
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Text("Thank you!")
                 } else {
-                    Icon(Icons.Default.Send, contentDescription = null)
+                    Icon(
+                        Icons.Default.Send, 
+                        contentDescription = null,
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Text("Send Feedback")
                 }
-                Spacer(Modifier.width(8.dp))
-                Text(
-                    when {
-                        uiState.isLoading -> "Submitting..."
-                        uiState.isSubmitted -> "Submitted"
-                        else -> "Send Feedback"
-                    }
-                )
             }
         }
     }

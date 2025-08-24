@@ -195,56 +195,52 @@ class FirebaseSampleDataSeeder(private val context: Context) {
                 category = FeedbackCategory.GENERAL,
                 message = "Absolutely love this app! The music quality is excellent and the interface is very user-friendly. Keep up the great work!",
                 deviceInfo = deviceInfo,
-                appVersion = getAppVersion(),
-                isAnonymous = true
+                appVersion = getAppVersion()
             ),
             UserFeedback(
                 rating = 4,
                 category = FeedbackCategory.FEATURE_REQUEST,
                 message = "Great app overall! Would love to see a dark mode option and the ability to create collaborative playlists with friends.",
+                email = "user@example.com",
                 deviceInfo = deviceInfo,
-                appVersion = getAppVersion(),
-                isAnonymous = false
+                appVersion = getAppVersion()
             ),
             UserFeedback(
                 rating = 3,
                 category = FeedbackCategory.UI_UX,
                 message = "The app works well but the user interface could be more intuitive. Sometimes it's hard to find certain features.",
                 deviceInfo = deviceInfo,
-                appVersion = getAppVersion(),
-                isAnonymous = true
+                appVersion = getAppVersion()
             ),
             UserFeedback(
                 rating = 5,
                 category = FeedbackCategory.PERFORMANCE,
                 message = "Amazing performance! Songs load quickly and the app rarely crashes. Very impressed with the stability.",
+                email = "happy.user@email.com",
                 deviceInfo = deviceInfo,
-                appVersion = getAppVersion(),
-                isAnonymous = false
+                appVersion = getAppVersion()
             ),
             UserFeedback(
                 rating = 2,
                 category = FeedbackCategory.OTHER,
                 message = "The app has potential but needs work. Battery drain is quite high and some features are confusing to use.",
                 deviceInfo = deviceInfo,
-                appVersion = getAppVersion(),
-                isAnonymous = true
+                appVersion = getAppVersion()
             ),
             UserFeedback(
                 rating = 4,
                 category = FeedbackCategory.FEATURE_REQUEST,
                 message = "Love the offline feature! Could you add support for podcasts and audiobooks as well? That would make this app perfect.",
+                email = "podcast.lover@mail.com",
                 deviceInfo = deviceInfo,
-                appVersion = getAppVersion(),
-                isAnonymous = false
+                appVersion = getAppVersion()
             ),
             UserFeedback(
                 rating = 5,
                 category = FeedbackCategory.GENERAL,
                 message = "Best music app I've used! The recommendation algorithm is spot on and I've discovered so many new artists.",
                 deviceInfo = deviceInfo,
-                appVersion = getAppVersion(),
-                isAnonymous = true
+                appVersion = getAppVersion()
             )
         )
         

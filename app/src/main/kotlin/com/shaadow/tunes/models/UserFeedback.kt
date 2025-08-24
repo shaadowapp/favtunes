@@ -10,10 +10,10 @@ data class UserFeedback(
     val rating: Int, // 1-5 stars
     val category: FeedbackCategory,
     val message: String,
+    val email: String? = null,
     val deviceInfo: DeviceInfo,
     val appVersion: String,
-    val timestamp: Long = System.currentTimeMillis(),
-    val isAnonymous: Boolean = true
+    val timestamp: Long = System.currentTimeMillis()
 ) {
     fun isValid(): Boolean {
         return rating in 1..5 && 
@@ -24,10 +24,11 @@ data class UserFeedback(
     fun toFirestoreMap(): Map<String, Any> {
         return mapOf(
             "id" to id,
-            "userId" to (if (isAnonymous) "" else (userId ?: "")),
+            "userId" to (userId ?: ""),
             "rating" to rating,
             "category" to category.name,
             "message" to message,
+            "email" to (email ?: ""),
             "deviceInfo" to mapOf(
                 "deviceModel" to deviceInfo.deviceModel,
                 "osVersion" to deviceInfo.osVersion,
@@ -38,8 +39,7 @@ data class UserFeedback(
                 "networkType" to deviceInfo.networkType
             ),
             "appVersion" to appVersion,
-            "timestamp" to timestamp,
-            "isAnonymous" to isAnonymous
+            "timestamp" to timestamp
         )
     }
 }
