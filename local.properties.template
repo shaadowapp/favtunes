@@ -1,0 +1,16 @@
+# Copy this file to local.properties and add your actual values
+# local.properties is gitignored for security
+
+sdk.dir=/path/to/your/android/sdk
+
+# API Keys and Credentials (local.properties is gitignored for security)
+YOUTUBE_API_KEY=your_youtube_api_key_here
+ONESIGNAL_APP_ID=your_onesignal_app_id_here
+
+# GitHub Remote Config Credentials
+GITHUB_TOKEN=your_github_personal_access_token_here
+REMOTE_CONFIG_OWNER=your_github_username
+REMOTE_CONFIG_REPO=your_private_repo_name
+
+# Note: These credentials are loaded from local.properties at build time
+# Fallback to encrypted storage if not found in local.properties

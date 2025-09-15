@@ -1,0 +1,26 @@
+{
+    "version": "1.2-api-fallback",
+    "lastUpdated": "2025-01-26T14:45:00Z",
+    "apiEndpoints": {
+        "useAlternativeFirst": false,
+        "alternativeEndpoints": [],
+        "fallbackTimeout": 3000,
+        "rotateEndpoints": false
+    },
+    "errorHandling": {
+        "videoIdMismatchEnabled": true,
+        "videoIdMismatchMaxRetries": 5,
+        "videoIdMismatchRetryDelayMs": 1000,
+        "videoIdMismatchSkipOnFailure": false,
+        "videoIdMismatchUseAlternativeApi": true
+    },
+    "debugging": {
+        "enableDetailedLogging": true,
+        "logNetworkRequests": true,
+        "logLevel": "INFO"
+    },
+    "customErrorMessages": {
+        "VideoIdMismatch": "🔄 YouTube API issues detected. Using alternative sources...",
+        "LoginRequired": "🔐 Authentication issues. Trying backup servers..."
+    }
+}

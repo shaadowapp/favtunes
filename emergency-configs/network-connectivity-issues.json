@@ -1,0 +1,94 @@
+{
+  "version": "1.3-network-issues",
+  "lastUpdated": "2025-01-28T12:00:00Z",
+  "description": "Emergency config for poor network connectivity or server issues",
+  
+  "errorHandling": {
+    "videoIdMismatchEnabled": true,
+    "videoIdMismatchMaxRetries": 2,
+    "videoIdMismatchRetryDelayMs": 5000,
+    "videoIdMismatchSkipOnFailure": true,
+    "videoIdMismatchUseAlternativeApi": false,
+    
+    "playableFormatNotFoundEnabled": true,
+    "playableFormatMaxRetries": 1,
+    "playableFormatRetryDelayMs": 3000,
+    "playableFormatSkipOnFailure": true,
+    
+    "unplayableExceptionEnabled": true,
+    "unplayableMaxRetries": 1,
+    "unplayableRetryDelayMs": 2000,
+    "unplayableSkipOnFailure": true,
+    
+    "loginRequiredEnabled": true,
+    "loginRequiredMaxRetries": 1,
+    "loginRequiredRetryDelayMs": 4000,
+    "loginRequiredSkipOnFailure": true,
+    
+    "genericErrorEnabled": true,
+    "genericErrorMaxRetries": 2,
+    "genericErrorRetryDelayMs": 4000,
+    "genericErrorSkipOnFailure": true
+  },
+  
+  "playerService": {
+    "cacheEnabled": true,
+    "cacheMaxSizeMB": 2048,
+    "connectTimeoutMs": 30000,
+    "readTimeoutMs": 20000,
+    "chunkSizeKB": 128,
+    "userAgent": "Mozilla/5.0 (Android 10; Mobile; rv:109.0) Gecko/115.0 Firefox/115.0",
+    "maxConcurrentRequests": 1,
+    "enablePreloading": false,
+    "preloadNextSongs": 0
+  },
+  
+  "apiEndpoints": {
+    "primaryYouTubeApi": "https://www.youtube.com",
+    "alternativeEndpoints": [],
+    "fallbackTimeout": 15000,
+    "useAlternativeFirst": false,
+    "rotateEndpoints": false
+  },
+  
+  "debugging": {
+    "enableDetailedLogging": true,
+    "logNetworkRequests": true,
+    "logErrorDetails": true,
+    "logPerformanceMetrics": false,
+    "enableCrashReporting": true,
+    "logLevel": "WARN"
+  },
+  
+  "emergency": {
+    "disablePlayback": false,
+    "disableSpecificFeatures": ["preloading", "background_downloads", "concurrent_requests"],
+    "forceSkipProblematicSongs": true,
+    "emergencyMessage": "🌐 Network connectivity issues detected. Reduced functionality for better stability.",
+    "redirectToAlternativePlayer": false
+  },
+  
+  "performance": {
+    "enableAudioOffload": false,
+    "bufferSizeMs": 60000,
+    "minBufferMs": 10000,
+    "maxBufferMs": 60000,
+    "enableSilenceSkipping": false,
+    "silenceThresholdDb": -50.0,
+    "enableVolumeNormalization": false
+  },
+  
+  "customErrorMessages": {
+    "VideoIdMismatch": "🌐 Network issues detected, skipping to next song...",
+    "PlayableFormatNotFound": "📶 Poor connection, trying simpler audio format...",
+    "Unplayable": "❌ Cannot load song due to network issues, skipping...",
+    "LoginRequired": "🔐 Connection timeout, skipping authentication-required content..."
+  },
+  
+  "featureFlags": {
+    "enableExperimentalPlayer": false,
+    "useNewAudioEngine": false,
+    "enableAdvancedCaching": true,
+    "allowBackgroundDownloads": false
+  }
+}

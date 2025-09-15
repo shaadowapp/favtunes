@@ -1,6 +1,9 @@
 package com.shaadow.tunes
 
 import android.app.Application
+import android.app.NotificationChannel
+import android.content.Context
+import android.os.Build
 import coil3.ImageLoader
 import coil3.PlatformContext
 import coil3.SingletonImageLoader
@@ -8,30 +11,27 @@ import coil3.disk.DiskCache
 import coil3.disk.directory
 import coil3.request.crossfade
 import com.google.firebase.FirebaseApp
+import com.onesignal.OneSignal
+import com.onesignal.debug.LogLevel
 import com.shaadow.innertube.Innertube
 import com.shaadow.innertube.requests.relatedPage
 import com.shaadow.innertube.requests.visitorData
-import com.shaadow.tunes.Database
 import com.shaadow.tunes.enums.CoilDiskCacheMaxSize
+import com.shaadow.tunes.notification.FavTunesNotificationManager
 import com.shaadow.tunes.utils.ActivityDiagnostics
+import com.shaadow.tunes.utils.AdvancedRemoteConfig
 import com.shaadow.tunes.utils.coilDiskCacheMaxSizeKey
 import com.shaadow.tunes.utils.getEnum
 import com.shaadow.tunes.utils.preferences
-import com.shaadow.tunes.notification.FavTunesNotificationManager
-import com.shaadow.tunes.notification.NotificationService
-
+import com.shaadow.tunes.utils.SecureCredentialsManager
+import com.shaadow.tunes.utils.SecureInitializer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import android.app.NotificationChannel
 import android.app.NotificationManager as SystemNotificationManager
-import android.content.Context
-import android.os.Build
-import com.onesignal.OneSignal
-import com.onesignal.debug.LogLevel
 
 class MainApplication : Application(), SingletonImageLoader.Factory {
     // Application-scoped coroutine scope that will be cancelled when the application is destroyed
@@ -42,13 +42,34 @@ class MainApplication : Application(), SingletonImageLoader.Factory {
     override fun onCreate() {
         super.onCreate()
 
-        // Enable verbose logging for debugging (remove in production)
-        OneSignal.Debug.logLevel = LogLevel.VERBOSE
-        // Initialize with your OneSignal App ID
-        OneSignal.initWithContext(this, "3190b63e-f333-446b-bbba-7712efa18bb9")
-        // Prompt for push notifications (recommended to use In-App Message in production)
+        // Initialize secure credentials manager
+        val credentialsManager = com.shaadow.tunes.utils.SecureCredentialsManager.getInstance(this)
+        
+        // Initialize credentials securely on first launch
+        SecureInitializer.initializeCredentials(this)
+        
+        // Set production logging level (no verbose logging in production)
+        OneSignal.Debug.logLevel = LogLevel.WARN
+        
+        // Initialize OneSignal with securely stored App ID
+        OneSignal.initWithContext(this, credentialsManager.getOneSignalAppId())
+        
+        // Initialize Innertube with secure API key
+        com.shaadow.innertube.Innertube.setApiKey(credentialsManager.getYouTubeApiKey())
+        
+        // Initialize advanced remote config for complete control
+        AdvancedRemoteConfig.initialize(this)
+        
+        // Initialize emergency config trigger system
+        com.shaadow.tunes.utils.EmergencyConfigTrigger.initialize(this)
+        
+        // Request notification permission only if OneSignal is properly configured
         applicationScope.launch {
-            OneSignal.Notifications.requestPermission(true)
+            val credentialsManager = com.shaadow.tunes.utils.SecureCredentialsManager.getInstance(this@MainApplication)
+            if (credentialsManager.areCredentialsConfigured()) {
+                // Request permission with user consent (not forced)
+                OneSignal.Notifications.requestPermission(false)
+            }
         }
         
         // Log system information for debugging
@@ -77,14 +98,18 @@ class MainApplication : Application(), SingletonImageLoader.Factory {
         val notificationManager = FavTunesNotificationManager(this)
         
         applicationScope.launch {
-            
-            // ONLY SCHEDULE workers, don't deliver notifications immediately on app start
-            notificationManager.scheduleEngagementNotifications()
-            notificationManager.scheduleDailySuggestions()
-            // Don't call scheduleMarketingNotification() here as it can deliver immediately
-            
-            // Log summary after scheduling
-            android.util.Log.d("MainApplication", "Notification system initialized")
+            // Only initialize notifications if user has granted permission and credentials are configured
+            val credentialsManager = com.shaadow.tunes.utils.SecureCredentialsManager.getInstance(this@MainApplication)
+            if (credentialsManager.areCredentialsConfigured()) {
+                // Schedule minimal, user-friendly notifications
+                // Reduced frequency to comply with Play Store policies
+                notificationManager.scheduleReducedEngagementNotifications()
+                notificationManager.scheduleWeeklySuggestions() // Changed from daily to weekly
+                
+                android.util.Log.d("MainApplication", "Notification system initialized with reduced frequency")
+            } else {
+                android.util.Log.d("MainApplication", "Notifications disabled - credentials not configured")
+            }
         }
 
         // Preload critical data immediately
@@ -141,30 +166,38 @@ class MainApplication : Application(), SingletonImageLoader.Factory {
                 NotificationChannel(
                     "general_notifications",
                     "General Notifications",
-                    SystemNotificationManager.IMPORTANCE_HIGH
+                    SystemNotificationManager.IMPORTANCE_DEFAULT
                 ).apply {
-                    description = "General app notifications"
+                    description = "Essential app notifications"
+                    enableVibration(false)
+                    setShowBadge(false)
                 },
                 NotificationChannel(
                     "music_suggestions",
                     "Music Suggestions",
-                    SystemNotificationManager.IMPORTANCE_HIGH
+                    SystemNotificationManager.IMPORTANCE_LOW
                 ).apply {
-                    description = "Personalized music recommendations"
+                    description = "Optional music recommendations"
+                    enableVibration(false)
+                    setShowBadge(false)
                 },
                 NotificationChannel(
                     "engagement_reminders",
                     "Engagement Reminders",
-                    SystemNotificationManager.IMPORTANCE_HIGH
+                    SystemNotificationManager.IMPORTANCE_MIN
                 ).apply {
-                    description = "Gentle reminders to discover new music"
+                    description = "Optional reminders (can be disabled)"
+                    enableVibration(false)
+                    setShowBadge(false)
                 },
                 NotificationChannel(
                     "marketing_fun",
                     "Fun Updates",
-                    SystemNotificationManager.IMPORTANCE_LOW
+                    SystemNotificationManager.IMPORTANCE_MIN
                 ).apply {
-                    description = "Witty updates and music humor"
+                    description = "Optional updates (can be disabled)"
+                    enableVibration(false)
+                    setShowBadge(false)
                 }
             )
             

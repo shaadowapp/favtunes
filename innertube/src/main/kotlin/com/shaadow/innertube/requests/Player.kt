@@ -28,16 +28,7 @@ suspend fun Innertube.player(videoId: String) = runCatchingNonCancellable {
     if (response.playabilityStatus?.status == "OK") {
         response
     } else {
-        @Serializable
-        data class AudioStream(
-            val url: String,
-            val bitrate: Long
-        )
 
-        @Serializable
-        data class PipedResponse(
-            val audioStreams: List<AudioStream>
-        )
 
         val safePlayerResponse = client.post(PLAYER) {
             setBody(
@@ -52,22 +43,6 @@ suspend fun Innertube.player(videoId: String) = runCatchingNonCancellable {
             mask("playabilityStatus.status,playerConfig.audioConfig,streamingData.adaptiveFormats,videoDetails.videoId")
         }.body<PlayerResponse>()
 
-        if (safePlayerResponse.playabilityStatus?.status != "OK") {
-            return@runCatchingNonCancellable response
-        }
-
-        val audioStreams = client.get("https://pipedapi.adminforge.de/streams/${videoId}") {
-            contentType(ContentType.Application.Json)
-        }.body<PipedResponse>().audioStreams
-
-        safePlayerResponse.copy(
-            streamingData = safePlayerResponse.streamingData?.copy(
-                adaptiveFormats = safePlayerResponse.streamingData.adaptiveFormats?.map { adaptiveFormat ->
-                    adaptiveFormat.copy(
-                        url = audioStreams.find { it.bitrate == adaptiveFormat.bitrate }?.url
-                    )
-                }
-            )
-        )
+        safePlayerResponse
     }
 }

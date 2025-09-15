@@ -15,19 +15,18 @@ fun TermsOfUse() {
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+            .padding(
+                top = 64.dp,
+                bottom = 120.dp,
+                start = 24.dp,
+                end = 24.dp
+            ),
+        verticalArrangement = Arrangement.spacedBy(30.dp)
     ) {
         Text(
             text = "Terms of Use",
             style = MaterialTheme.typography.headlineMedium,
             fontWeight = FontWeight.Bold
-        )
-        
-        Text(
-            text = "Last updated: ${java.text.SimpleDateFormat("MMMM dd, yyyy", java.util.Locale.getDefault()).format(java.util.Date())}",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
         
         Text(
@@ -109,5 +108,13 @@ fun TermsOfUse() {
             text = "For questions about these Terms of Use, please contact us through the app's feedback feature or visit our GitHub repository.",
             style = MaterialTheme.typography.bodyMedium
         )
+
+        Text(
+            text = "Last updated: ${java.text.SimpleDateFormat("MMMM dd, yyyy", java.util.Locale.getDefault()).format(java.util.Date())}",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+
+        Spacer(modifier = Modifier.height(64.dp))
     }
 }

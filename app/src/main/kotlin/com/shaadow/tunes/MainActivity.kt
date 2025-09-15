@@ -48,6 +48,7 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.navigation.compose.rememberNavController
 import com.google.android.material.snackbar.Snackbar
+import com.shaadow.tunes.BuildConfig
 import com.google.android.play.core.appupdate.AppUpdateManager
 import com.google.android.play.core.appupdate.AppUpdateManagerFactory
 import com.google.android.play.core.appupdate.AppUpdateOptions
@@ -70,6 +71,8 @@ import com.shaadow.tunes.ui.styling.AppTheme
 import com.shaadow.tunes.utils.asMediaItem
 import com.shaadow.tunes.utils.forcePlay
 import com.shaadow.tunes.utils.intent
+import com.shaadow.tunes.utils.rememberShakeDetector
+import com.shaadow.tunes.ui.components.BugReportBottomSheet
 import com.shaadow.tunes.suggestion.SimpleSuggestionIntegration
 import com.shaadow.tunes.Database
 import com.shaadow.tunes.ui.screens.onboarding.OnboardingScreen
@@ -109,6 +112,7 @@ class MainActivity : ComponentActivity() {
     private var binder by mutableStateOf<PlayerService.Binder?>(null)
     private var data by mutableStateOf<Uri?>(null)
     private var showOnboarding by mutableStateOf(false)
+    private var showGlobalBugReportSheet by mutableStateOf(false)
     private lateinit var suggestionIntegration: SimpleSuggestionIntegration
 
     override fun onStart() {
@@ -136,6 +140,11 @@ class MainActivity : ComponentActivity() {
         // Initialize suggestion system
         suggestionIntegration = SimpleSuggestionIntegration.getInstance(this)
         showOnboarding = suggestionIntegration.needsOnboarding()
+        
+        // Test screen detection system (debug only)
+        if (BuildConfig.DEBUG) {
+            com.shaadow.tunes.utils.ScreenDetectorTest.runAllTests()
+        }
         
         // Obtain the FirebaseAnalytics instance.
         analytics = Firebase.analytics
@@ -191,6 +200,11 @@ class MainActivity : ComponentActivity() {
                 },
                 skipHiddenState = false
             )
+            
+            // Global shake detection for bug reporting
+            rememberShakeDetector {
+                showGlobalBugReportSheet = true
+            }
 
             AppTheme {
                 Box(modifier = Modifier.fillMaxSize()) {
@@ -247,6 +261,16 @@ class MainActivity : ComponentActivity() {
                         }
                         }
                     }
+                }
+                
+                // Global Bug Report Sheet
+                if (showGlobalBugReportSheet) {
+                    BugReportBottomSheet(
+                        navController = navController,
+                        onDismiss = { 
+                            showGlobalBugReportSheet = false
+                        }
+                    )
                 }
             }
 

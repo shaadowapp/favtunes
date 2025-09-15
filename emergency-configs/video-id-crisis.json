@@ -1,0 +1,32 @@
+{
+  "version": "1.1-emergency",
+  "lastUpdated": "2025-01-26T15:30:00Z",
+  
+  "errorHandling": {
+    "videoIdMismatchEnabled": true,
+    "videoIdMismatchMaxRetries": 10,
+    "videoIdMismatchRetryDelayMs": 500,
+    "videoIdMismatchSkipOnFailure": true,
+    "videoIdMismatchUseAlternativeApi": true
+  },
+  
+  "debugging": {
+    "enableDetailedLogging": true,
+    "logNetworkRequests": true,
+    "logErrorDetails": true,
+    "logLevel": "DEBUG"
+  },
+  
+  "emergency": {
+    "disablePlayback": false,
+    "forceSkipProblematicSongs": true,
+    "emergencyMessage": "Experiencing playback issues. Automatically skipping problematic songs.",
+    "redirectToAlternativePlayer": true
+  },
+  
+  "customErrorMessages": {
+    "VideoIdMismatch": "🔄 Trying alternative source... Please wait.",
+    "PlayableFormatNotFound": "⏭️ Skipping to next song...",
+    "Unplayable": "❌ Song unavailable, moving to next..."
+  }
+}

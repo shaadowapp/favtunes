@@ -41,6 +41,7 @@ import com.shaadow.tunes.R
 import com.shaadow.tunes.viewmodels.UserViewModel
 import androidx.compose.runtime.*
 import com.shaadow.tunes.database.UserEntity
+import com.shaadow.tunes.ui.components.ScreenIdentifier
 
 
 @Composable
@@ -60,6 +61,12 @@ fun ProfileScreen(
         }
     }
 
+    // Screen identifier for accurate screen detection
+    ScreenIdentifier(
+        screenId = "profile",
+        screenName = "Profile Screen"
+    )
+    
     userData?.let { user ->
         Column(
             modifier = Modifier
@@ -251,9 +258,6 @@ fun InfoRow(label: String, value: String) {
 fun ProfilePictureDialog(onDismiss: () -> Unit, onImageSelected: (Int) -> Unit) {
     val images = listOf(
         R.drawable.app_icon, // Default
-        R.drawable.ic_launcher_foreground,
-        R.drawable.logo_dark,
-        R.drawable.logo_light,
     )
 
     Dialog(onDismissRequest = onDismiss) {

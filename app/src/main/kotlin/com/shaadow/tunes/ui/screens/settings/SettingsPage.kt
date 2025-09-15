@@ -19,6 +19,7 @@ import androidx.compose.ui.res.stringResource
 import com.shaadow.tunes.enums.SettingsSection
 import com.shaadow.tunes.ui.screens.settings.legal.PrivacyPolicy
 import com.shaadow.tunes.ui.screens.settings.legal.TermsOfUse
+import com.shaadow.tunes.ui.components.ScreenIdentifier
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
 @Composable
@@ -47,6 +48,40 @@ fun SettingsPage(
             )
         }
     ) { paddingValues ->
+        // Screen identifier for accurate screen detection
+        ScreenIdentifier(
+            screenId = when (section) {
+                SettingsSection.Profile -> "settings_profile"
+                SettingsSection.About -> "settings_about"
+                SettingsSection.General -> "settings_general"
+                SettingsSection.Suggestions -> "settings_suggestions"
+                SettingsSection.Player -> "settings_player"
+                SettingsSection.Cache -> "settings_cache"
+                SettingsSection.Gestures -> "settings_gestures"
+                SettingsSection.Database -> "settings_database"
+                SettingsSection.Other -> "settings_other"
+                SettingsSection.TermsOfUse -> "settings_terms"
+                SettingsSection.PrivacyPolicy -> "settings_privacy"
+                SettingsSection.BugReport -> "settings_bugreport"
+                SettingsSection.Feedback -> "settings_feedback"
+            },
+            screenName = when (section) {
+                SettingsSection.Profile -> "Profile Settings"
+                SettingsSection.About -> "About Settings"
+                SettingsSection.General -> "General Settings"
+                SettingsSection.Suggestions -> "Suggestions Settings"
+                SettingsSection.Player -> "Player Settings"
+                SettingsSection.Cache -> "Cache Settings"
+                SettingsSection.Gestures -> "Gestures Settings"
+                SettingsSection.Database -> "Database Settings"
+                SettingsSection.Other -> "Other Settings"
+                SettingsSection.TermsOfUse -> "Terms of Use"
+                SettingsSection.PrivacyPolicy -> "Privacy Policy"
+                SettingsSection.BugReport -> "Bug Report Settings"
+                SettingsSection.Feedback -> "Feedback Settings"
+            }
+        )
+        
         when (section) {
             SettingsSection.Profile -> ProfileScreen(paddingValues)
             SettingsSection.About -> About()

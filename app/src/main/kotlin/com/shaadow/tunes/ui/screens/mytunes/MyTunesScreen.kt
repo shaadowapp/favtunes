@@ -19,6 +19,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.shaadow.tunes.Database
+import com.shaadow.tunes.ui.components.ScreenIdentifier
 import com.shaadow.tunes.ui.styling.px
 import com.shaadow.tunes.utils.thumbnail
 
@@ -37,6 +38,12 @@ fun MyTunesScreen() {
         android.util.Log.d("MyTunesScreen", "Recent songs count: ${recentSongs.size}, Fallback songs count: ${fallbackSongs.size}")
     }
 
+    
+    // Screen identifier for accurate screen detection
+    ScreenIdentifier(
+        screenId = "mytunes",
+        screenName = "My Tunes Screen"
+    )
     
     LazyColumn(
         modifier = Modifier.fillMaxSize(),

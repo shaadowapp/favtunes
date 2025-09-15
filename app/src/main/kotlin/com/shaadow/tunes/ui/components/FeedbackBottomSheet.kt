@@ -32,6 +32,8 @@ fun FeedbackBottomSheet(
     // Handle successful submission
     LaunchedEffect(uiState.isSubmitted) {
         if (uiState.isSubmitted) {
+            // Reset the form after successful submission
+            viewModel.resetForm()
             onDismiss()
         }
     }

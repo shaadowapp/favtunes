@@ -1,0 +1,94 @@
+{
+  "version": "1.3-crash-prevention",
+  "lastUpdated": "2025-01-28T12:00:00Z",
+  "description": "Emergency config to prevent app crashes and ensure stability",
+  
+  "errorHandling": {
+    "videoIdMismatchEnabled": true,
+    "videoIdMismatchMaxRetries": 1,
+    "videoIdMismatchRetryDelayMs": 1000,
+    "videoIdMismatchSkipOnFailure": true,
+    "videoIdMismatchUseAlternativeApi": false,
+    
+    "playableFormatNotFoundEnabled": true,
+    "playableFormatMaxRetries": 1,
+    "playableFormatRetryDelayMs": 500,
+    "playableFormatSkipOnFailure": true,
+    
+    "unplayableExceptionEnabled": true,
+    "unplayableMaxRetries": 0,
+    "unplayableRetryDelayMs": 0,
+    "unplayableSkipOnFailure": true,
+    
+    "loginRequiredEnabled": true,
+    "loginRequiredMaxRetries": 0,
+    "loginRequiredRetryDelayMs": 0,
+    "loginRequiredSkipOnFailure": true,
+    
+    "genericErrorEnabled": true,
+    "genericErrorMaxRetries": 1,
+    "genericErrorRetryDelayMs": 1000,
+    "genericErrorSkipOnFailure": true
+  },
+  
+  "playerService": {
+    "cacheEnabled": false,
+    "cacheMaxSizeMB": 128,
+    "connectTimeoutMs": 10000,
+    "readTimeoutMs": 5000,
+    "chunkSizeKB": 64,
+    "userAgent": "Mozilla/5.0 (Android 10; Mobile; rv:109.0) Gecko/115.0 Firefox/115.0",
+    "maxConcurrentRequests": 1,
+    "enablePreloading": false,
+    "preloadNextSongs": 0
+  },
+  
+  "apiEndpoints": {
+    "primaryYouTubeApi": "https://www.youtube.com",
+    "alternativeEndpoints": [],
+    "fallbackTimeout": 5000,
+    "useAlternativeFirst": false,
+    "rotateEndpoints": false
+  },
+  
+  "debugging": {
+    "enableDetailedLogging": false,
+    "logNetworkRequests": false,
+    "logErrorDetails": false,
+    "logPerformanceMetrics": false,
+    "enableCrashReporting": true,
+    "logLevel": "ERROR"
+  },
+  
+  "emergency": {
+    "disablePlayback": false,
+    "disableSpecificFeatures": ["preloading", "background_downloads", "concurrent_requests", "caching", "detailed_logging"],
+    "forceSkipProblematicSongs": true,
+    "emergencyMessage": "🚨 Stability mode activated. Some features disabled to prevent crashes.",
+    "redirectToAlternativePlayer": false
+  },
+  
+  "performance": {
+    "enableAudioOffload": false,
+    "bufferSizeMs": 15000,
+    "minBufferMs": 2000,
+    "maxBufferMs": 15000,
+    "enableSilenceSkipping": false,
+    "silenceThresholdDb": -50.0,
+    "enableVolumeNormalization": false
+  },
+  
+  "customErrorMessages": {
+    "VideoIdMismatch": "⚠️ Skipping problematic song to maintain stability...",
+    "PlayableFormatNotFound": "⚠️ Audio format issue, skipping to prevent crash...",
+    "Unplayable": "❌ Skipping unplayable content for stability...",
+    "LoginRequired": "🔐 Skipping restricted content to avoid issues..."
+  },
+  
+  "featureFlags": {
+    "enableExperimentalPlayer": false,
+    "useNewAudioEngine": false,
+    "enableAdvancedCaching": false,
+    "allowBackgroundDownloads": false
+  }
+}

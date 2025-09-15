@@ -2,13 +2,21 @@ package com.shaadow.tunes.ui.screens.settings
 
 import android.content.pm.PackageManager
 import android.os.Build
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import compose.icons.FontAwesomeIcons
+import compose.icons.fontawesomeicons.Brands
+import compose.icons.fontawesomeicons.brands.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -52,10 +60,17 @@ fun About() {
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .padding(top = 8.dp, bottom = 16.dp + playerPadding)
+            .padding(
+                top = 80.dp,
+                bottom = 80.dp + playerPadding,
+                start = 8.dp,
+                end = 8.dp
+            )
     ) {
+        Spacer(modifier = Modifier.height(20.dp))
+
         // App Icon
-        Icon(
+        Image(
             painter = painterResource(id = R.drawable.app_icon),
             contentDescription = stringResource(id = R.string.app_name),
             modifier = Modifier
@@ -63,7 +78,6 @@ fun About() {
                 .width(108.dp)
                 .padding(top = 25.dp)
                 .aspectRatio(1f),
-            tint = Color.Red
         )
 
         // App Name
@@ -102,6 +116,59 @@ fun About() {
             }) {
                 Text(text = "Our Official Website")
             }
+        }
+
+        // Social Media Section
+        Text(
+            text = "Follow Us",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.SemiBold,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 18.dp, vertical = 16.dp),
+            textAlign = TextAlign.Center
+        )
+        
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 18.dp),
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            // Instagram
+            SocialMediaIcon(
+                icon = FontAwesomeIcons.Brands.Instagram,
+                contentDescription = "Instagram",
+                onClick = { uriHandler.openUri("https://instagram.com/favtunesapp") }
+            )
+            
+            // Twitter
+            SocialMediaIcon(
+                icon = FontAwesomeIcons.Brands.Twitter,
+                contentDescription = "Twitter",
+                onClick = { uriHandler.openUri("https://twitter.com/favtunesapp") }
+            )
+            
+            // BlueSky
+//            SocialMediaIcon(
+//                icon = FontAwesomeIcons.Brands.Bluesky,
+//                contentDescription = "BlueSky",
+//                onClick = { uriHandler.openUri("https://bsky.app/profile/favtunes.bsky.social") }
+//            )
+            
+            // LinkedIn
+            SocialMediaIcon(
+                icon = FontAwesomeIcons.Brands.Linkedin,
+                contentDescription = "LinkedIn",
+                onClick = { uriHandler.openUri("https://linkedin.com/company/shaadowplatforms/") }
+            )
+            
+            // YouTube
+            SocialMediaIcon(
+                icon = FontAwesomeIcons.Brands.Youtube,
+                contentDescription = "YouTube",
+                onClick = { uriHandler.openUri("https://youtube.com/@shaadowplatforms") }
+            )
         }
 
         Spacer(modifier = Modifier.height(25.dp))
@@ -155,5 +222,35 @@ fun About() {
                 .fillMaxWidth()
                 .padding(top = 5.dp, start = 18.dp)
         )
+    }
+}
+
+@Composable
+private fun SocialMediaIcon(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    contentDescription: String,
+    onClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .size(56.dp)
+            .clickable { onClick() },
+        shape = CircleShape,
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+    ) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = contentDescription,
+                tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                modifier = Modifier.size(24.dp)
+            )
+        }
     }
 }

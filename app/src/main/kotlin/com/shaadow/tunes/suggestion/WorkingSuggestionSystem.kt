@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.media3.common.MediaItem
 import com.shaadow.tunes.Database
 import com.shaadow.tunes.utils.asMediaItem
+import com.shaadow.tunes.utils.SuggestionSecurity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
@@ -15,6 +16,7 @@ import kotlinx.coroutines.withContext
 class WorkingSuggestionSystem(private val context: Context) {
     
     private val preferences = context.getSharedPreferences("working_suggestions", Context.MODE_PRIVATE)
+    private val securePrefs = SuggestionSecurity.getSecurePreferences(context)
     
     /**
      * Get recommendations based on user preferences and behavior
@@ -159,20 +161,59 @@ class WorkingSuggestionSystem(private val context: Context) {
 
     
     /**
-     * Track song interactions
+     * Track song interactions with security protection
      */
     fun onSongPlayed(mediaItem: MediaItem, playDuration: Long = 0L) {
         val playCount = preferences.getInt("play_${mediaItem.mediaId}", 0)
+        val skipCount = preferences.getInt("skip_${mediaItem.mediaId}", 0)
+        val liked = preferences.getBoolean("liked_${mediaItem.mediaId}", false)
+        
+        // Store in regular preferences for backward compatibility
         preferences.edit().putInt("play_${mediaItem.mediaId}", playCount + 1).apply()
+        
+        // Store securely to prevent manipulation
+        SuggestionSecurity.secureTrackingData(
+            context = context,
+            songId = mediaItem.mediaId,
+            playCount = playCount + 1,
+            skipCount = skipCount,
+            liked = liked
+        )
     }
     
     fun onSongSkipped(mediaItem: MediaItem, playDuration: Long = 0L) {
+        val playCount = preferences.getInt("play_${mediaItem.mediaId}", 0)
         val skipCount = preferences.getInt("skip_${mediaItem.mediaId}", 0)
+        val liked = preferences.getBoolean("liked_${mediaItem.mediaId}", false)
+        
+        // Store in regular preferences for backward compatibility
         preferences.edit().putInt("skip_${mediaItem.mediaId}", skipCount + 1).apply()
+        
+        // Store securely to prevent manipulation
+        SuggestionSecurity.secureTrackingData(
+            context = context,
+            songId = mediaItem.mediaId,
+            playCount = playCount,
+            skipCount = skipCount + 1,
+            liked = liked
+        )
     }
     
     fun onSongLiked(mediaItem: MediaItem) {
+        val playCount = preferences.getInt("play_${mediaItem.mediaId}", 0)
+        val skipCount = preferences.getInt("skip_${mediaItem.mediaId}", 0)
+        
+        // Store in regular preferences for backward compatibility
         preferences.edit().putBoolean("liked_${mediaItem.mediaId}", true).apply()
+        
+        // Store securely to prevent manipulation
+        SuggestionSecurity.secureTrackingData(
+            context = context,
+            songId = mediaItem.mediaId,
+            playCount = playCount,
+            skipCount = skipCount,
+            liked = true
+        )
     }
     
     fun onSongAddedToPlaylist(mediaItem: MediaItem, playlistName: String) {
@@ -192,10 +233,22 @@ class WorkingSuggestionSystem(private val context: Context) {
     
     fun setInitialPreferences(genres: List<String>): Boolean {
         return try {
+            // Validate and limit preferences to prevent gaming
+            val validatedGenres = SuggestionSecurity.validatePreferences(genres.toSet())
+            
             preferences.edit()
-                .putStringSet("preferred_genres", genres.toSet())
+                .putStringSet("preferred_genres", validatedGenres)
                 .putBoolean("onboarding_complete", true)
                 .apply()
+            
+            // Store securely
+            SuggestionSecurity.storeSecureData(
+                context = context,
+                key = "user_preferences",
+                value = validatedGenres.joinToString(",")
+            )
+            
+            SuggestionSecurity.recordPreferenceUpdate(context)
             true
         } catch (e: Exception) {
             false
@@ -210,17 +263,20 @@ class WorkingSuggestionSystem(private val context: Context) {
     }
     
     /**
-     * Clear all suggestion data
+     * Clear all suggestion data (protected operation)
      */
     suspend fun clearAllData() {
         preferences.edit().clear().apply()
+        SuggestionSecurity.clearSecureData(context)
     }
     
     /**
-     * Get tracking status for debugging
+     * Get tracking status with security information
      */
     fun getTrackingStatus(): Map<String, Any> {
         val allPrefs = preferences.all
+        val integrityReport = SuggestionSecurity.getIntegrityReport(context)
+        
         return mapOf(
             "totalTrackedSongs" to allPrefs.keys.count { it.startsWith("play_") },
             "totalLikedSongs" to allPrefs.keys.count { key -> 
@@ -228,7 +284,9 @@ class WorkingSuggestionSystem(private val context: Context) {
             },
             "totalSkippedSongs" to allPrefs.keys.count { it.startsWith("skip_") },
             "isTrackingActive" to (allPrefs.isNotEmpty()),
-            "onboardingComplete" to isOnboardingComplete()
+            "onboardingComplete" to isOnboardingComplete(),
+            "dataIntegrity" to integrityReport,
+            "securityProtected" to true
         )
     }
     
@@ -240,9 +298,26 @@ class WorkingSuggestionSystem(private val context: Context) {
     
     fun updatePreferences(genres: List<String>): Boolean {
         return try {
+            // Check rate limiting to prevent rapid manipulation
+            if (!SuggestionSecurity.canUpdatePreferences(context)) {
+                return false
+            }
+            
+            // Validate and limit preferences to prevent gaming
+            val validatedGenres = SuggestionSecurity.validatePreferences(genres.toSet())
+            
             preferences.edit()
-                .putStringSet("preferred_genres", genres.toSet())
+                .putStringSet("preferred_genres", validatedGenres)
                 .apply()
+            
+            // Store securely
+            SuggestionSecurity.storeSecureData(
+                context = context,
+                key = "user_preferences",
+                value = validatedGenres.joinToString(",")
+            )
+            
+            SuggestionSecurity.recordPreferenceUpdate(context)
             true
         } catch (e: Exception) {
             false

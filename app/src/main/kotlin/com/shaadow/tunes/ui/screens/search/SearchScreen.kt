@@ -27,6 +27,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
+import com.shaadow.tunes.ui.components.ScreenIdentifier
 import com.shaadow.tunes.ui.components.SearchInputField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -127,6 +128,12 @@ fun SearchScreen(
         } else null
     }
 
+    // Screen identifier for accurate screen detection
+    ScreenIdentifier(
+        screenId = "search",
+        screenName = "Search Screen"
+    )
+    
     Column(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally

@@ -41,7 +41,7 @@ class LocalNotificationHelper(private val context: Context) : NotificationDelive
         )
         
         val notification = NotificationCompat.Builder(context, ENGAGEMENT_CHANNEL_ID)
-            .setSmallIcon(R.drawable.ic_launcher_foreground)
+            .setSmallIcon(R.drawable.app_icon)
             .setContentTitle(content.title)
             .setContentText(content.body)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
@@ -62,7 +62,7 @@ class LocalNotificationHelper(private val context: Context) : NotificationDelive
         )
         
         val notification = NotificationCompat.Builder(context, MUSIC_CHANNEL_ID)
-            .setSmallIcon(R.drawable.ic_launcher_foreground)
+            .setSmallIcon(R.drawable.app_icon)
             .setContentTitle(content.title)
             .setContentText(content.body)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
@@ -83,7 +83,7 @@ class LocalNotificationHelper(private val context: Context) : NotificationDelive
         )
         
         val notification = NotificationCompat.Builder(context, MARKETING_CHANNEL_ID)
-            .setSmallIcon(R.drawable.ic_launcher_foreground)
+            .setSmallIcon(R.drawable.app_icon)
             .setContentTitle(content.title)
             .setContentText(content.body)
             .setPriority(NotificationCompat.PRIORITY_LOW)
@@ -108,7 +108,7 @@ class LocalNotificationHelper(private val context: Context) : NotificationDelive
     
     override fun showCustomNotification(content: NotificationContent, pendingIntent: PendingIntent) {
         val notification = NotificationCompat.Builder(context, ENGAGEMENT_CHANNEL_ID)
-            .setSmallIcon(R.drawable.ic_launcher_foreground)
+            .setSmallIcon(R.drawable.app_icon)
             .setContentTitle(content.title)
             .setContentText(content.body)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)

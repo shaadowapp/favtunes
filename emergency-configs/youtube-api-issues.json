@@ -1,0 +1,94 @@
+{
+  "version": "1.3-youtube-issues",
+  "lastUpdated": "2025-01-28T12:00:00Z",
+  "description": "Emergency config for YouTube API rate limiting or temporary issues",
+  
+  "errorHandling": {
+    "videoIdMismatchEnabled": true,
+    "videoIdMismatchMaxRetries": 5,
+    "videoIdMismatchRetryDelayMs": 3000,
+    "videoIdMismatchSkipOnFailure": true,
+    "videoIdMismatchUseAlternativeApi": false,
+    
+    "playableFormatNotFoundEnabled": true,
+    "playableFormatMaxRetries": 4,
+    "playableFormatRetryDelayMs": 2500,
+    "playableFormatSkipOnFailure": true,
+    
+    "unplayableExceptionEnabled": true,
+    "unplayableMaxRetries": 2,
+    "unplayableRetryDelayMs": 2000,
+    "unplayableSkipOnFailure": true,
+    
+    "loginRequiredEnabled": true,
+    "loginRequiredMaxRetries": 3,
+    "loginRequiredRetryDelayMs": 5000,
+    "loginRequiredSkipOnFailure": true,
+    
+    "genericErrorEnabled": true,
+    "genericErrorMaxRetries": 3,
+    "genericErrorRetryDelayMs": 3000,
+    "genericErrorSkipOnFailure": true
+  },
+  
+  "playerService": {
+    "cacheEnabled": true,
+    "cacheMaxSizeMB": 1024,
+    "connectTimeoutMs": 25000,
+    "readTimeoutMs": 15000,
+    "chunkSizeKB": 256,
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; rv:109.0) Gecko/20100101 Firefox/115.0",
+    "maxConcurrentRequests": 2,
+    "enablePreloading": false,
+    "preloadNextSongs": 1
+  },
+  
+  "apiEndpoints": {
+    "primaryYouTubeApi": "https://www.youtube.com",
+    "alternativeEndpoints": [],
+    "fallbackTimeout": 8000,
+    "useAlternativeFirst": false,
+    "rotateEndpoints": false
+  },
+  
+  "debugging": {
+    "enableDetailedLogging": true,
+    "logNetworkRequests": true,
+    "logErrorDetails": true,
+    "logPerformanceMetrics": true,
+    "enableCrashReporting": true,
+    "logLevel": "INFO"
+  },
+  
+  "emergency": {
+    "disablePlayback": false,
+    "disableSpecificFeatures": ["preloading", "background_downloads"],
+    "forceSkipProblematicSongs": true,
+    "emergencyMessage": "⚠️ YouTube API experiencing issues. Some songs may skip automatically.",
+    "redirectToAlternativePlayer": false
+  },
+  
+  "performance": {
+    "enableAudioOffload": true,
+    "bufferSizeMs": 30000,
+    "minBufferMs": 5000,
+    "maxBufferMs": 30000,
+    "enableSilenceSkipping": false,
+    "silenceThresholdDb": -50.0,
+    "enableVolumeNormalization": false
+  },
+  
+  "customErrorMessages": {
+    "VideoIdMismatch": "🔄 Song temporarily unavailable due to API issues, skipping...",
+    "PlayableFormatNotFound": "⚠️ Audio format unavailable, trying next song...",
+    "Unplayable": "❌ This song cannot be played right now, skipping...",
+    "LoginRequired": "🔐 Authentication issues detected, skipping song..."
+  },
+  
+  "featureFlags": {
+    "enableExperimentalPlayer": false,
+    "useNewAudioEngine": false,
+    "enableAdvancedCaching": true,
+    "allowBackgroundDownloads": false
+  }
+}

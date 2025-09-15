@@ -32,6 +32,7 @@ import com.shaadow.tunes.R
 import com.shaadow.tunes.models.LocalMenuState
 import com.shaadow.tunes.models.Section
 import com.shaadow.tunes.query
+import com.shaadow.tunes.ui.components.ScreenIdentifier
 import com.shaadow.tunes.ui.components.TabScaffold
 import com.shaadow.tunes.ui.components.TooltipIconButton
 import com.shaadow.tunes.ui.components.themed.NonQueuedMediaItemMenu
@@ -88,6 +89,12 @@ fun ArtistScreen(
     val thumbnailContent = adaptiveThumbnailContent(
         isLoading = viewModel.artist?.timestamp == null,
         url = viewModel.artist?.thumbnailUrl
+    )
+
+    // Screen identifier for accurate screen detection
+    ScreenIdentifier(
+        screenId = "artist",
+        screenName = "Artist Screen"
     )
 
     TabScaffold(

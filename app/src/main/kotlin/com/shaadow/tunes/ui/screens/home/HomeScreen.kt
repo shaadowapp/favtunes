@@ -37,7 +37,6 @@ import androidx.compose.runtime.setValue
 import com.shaadow.tunes.ui.components.BugReportBottomSheet
 import com.shaadow.tunes.ui.components.FeedbackBottomSheet
 import com.shaadow.tunes.ui.components.SponsoredAppsBottomSheet
-import com.shaadow.tunes.utils.rememberShakeDetector
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -46,6 +45,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.shaadow.tunes.R
 import com.shaadow.tunes.ui.components.AppIcon
+import com.shaadow.tunes.ui.components.ScreenIdentifier
 import com.shaadow.tunes.ui.components.TooltipIconButton
 
 
@@ -64,11 +64,6 @@ fun HomeScreen(
     var showSponsoredSheet by remember { mutableStateOf(false) }
     var showBugReportSheet by remember { mutableStateOf(false) }
     var showDropdownMenu by remember { mutableStateOf(false) }
-    
-    // Shake detection for bug reporting
-    rememberShakeDetector {
-        showBugReportSheet = true
-    }
 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -197,6 +192,26 @@ fun HomeScreen(
             )
         }
     ) { paddingValues ->
+        // Screen identifier for accurate screen detection
+        ScreenIdentifier(
+            screenId = when (screenIndex) {
+                0 -> "home"
+                1 -> "songs"
+                2 -> "artists"
+                3 -> "playlists"
+                4 -> "mytunes"
+                else -> "home"
+            },
+            screenName = when (screenIndex) {
+                0 -> "Home Screen"
+                1 -> "Songs Screen"
+                2 -> "Artists Screen"
+                3 -> "Playlists Screen"
+                4 -> "My Tunes Screen"
+                else -> "Home Screen"
+            }
+        )
+        
         Surface(
             modifier = Modifier
                 .fillMaxSize()

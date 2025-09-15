@@ -64,6 +64,7 @@ import com.shaadow.tunes.R
 import com.shaadow.tunes.models.ActionInfo
 import com.shaadow.tunes.models.LocalMenuState
 import com.shaadow.tunes.ui.components.MusicBars
+import com.shaadow.tunes.ui.components.ScreenIdentifier
 import com.shaadow.tunes.ui.components.SwipeToActionBox
 import com.shaadow.tunes.ui.components.TooltipIconButton
 import com.shaadow.tunes.ui.components.themed.QueuedMediaItemMenu
@@ -138,6 +139,12 @@ fun Queue(
             SnackbarHost(hostState = snackbarHostState)
         }
     ) { paddingValues ->
+        // Screen identifier for accurate screen detection
+        ScreenIdentifier(
+            screenId = "queue",
+            screenName = "Queue Screen"
+        )
+        
         Column(
             modifier = Modifier
                 .background(BottomSheetDefaults.ContainerColor)

@@ -28,6 +28,7 @@ import com.shaadow.tunes.models.Album
 import com.shaadow.tunes.models.Section
 import com.shaadow.tunes.models.SongAlbumMap
 import com.shaadow.tunes.query
+import com.shaadow.tunes.ui.components.ScreenIdentifier
 import com.shaadow.tunes.ui.components.TabScaffold
 import com.shaadow.tunes.ui.components.TooltipIconButton
 import com.shaadow.tunes.ui.components.themed.adaptiveThumbnailContent
@@ -107,6 +108,12 @@ fun AlbumScreen(
 
     val thumbnailContent =
         adaptiveThumbnailContent(album?.timestamp == null, album?.thumbnailUrl)
+
+    // Screen identifier for accurate screen detection
+    ScreenIdentifier(
+        screenId = "album",
+        screenName = "Album Screen"
+    )
 
     TabScaffold(
         pagerState = pagerState,

@@ -21,6 +21,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import com.shaadow.tunes.R
 import com.shaadow.tunes.enums.BuiltInPlaylist
+import com.shaadow.tunes.ui.components.ScreenIdentifier
 
 @OptIn(ExperimentalMaterial3Api::class)
 @ExperimentalFoundationApi
@@ -60,6 +61,12 @@ fun BuiltInPlaylistScreen(
             )
         }
     ) { paddingValues ->
+        // Screen identifier for accurate screen detection
+        ScreenIdentifier(
+            screenId = "builtinplaylist",
+            screenName = "Built-in Playlist Screen"
+        )
+        
         Surface(
             modifier = Modifier
                 .fillMaxSize()

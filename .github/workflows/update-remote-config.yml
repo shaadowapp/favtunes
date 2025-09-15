@@ -1,0 +1,37 @@
+name: Update Remote Config
+
+on:
+  push:
+    paths:
+      - 'advanced-tunes-config.json'
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  validate-config:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Validate JSON
+        run: |
+          if ! jq empty advanced-tunes-config.json; then
+            echo "❌ Invalid JSON in advanced-tunes-config.json"
+            exit 1
+          fi
+          echo "✅ JSON is valid"
+          
+      - name: Check for non-YouTube APIs
+        run: |
+          if grep -q "pipedapi\|spotify\|soundcloud\|deezer" advanced-tunes-config.json; then
+            echo "❌ Non-YouTube APIs detected in config"
+            exit 1
+          fi
+          echo "✅ Only YouTube APIs detected"
+          
+      - name: Notify success
+        run: |
+          echo "🎉 Remote config updated successfully!"
+          echo "Config will be available at: https://raw.githubusercontent.com/${{ github.repository }}/main/advanced-tunes-config.json"

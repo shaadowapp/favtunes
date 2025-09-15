@@ -17,6 +17,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.shaadow.tunes.LocalPlayerPadding
 import com.shaadow.tunes.R
+import com.shaadow.tunes.ui.components.ScreenIdentifier
 import com.shaadow.tunes.utils.listGesturesEnabledKey
 import com.shaadow.tunes.utils.miniplayerGesturesEnabledKey
 import com.shaadow.tunes.utils.playerGesturesEnabledKey
@@ -30,13 +31,19 @@ fun GestureSettings() {
     var playerGesturesEnabled by rememberPreference(playerGesturesEnabledKey, true)
     var miniplayerGesturesEnabled by rememberPreference(miniplayerGesturesEnabledKey, true)
 
+    // Screen identifier for accurate screen detection
+    ScreenIdentifier(
+        screenId = "gestures_settings",
+        screenName = "Gestures Settings"
+    )
+    
     Column(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
             .padding(
-                top = 16.dp,
-                bottom = 16.dp + playerPadding,
+                top = 32.dp,
+                bottom = 32.dp + playerPadding,
                 start = 0.dp,
                 end = 0.dp
             )

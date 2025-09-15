@@ -38,6 +38,7 @@ import com.shaadow.tunes.models.Playlist
 import com.shaadow.tunes.models.SongPlaylistMap
 import com.shaadow.tunes.query
 import com.shaadow.tunes.transaction
+import com.shaadow.tunes.ui.components.ScreenIdentifier
 import com.shaadow.tunes.ui.components.TooltipIconButton
 import com.shaadow.tunes.ui.components.themed.TextFieldDialog
 import com.shaadow.tunes.utils.asMediaItem
@@ -66,6 +67,12 @@ fun PlaylistScreen(
             Innertube.playlistPage(browseId = browseId)?.completed()?.getOrNull()
         }
     }
+
+    // Screen identifier for accurate screen detection
+    ScreenIdentifier(
+        screenId = "playlist",
+        screenName = "Playlist Screen"
+    )
 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),

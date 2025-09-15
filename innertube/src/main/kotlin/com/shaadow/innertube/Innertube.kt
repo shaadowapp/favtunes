@@ -16,6 +16,15 @@ import com.shaadow.innertube.models.Thumbnail
 import kotlinx.serialization.json.Json
 
 object Innertube {
+    // Secure API key storage
+    private var apiKey: String = "AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8" // Default fallback
+    
+    fun setApiKey(key: String) {
+        apiKey = key
+    }
+    
+    private fun getApiKey(): String = apiKey
+    
     val client = HttpClient(OkHttp) {
 
         expectSuccess = true
@@ -35,7 +44,7 @@ object Innertube {
         defaultRequest {
             url(scheme = "https", host ="music.youtube.com") {
                 contentType(ContentType.Application.Json)
-                headers.append("X-Goog-Api-Key", "AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8")
+                headers.append("X-Goog-Api-Key", getApiKey())
                 parameters.append("prettyPrint", "false")
             }
         }

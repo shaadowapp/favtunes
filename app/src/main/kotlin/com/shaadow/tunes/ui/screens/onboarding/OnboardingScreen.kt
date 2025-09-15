@@ -36,6 +36,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.shaadow.tunes.data.OnboardingData
+import com.shaadow.tunes.ui.components.ScreenIdentifier
 import com.shaadow.tunes.viewmodels.OnboardingViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -45,6 +46,12 @@ fun OnboardingScreen(
 ) {
     val context = LocalContext.current
     val viewModel = remember { OnboardingViewModel(context) }
+    
+    // Screen identifier for accurate screen detection
+    ScreenIdentifier(
+        screenId = "onboarding",
+        screenName = "Onboarding Screen"
+    )
     
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -185,7 +192,7 @@ private fun WelcomeStep() {
         verticalArrangement = Arrangement.Center
     ) {
         Image(
-            painter = painterResource(id = R.drawable.ic_launcher_foreground),
+            painter = painterResource(id = R.drawable.app_icon),
             contentDescription = null,
             modifier = Modifier.size(120.dp)
         )

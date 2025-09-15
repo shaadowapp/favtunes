@@ -63,6 +63,34 @@ class FavTunesNotificationManager(
     }
 
     /**
+     * Schedule reduced frequency engagement notifications (Play Store compliant)
+     * Only sends notifications after 3+ days of inactivity, maximum once per week
+     */
+    suspend fun scheduleReducedEngagementNotifications() {
+        if (!getPreferences().getBoolean(PREF_NOTIFICATIONS_ENABLED, true)) return
+        if (!getPreferences().getBoolean(PREF_ENGAGEMENT_REMINDERS, true)) return
+        
+        val constraints = Constraints.Builder()
+            .setRequiredNetworkType(NetworkType.CONNECTED)
+            .build()
+
+        val engagementWork = PeriodicWorkRequestBuilder<ReducedEngagementNotificationWorker>(
+            7, TimeUnit.DAYS // Check weekly instead of daily
+        )
+            .setConstraints(constraints)
+            .addTag("reduced_$ENGAGEMENT_WORK_TAG")
+            .setInitialDelay(3, TimeUnit.DAYS) // Start after 3 days
+            .build()
+
+        WorkManager.getInstance(context)
+            .enqueueUniquePeriodicWork(
+                "reduced_$ENGAGEMENT_WORK_TAG",
+                ExistingPeriodicWorkPolicy.REPLACE,
+                engagementWork
+            )
+    }
+
+    /**
      * Schedule smart music suggestions
      */
     suspend fun scheduleDailySuggestions() {
@@ -84,6 +112,34 @@ class FavTunesNotificationManager(
         WorkManager.getInstance(context)
             .enqueueUniquePeriodicWork(
                 DAILY_SUGGESTION_WORK_TAG,
+                ExistingPeriodicWorkPolicy.REPLACE,
+                suggestionWork
+            )
+    }
+
+    /**
+     * Schedule weekly music suggestions (Play Store compliant)
+     * Reduced frequency to avoid being considered spam
+     */
+    suspend fun scheduleWeeklySuggestions() {
+        if (!getPreferences().getBoolean(PREF_NOTIFICATIONS_ENABLED, true)) return
+        if (!getPreferences().getBoolean(PREF_MUSIC_SUGGESTIONS, true)) return
+        
+        val constraints = Constraints.Builder()
+            .setRequiredNetworkType(NetworkType.CONNECTED)
+            .build()
+
+        val suggestionWork = PeriodicWorkRequestBuilder<WeeklySuggestionWorker>(
+            7, TimeUnit.DAYS // Weekly instead of daily
+        )
+            .setConstraints(constraints)
+            .addTag("weekly_$DAILY_SUGGESTION_WORK_TAG")
+            .setInitialDelay(2, TimeUnit.DAYS) // Start after 2 days
+            .build()
+
+        WorkManager.getInstance(context)
+            .enqueueUniquePeriodicWork(
+                "weekly_$DAILY_SUGGESTION_WORK_TAG",
                 ExistingPeriodicWorkPolicy.REPLACE,
                 suggestionWork
             )
@@ -189,6 +245,65 @@ class DailySuggestionWorker(
                 sortBy = com.shaadow.tunes.enums.SongSortBy.DateAdded, 
                 sortOrder = com.shaadow.tunes.enums.SortOrder.Descending
             ).first().take(5)
+            
+            if (recentSongs.isNotEmpty()) {
+                notificationManager.sendMusicSuggestion(recentSongs)
+            }
+            
+            return Result.success()
+        } catch (e: Exception) {
+            return Result.failure()
+        }
+    }
+}
+
+/**
+ * Reduced frequency engagement notification worker (Play Store compliant)
+ * Only sends notifications after 3+ days of inactivity, maximum once per week
+ */
+class ReducedEngagementNotificationWorker(
+    context: Context,
+    params: WorkerParameters
+) : CoroutineWorker(context, params) {
+
+    override suspend fun doWork(): Result {
+        val notificationManager = FavTunesNotificationManager(applicationContext)
+        val hoursSinceLastOpen = notificationManager.getHoursSinceLastOpen()
+        
+        // Only send if user has been away for at least 3 days (72 hours)
+        // and respects the minimum gap between notifications
+        if (hoursSinceLastOpen >= 72) {
+            notificationManager.sendEngagementNotification(hoursSinceLastOpen)
+        }
+        
+        return Result.success()
+    }
+}
+
+/**
+ * Weekly music suggestion worker (Play Store compliant)
+ * Reduced frequency to avoid being considered spam
+ */
+class WeeklySuggestionWorker(
+    context: Context,
+    params: WorkerParameters
+) : CoroutineWorker(context, params) {
+
+    override suspend fun doWork(): Result {
+        try {
+            val notificationManager = FavTunesNotificationManager(applicationContext)
+            
+            // Only send suggestions if user has been somewhat active
+            val hoursSinceLastOpen = notificationManager.getHoursSinceLastOpen()
+            if (hoursSinceLastOpen > 168) { // More than a week - user might have abandoned app
+                return Result.success() // Don't send to inactive users
+            }
+            
+            // Get some recent songs for suggestions
+            val recentSongs = Database.songs(
+                sortBy = com.shaadow.tunes.enums.SongSortBy.DateAdded, 
+                sortOrder = com.shaadow.tunes.enums.SortOrder.Descending
+            ).first().take(3) // Reduced from 5 to 3
             
             if (recentSongs.isNotEmpty()) {
                 notificationManager.sendMusicSuggestion(recentSongs)

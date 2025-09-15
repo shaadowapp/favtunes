@@ -26,8 +26,19 @@ android {
         applicationId = "com.shaadow.tunes"
         minSdk = 24
         targetSdk = 36
-        versionCode = 13
-        versionName = "2.2.1"
+        versionCode = 16
+        versionName = "2.5.1"
+        
+        // Load credentials from local.properties (gitignored for security)
+        buildConfigField("String", "YOUTUBE_API_KEY", "\"${project.findProperty("YOUTUBE_API_KEY") ?: ""}\"")
+        buildConfigField("String", "ONESIGNAL_APP_ID", "\"${project.findProperty("ONESIGNAL_APP_ID") ?: ""}\"")
+        buildConfigField("String", "GITHUB_TOKEN", "\"${project.findProperty("GITHUB_TOKEN") ?: ""}\"")
+        buildConfigField("String", "REMOTE_CONFIG_REPO", "\"${project.findProperty("REMOTE_CONFIG_REPO") ?: ""}\"")
+        buildConfigField("String", "REMOTE_CONFIG_OWNER", "\"${project.findProperty("REMOTE_CONFIG_OWNER") ?: ""}\"")
+        
+        // App metadata
+        buildConfigField("String", "APP_VERSION", "\"${versionName}\"")
+        buildConfigField("int", "VERSION_CODE", "${versionCode}")
     }
 
     splits {
@@ -69,9 +80,9 @@ android {
 
     lint {
         htmlReport = true
-        htmlOutput = file("$buildDir/reports/lint-report.html")
+        htmlOutput = file("${layout.buildDirectory.get()}/reports/lint-report.html")
         xmlReport = true
-        xmlOutput = file("$buildDir/reports/lint-report.xml")
+        xmlOutput = file("${layout.buildDirectory.get()}/reports/lint-report.xml")
     }
 }
 
@@ -86,6 +97,9 @@ dependencies {
     implementation(libs.coil.network)
     implementation(libs.compose.material.icons)
     implementation(libs.compose.material3)
+    
+    // Social Media Icons
+    implementation("br.com.devsrsouza.compose.icons:font-awesome:1.1.1")
     implementation(libs.material.motion.compose)
     implementation(libs.compose.navigation)
     implementation(libs.compose.shimmer)
@@ -115,6 +129,7 @@ dependencies {
     implementation(platform(libs.firebase.bom))
     implementation(libs.material3)
     implementation(libs.app.update)
+    implementation("androidx.security:security-crypto:1.1.0-alpha06")
     implementation(libs.app.update.ktx)
     
     // Suggestion System Dependencies

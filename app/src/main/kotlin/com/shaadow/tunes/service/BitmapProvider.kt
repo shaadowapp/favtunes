@@ -86,4 +86,28 @@ class BitmapProvider(
                 .build()
         )
     }
+
+    /**
+     * Clear unused bitmaps to free memory
+     */
+    fun clearUnusedBitmaps() {
+        try {
+            // Cancel any pending image loading
+            lastEnqueued?.dispose()
+            lastEnqueued = null
+
+            // Clear cached bitmaps if they're not the default
+            if (lastBitmap != null && lastBitmap != defaultBitmap) {
+                lastBitmap?.recycle()
+                lastBitmap = null
+            }
+
+            // Clear URI reference
+            lastUri = null
+
+            android.util.Log.d("BitmapProvider", "Unused bitmaps cleared")
+        } catch (e: Exception) {
+            android.util.Log.w("BitmapProvider", "Error clearing bitmaps", e)
+        }
+    }
 }

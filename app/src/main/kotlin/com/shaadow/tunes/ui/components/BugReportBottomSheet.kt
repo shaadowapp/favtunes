@@ -36,15 +36,16 @@ fun BugReportBottomSheet(
     val severities = BugSeverity.values().toList()
     
     // Auto-detect screen context when sheet opens
-    // TODO: Implement screen context detection
-    // LaunchedEffect(Unit) {
-    //     val screenContext = ScreenDetector.getCurrentScreenContext(navController)
-    //     viewModel.setScreenContext(screenContext)
-    // }
+    LaunchedEffect(Unit) {
+        val screenContext = ScreenDetector.getCurrentScreenContext(navController)
+        viewModel.setScreenContext(screenContext)
+    }
     
     // Handle successful submission
     LaunchedEffect(uiState.isSubmitted) {
         if (uiState.isSubmitted) {
+            // Reset the form after successful submission
+            viewModel.resetForm()
             onDismiss()
         }
     }
@@ -88,24 +89,24 @@ fun BugReportBottomSheet(
                 )
             }
             
-            // Screen Context Info - TODO: Implement screen context detection
-            // if (uiState.screenContext != null) {
-            //     Card(
-            //         colors = CardDefaults.cardColors(
-            //             containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
-            //         ),
-            //         modifier = Modifier
-            //             .fillMaxWidth()
-            //             .padding(bottom = 16.dp)
-            //     ) {
-            //         Text(
-            //             text = "📍 Reporting issue from: ${uiState.screenContext.screenName}",
-            //             style = MaterialTheme.typography.bodySmall,
-            //             modifier = Modifier.padding(12.dp),
-            //             color = MaterialTheme.colorScheme.onPrimaryContainer
-            //         )
-            //     }
-            // }
+            // Screen Context Info
+            uiState.screenContext?.let { screenContext ->
+                Card(
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
+                    ),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 16.dp)
+                ) {
+                    Text(
+                        text = "📍 Reporting issue from: ${screenContext.screenName}",
+                        style = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier.padding(12.dp),
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                }
+            }
             
             // Error Display
             uiState.error?.let { error ->

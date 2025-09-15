@@ -113,11 +113,13 @@ class OnboardingViewModel(private val context: Context) : ViewModel() {
                 val sharedPrefs = context.getSharedPreferences("language_prefs", Context.MODE_PRIVATE)
                 sharedPrefs.edit().putString("selected_language", selectedLanguage).apply()
                 
-                // Combine all preferences
-                val allPreferences = selectedGenres + selectedMoods
+                // Save only the selected genres as user preferences (not moods)
+                // Moods are used for other purposes but genres are what define music taste
+                val success = suggestionIntegration.getSuggestionSystem().setInitialPreferences(selectedGenres.toList())
                 
-                // Save preferences
-                val success = suggestionIntegration.getSuggestionSystem().setInitialPreferences(allPreferences.toList())
+                // Also save moods separately for other features if needed
+                val moodPrefs = context.getSharedPreferences("mood_prefs", Context.MODE_PRIVATE)
+                moodPrefs.edit().putStringSet("selected_moods", selectedMoods).apply()
                 
                 if (success) {
                     onComplete()

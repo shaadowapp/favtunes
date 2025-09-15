@@ -1,0 +1,94 @@
+{
+  "version": "1.3-playback-disabled",
+  "lastUpdated": "2025-01-28T12:00:00Z",
+  "description": "Emergency config to completely disable playback in case of critical issues",
+  
+  "errorHandling": {
+    "videoIdMismatchEnabled": false,
+    "videoIdMismatchMaxRetries": 0,
+    "videoIdMismatchRetryDelayMs": 0,
+    "videoIdMismatchSkipOnFailure": true,
+    "videoIdMismatchUseAlternativeApi": false,
+    
+    "playableFormatNotFoundEnabled": false,
+    "playableFormatMaxRetries": 0,
+    "playableFormatRetryDelayMs": 0,
+    "playableFormatSkipOnFailure": true,
+    
+    "unplayableExceptionEnabled": false,
+    "unplayableMaxRetries": 0,
+    "unplayableRetryDelayMs": 0,
+    "unplayableSkipOnFailure": true,
+    
+    "loginRequiredEnabled": false,
+    "loginRequiredMaxRetries": 0,
+    "loginRequiredRetryDelayMs": 0,
+    "loginRequiredSkipOnFailure": true,
+    
+    "genericErrorEnabled": false,
+    "genericErrorMaxRetries": 0,
+    "genericErrorRetryDelayMs": 0,
+    "genericErrorSkipOnFailure": true
+  },
+  
+  "playerService": {
+    "cacheEnabled": false,
+    "cacheMaxSizeMB": 0,
+    "connectTimeoutMs": 1000,
+    "readTimeoutMs": 1000,
+    "chunkSizeKB": 0,
+    "userAgent": "Mozilla/5.0 (Android 10; Mobile; rv:109.0) Gecko/115.0 Firefox/115.0",
+    "maxConcurrentRequests": 0,
+    "enablePreloading": false,
+    "preloadNextSongs": 0
+  },
+  
+  "apiEndpoints": {
+    "primaryYouTubeApi": "https://www.youtube.com",
+    "alternativeEndpoints": [],
+    "fallbackTimeout": 1000,
+    "useAlternativeFirst": false,
+    "rotateEndpoints": false
+  },
+  
+  "debugging": {
+    "enableDetailedLogging": false,
+    "logNetworkRequests": false,
+    "logErrorDetails": false,
+    "logPerformanceMetrics": false,
+    "enableCrashReporting": true,
+    "logLevel": "ERROR"
+  },
+  
+  "emergency": {
+    "disablePlayback": true,
+    "disableSpecificFeatures": ["playback", "preloading", "background_downloads", "concurrent_requests", "caching", "detailed_logging", "streaming"],
+    "forceSkipProblematicSongs": true,
+    "emergencyMessage": "🚨 CRITICAL: Playback temporarily disabled due to emergency. Please update the app or check for announcements.",
+    "redirectToAlternativePlayer": false
+  },
+  
+  "performance": {
+    "enableAudioOffload": false,
+    "bufferSizeMs": 0,
+    "minBufferMs": 0,
+    "maxBufferMs": 0,
+    "enableSilenceSkipping": false,
+    "silenceThresholdDb": -50.0,
+    "enableVolumeNormalization": false
+  },
+  
+  "customErrorMessages": {
+    "VideoIdMismatch": "🚨 Playback disabled due to critical issues. Please check for app updates.",
+    "PlayableFormatNotFound": "🚨 Playback disabled due to critical issues. Please check for app updates.",
+    "Unplayable": "🚨 Playback disabled due to critical issues. Please check for app updates.",
+    "LoginRequired": "🚨 Playback disabled due to critical issues. Please check for app updates."
+  },
+  
+  "featureFlags": {
+    "enableExperimentalPlayer": false,
+    "useNewAudioEngine": false,
+    "enableAdvancedCaching": false,
+    "allowBackgroundDownloads": false
+  }
+}

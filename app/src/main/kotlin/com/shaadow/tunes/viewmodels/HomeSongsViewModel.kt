@@ -56,13 +56,36 @@ class HomeSongsViewModel : ViewModel() {
         sortOrder: SortOrder
     ) {
         try {
-            val recentSongs = Database.songs(sortBy, sortOrder).first()
+            // Use more efficient query with LIMIT to reduce memory usage
+            val songsFlow = when (sortBy) {
+                SongSortBy.PlayTime -> when (sortOrder) {
+                    SortOrder.Ascending -> Database.songsByPlayTimeAsc()
+                    SortOrder.Descending -> Database.songsByPlayTimeDesc()
+                }
+                SongSortBy.Title -> when (sortOrder) {
+                    SortOrder.Ascending -> Database.songsByTitleAsc()
+                    SortOrder.Descending -> Database.songsByTitleDesc()
+                }
+                SongSortBy.DateAdded -> when (sortOrder) {
+                    SortOrder.Ascending -> Database.songsByRowIdAsc()
+                    SortOrder.Descending -> Database.songsByRowIdDesc()
+                }
+                SongSortBy.Artist -> when (sortOrder) {
+                    SortOrder.Ascending -> Database.songsByArtistsAsc()
+                    SortOrder.Descending -> Database.songsByArtistsDesc()
+                }
+            }
+
+            // Collect only the first emission and limit results
+            val recentSongs = songsFlow.first().take(50) // Increased limit but still reasonable
+
             items = if (recentSongs.isEmpty()) {
-                defaultSongs.take(5) // Only show 5 default songs
+                defaultSongs.take(5)
             } else {
-                recentSongs.take(20) // Limit to 20 recent songs for performance
+                recentSongs
             }
         } catch (e: Exception) {
+            android.util.Log.e("HomeSongsViewModel", "Error loading songs", e)
             items = defaultSongs.take(5)
         }
     }

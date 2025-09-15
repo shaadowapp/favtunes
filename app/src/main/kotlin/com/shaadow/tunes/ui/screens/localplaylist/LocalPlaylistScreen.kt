@@ -46,6 +46,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
+import com.shaadow.tunes.ui.components.ScreenIdentifier
 
 @OptIn(ExperimentalMaterial3Api::class)
 @ExperimentalFoundationApi
@@ -139,6 +140,12 @@ fun LocalPlaylistScreen(
             )
         }
     ) { paddingValues ->
+        // Screen identifier for accurate screen detection
+        ScreenIdentifier(
+            screenId = "localplaylist",
+            screenName = "Local Playlist Screen"
+        )
+        
         Surface(
             modifier = Modifier
                 .fillMaxSize()

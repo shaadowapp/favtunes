@@ -17,7 +17,6 @@ import androidx.compose.material.icons.automirrored.outlined.PlaylistPlay
 import androidx.compose.material.icons.automirrored.outlined.QueueMusic
 import androidx.compose.material.icons.outlined.Album
 import androidx.compose.material.icons.outlined.LibraryMusic
-import androidx.compose.material.icons.outlined.Movie
 import androidx.compose.material.icons.outlined.MusicNote
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material3.CircularProgressIndicator
@@ -50,6 +49,7 @@ import com.shaadow.tunes.models.LocalMenuState
 import com.shaadow.tunes.models.Section
 import com.shaadow.tunes.models.Song
 import com.shaadow.tunes.ui.components.ChipScaffold
+import com.shaadow.tunes.ui.components.ScreenIdentifier
 import com.shaadow.tunes.ui.components.SwipeToActionBox
 import com.shaadow.tunes.ui.components.themed.InHistoryMediaItemMenu
 import com.shaadow.tunes.ui.components.themed.NonQueuedMediaItemMenu
@@ -60,7 +60,6 @@ import com.shaadow.tunes.ui.items.ListItemPlaceholder
 import com.shaadow.tunes.ui.items.LocalSongItem
 import com.shaadow.tunes.ui.items.PlaylistItem
 import com.shaadow.tunes.ui.items.SongItem
-import com.shaadow.tunes.ui.items.VideoItem
 import com.shaadow.tunes.ui.styling.Dimensions
 import com.shaadow.tunes.utils.asMediaItem
 import com.shaadow.tunes.utils.enqueue
@@ -89,7 +88,6 @@ fun SearchResults(
         Section(stringResource(id = R.string.songs), Icons.Outlined.MusicNote),
         Section(stringResource(id = R.string.albums), Icons.Outlined.Album),
         Section(stringResource(id = R.string.artists), Icons.Outlined.Person),
-        Section(stringResource(id = R.string.videos), Icons.Outlined.Movie),
         Section(stringResource(id = R.string.playlists), Icons.AutoMirrored.Outlined.QueueMusic),
         Section(stringResource(id = R.string.featured), Icons.AutoMirrored.Outlined.QueueMusic),
         Section(stringResource(id = R.string.library), Icons.Outlined.LibraryMusic)
@@ -101,6 +99,12 @@ fun SearchResults(
         isLoading = false
     }
 
+    // Screen identifier for accurate screen detection
+    ScreenIdentifier(
+        screenId = "search_results",
+        screenName = "Search Results Screen"
+    )
+    
     ChipScaffold(
         tabIndex = tabIndex,
         onTabChanged = onTabIndexChanges,
@@ -225,73 +229,13 @@ fun SearchResults(
                 )
             }
 
-            3 -> {
-                val binder = LocalPlayerServiceBinder.current
-                val menuState = LocalMenuState.current
-
+            3, 4 -> {
                 ItemsPage(
-                    tag = "searchResults/$query/videos",
-                    itemsPageProvider = { continuation ->
-                        if (continuation == null) {
-                            Innertube.searchPage(
-                                query = query,
-                                params = Innertube.SearchFilter.Video.value,
-                                fromMusicShelfRendererContent = Innertube.VideoItem::from
-                            )
-                        } else {
-                            Innertube.searchPage(
-                                continuation = continuation,
-                                fromMusicShelfRendererContent = Innertube.VideoItem::from
-                            )
-                        }
-                    },
-                    emptyItemsText = emptyItemsText,
-                    itemContent = { video ->
-                        SwipeToActionBox(
-                            modifier = Modifier.animateItem(),
-                            state = rememberSwipeToDismissBoxState(),
-                            primaryAction = ActionInfo(
-                                onClick = { binder?.player?.enqueue(video.asMediaItem) },
-                                icon = Icons.AutoMirrored.Outlined.PlaylistPlay,
-                                description = R.string.enqueue
-                            )
-                        ) {
-                            VideoItem(
-                                video = video,
-                                onClick = {
-                                    binder?.stopRadio()
-                                    binder?.player?.forcePlay(video.asMediaItem)
-                                    binder?.setupRadio(video.info?.endpoint)
-                                },
-                                onLongClick = {
-                                    menuState.display {
-                                        NonQueuedMediaItemMenu(
-                                            mediaItem = video.asMediaItem,
-                                            onDismiss = menuState::hide,
-                                            onGoToAlbum = onAlbumClick,
-                                            onGoToArtist = onArtistClick
-                                        )
-                                    }
-                                }
-                            )
-                        }
-                    },
-                    itemPlaceholderContent = {
-                        ListItemPlaceholder(
-                            thumbnailHeight = 64.dp,
-                            thumbnailAspectRatio = 16F / 9F
-                        )
-                    }
-                )
-            }
-
-            4, 5 -> {
-                ItemsPage(
-                    tag = "searchResults/$query/${if (index == 4) "playlists" else "featured"}",
+                    tag = "searchResults/$query/${if (index == 3) "playlists" else "featured"}",
                     itemsPageProvider = { continuation ->
                         if (continuation == null) {
                             val filter =
-                                if (index == 4) Innertube.SearchFilter.CommunityPlaylist else Innertube.SearchFilter.FeaturedPlaylist
+                                if (index == 3) Innertube.SearchFilter.CommunityPlaylist else Innertube.SearchFilter.FeaturedPlaylist
 
                             Innertube.searchPage(
                                 query = query,
@@ -318,7 +262,7 @@ fun SearchResults(
                 )
             }
 
-            6 -> {
+            5 -> {
                 val binder = LocalPlayerServiceBinder.current
                 val menuState = LocalMenuState.current
                 var items: List<Song> by remember { mutableStateOf(emptyList()) }

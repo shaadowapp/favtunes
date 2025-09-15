@@ -37,6 +37,8 @@ val Innertube.SongItem.asMediaItem: MediaItem
         )
         .build()
 
+// Video functionality removed - keeping for reference
+/*
 val Innertube.VideoItem.asMediaItem: MediaItem
     @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
     get() = MediaItem.Builder()
@@ -58,6 +60,7 @@ val Innertube.VideoItem.asMediaItem: MediaItem
                 .build()
         )
         .build()
+*/
 
 val Song.asMediaItem: MediaItem
     @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)

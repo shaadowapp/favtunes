@@ -104,7 +104,12 @@ fun DatabaseSettings() {
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .padding(top = 8.dp, bottom = 16.dp + playerPadding)
+            .padding(
+                top = 24.dp,
+                bottom = 32.dp + playerPadding,
+                start = 16.dp,
+                end = 16.dp
+            )
     ) {
         Text(
             text = stringResource(id = R.string.history),
@@ -193,6 +198,9 @@ fun DatabaseSettings() {
             }
         )
 
-        InfoInformation(text = stringResource(id = R.string.restore_information))
+        InfoInformation(
+            text = stringResource(id = R.string.restore_information),
+            modifier = Modifier.padding(horizontal = 0.dp)
+        )
     }
 }

@@ -30,6 +30,7 @@ import com.shaadow.tunes.models.LocalMenuState
 import com.shaadow.tunes.models.Song
 import com.shaadow.tunes.models.SongWithContentLength
 import com.shaadow.tunes.ui.components.CoverScaffold
+import com.shaadow.tunes.ui.components.ScreenIdentifier
 import com.shaadow.tunes.ui.components.SwipeToActionBox
 import com.shaadow.tunes.ui.components.themed.InHistoryMediaItemMenu
 import com.shaadow.tunes.ui.components.themed.NonQueuedMediaItemMenu
@@ -74,6 +75,12 @@ fun BuiltInPlaylistSongs(
         }.collect { songs = it }
     }
 
+    // Screen identifier for accurate screen detection
+    ScreenIdentifier(
+        screenId = "builtin_playlist_songs",
+        screenName = "Built-in Playlist Songs"
+    )
+    
     LazyColumn(
         contentPadding = PaddingValues(top = 16.dp, bottom = 16.dp + playerPadding),
         modifier = Modifier.fillMaxSize(),

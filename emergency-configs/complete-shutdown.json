@@ -1,0 +1,16 @@
+{
+  "version": "1.0-shutdown",
+  "lastUpdated": "2025-01-26T16:00:00Z",
+  
+  "emergency": {
+    "disablePlayback": true,
+    "emergencyMessage": "Music service temporarily unavailable due to technical issues. We're working to fix this. Please try again later.",
+    "redirectToAlternativePlayer": false
+  },
+  
+  "debugging": {
+    "enableDetailedLogging": true,
+    "logErrorDetails": true,
+    "logLevel": "ERROR"
+  }
+}

@@ -57,8 +57,14 @@ fun CacheSettings() {
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .padding(top = 8.dp, bottom = 16.dp + playerPadding)
+            .padding(
+                top = 64.dp,
+                bottom = 32.dp + playerPadding,
+                start = 16.dp,
+                end = 16.dp
+            )
     ) {
+        Spacer(modifier = Modifier.height(64.dp))
         context.imageLoader.diskCache?.let { diskCache ->
             val diskCacheSize = remember(diskCache) {
                 diskCache.size
@@ -128,6 +134,9 @@ fun CacheSettings() {
             )
         }
 
-        InfoInformation(text = stringResource(id = R.string.cache_information))
+        InfoInformation(
+            text = stringResource(id = R.string.cache_information),
+            modifier = Modifier.padding(horizontal = 0.dp)
+        )
     }
 }

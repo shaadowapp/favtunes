@@ -1,5 +1,9 @@
 package com.shaadow.tunes.ui.items
 
+// Video functionality has been removed from FavTunes to focus on music-only experience
+// This file is kept for reference but VideoItem is no longer used
+
+/*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -71,3 +75,4 @@ fun VideoItem(
         thumbnailAspectRatio = 16F / 9F
     )
 }
+*/

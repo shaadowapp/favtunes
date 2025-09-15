@@ -54,8 +54,8 @@ fun GeneralSettings() {
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
             .padding(
-                top = 16.dp,
-                bottom = 16.dp + playerPadding,
+                top = 32.dp,
+                bottom = 32.dp + playerPadding,
                 start = 0.dp,
                 end = 0.dp
             )

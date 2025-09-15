@@ -20,6 +20,7 @@ import com.shaadow.tunes.models.BugCategory
 import com.shaadow.tunes.utils.NetworkMonitor
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.platform.LocalContext
+import com.shaadow.tunes.ui.components.ScreenIdentifier
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -45,6 +46,12 @@ fun BugReportScreen(
             onNavigateBack()
         }
     }
+    
+    // Screen identifier for accurate screen detection
+    ScreenIdentifier(
+        screenId = "bugreport",
+        screenName = "Bug Report Screen"
+    )
     
     Scaffold(
         topBar = {

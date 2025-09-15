@@ -607,7 +607,7 @@ interface Database {
     views = [
         SortedSongPlaylistMap::class
     ],
-    version = 24,
+    version = 25,
     exportSchema = true,
     autoMigrations = [
         AutoMigration(from = 1, to = 2),
@@ -629,6 +629,7 @@ interface Database {
         AutoMigration(from = 20, to = 21, spec = DatabaseInitializer.From20To21Migration::class),
         AutoMigration(from = 21, to = 22, spec = DatabaseInitializer.From21To22Migration::class),
         AutoMigration(from = 23, to = 24),
+        AutoMigration(from = 24, to = 25, spec = DatabaseInitializer.PerformanceOptimizationMigration::class),
     ],
 )
 @TypeConverters(Converters::class)
@@ -766,6 +767,8 @@ abstract class DatabaseInitializer protected constructor() : RoomDatabase() {
 
     @DeleteColumn.Entries(DeleteColumn("Artist", "info"))
     class From21To22Migration : AutoMigrationSpec
+
+    class PerformanceOptimizationMigration : AutoMigrationSpec
 
     class From22To23Migration : Migration(22, 23) {
         override fun migrate(db: SupportSQLiteDatabase) {

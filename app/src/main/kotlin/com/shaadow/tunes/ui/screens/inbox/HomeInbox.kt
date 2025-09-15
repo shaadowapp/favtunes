@@ -16,13 +16,17 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
@@ -31,6 +35,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.math.roundToInt
+import com.shaadow.tunes.ui.components.ScreenIdentifier
 
 data class Notification(
     val id: String = "",
@@ -47,60 +52,77 @@ data class Notification(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeInboxScreen() {
+    // Screen identifier for accurate screen detection
+    ScreenIdentifier(
+        screenId = "inbox",
+        screenName = "Inbox Screen"
+    )
+    
     var notifications by remember { mutableStateOf(listOf<Notification>()) }
     var isLoading by remember { mutableStateOf(false) }
     val db = FirebaseFirestore.getInstance()
 
+    // Sample notifications data
+    val sampleNotifications = listOf(
+        Notification(
+            id = "sample_1",
+            title = "Welcome to FavTunes",
+            message = "Thanks for using FavTunes! Check out our latest features and updates.",
+            timestamp = Timestamp.now(),
+            read = false,
+            type = "info",
+            priority = "normal"
+        ),
+        Notification(
+            id = "sample_2",
+            title = "Offline Mode Available",
+            message = "You can now listen to your downloaded songs even without internet connection.",
+            timestamp = Timestamp(System.currentTimeMillis() / 1000 - 3600, 0),
+            read = true,
+            type = "feature",
+            priority = "normal"
+        )
+    )
+
     fun loadNotifications() {
         isLoading = true
-        db.collection("notifications")
-            .orderBy("timestamp", com.google.firebase.firestore.Query.Direction.DESCENDING)
-            .get()
-            .addOnSuccessListener { snapshot ->
-                val notifList = if (snapshot.isEmpty) {
-                    listOf(
-                        Notification(
-                            id = "1",
-                            title = "Update Available",
-                            message = "FavTunes v2.3.0 is now available with new features and bug fixes. Update now to get the latest improvements.",
-                            timestamp = Timestamp.now(),
-                            read = false,
-                            type = "update",
-                            priority = "high",
-                            actionText = "Update Now",
-                            actionUrl = "https://play.google.com/store/apps/details?id=com.shaadow.tunes"
-                        ),
-                        Notification(
-                            id = "2",
-                            title = "New Features Added",
-                            message = "Discover new playlist management features and improved audio quality settings in the latest version.",
-                            timestamp = Timestamp(System.currentTimeMillis() / 1000 - 3600, 0),
-                            read = true,
-                            type = "feature",
-                            priority = "normal"
-                        ),
-                        Notification(
-                            id = "3",
-                            title = "Maintenance Notice",
-                            message = "Scheduled maintenance will occur tonight from 2:00 AM to 4:00 AM. Some features may be temporarily unavailable.",
-                            timestamp = Timestamp(System.currentTimeMillis() / 1000 - 7200, 0),
-                            read = false,
-                            type = "maintenance",
-                            priority = "medium"
-                        )
-                    )
-                } else {
-                    snapshot.documents.map { doc ->
-                        doc.toObject(Notification::class.java)!!.copy(id = doc.id)
+
+        try {
+            db.collection("notifications")
+                .orderBy("timestamp", com.google.firebase.firestore.Query.Direction.DESCENDING)
+                .get()
+                .addOnSuccessListener { snapshot ->
+                    val notifList = if (snapshot.isEmpty) {
+                        // Fallback sample notifications
+                        sampleNotifications
+                    } else {
+                        // Safe deserialization with error handling
+                        snapshot.documents.mapNotNull { doc ->
+                            try {
+                                val notification = doc.toObject(Notification::class.java)
+                                notification?.copy(id = doc.id ?: "")
+                            } catch (e: Exception) {
+                                Log.w("HomeInboxScreen", "Error deserializing notification ${doc.id}", e)
+                                null // Skip malformed documents
+                            }
+                        }
                     }
+                    notifications = notifList
+                    Log.d("HomeInboxScreen", "Successfully loaded ${notifList.size} notifications")
+                    isLoading = false
                 }
-                notifications = notifList
-                isLoading = false
-            }
-            .addOnFailureListener { e ->
-                Log.w("HomeInboxScreen", "Error getting documents.", e)
-                isLoading = false
-            }
+                .addOnFailureListener { e ->
+                    Log.w("HomeInboxScreen", "Error getting documents from Firebase.", e)
+                    // Fallback to sample data when Firebase fails
+                    notifications = sampleNotifications
+                    isLoading = false
+                }
+        } catch (e: Exception) {
+            Log.e("HomeInboxScreen", "Critical error in loadNotifications", e)
+            // Fallback to sample data
+            notifications = sampleNotifications
+            isLoading = false
+        }
     }
 
     LaunchedEffect(Unit) {
@@ -153,38 +175,60 @@ fun HomeInboxScreen() {
             isLoading = isLoading,
             onRefresh = { loadNotifications() },
             onDelete = { notification ->
-                // Delete from Firebase
-                if (notification.id.isNotEmpty()) {
-                    db.collection("notifications").document(notification.id)
-                        .delete()
-                        .addOnSuccessListener {
-                            notifications = notifications.filter { it != notification }
-                        }
-                        .addOnFailureListener { e ->
-                            Log.w("HomeInboxScreen", "Error deleting document", e)
-                        }
-                } else {
-                    // For sample data
+                try {
+                    if (notification.id.isNotEmpty() && !notification.id.startsWith("sample_")) {
+                        // Delete from Firebase with error handling
+                        db.collection("notifications").document(notification.id)
+                            .delete()
+                            .addOnSuccessListener {
+                                notifications = notifications.filter { it != notification }
+                                Log.d("HomeInboxScreen", "Successfully deleted notification ${notification.id}")
+                            }
+                            .addOnFailureListener { e ->
+                                Log.w("HomeInboxScreen", "Error deleting document ${notification.id}", e)
+                                // Still remove from UI as optimistic update
+                                notifications = notifications.filter { it != notification }
+                            }
+                    } else {
+                        // For sample data or empty ID
+                        notifications = notifications.filter { it != notification }
+                    }
+                } catch (e: Exception) {
+                    Log.e("HomeInboxScreen", "Critical error in delete operation", e)
+                    // Still remove from UI to prevent stuck state
                     notifications = notifications.filter { it != notification }
                 }
             },
             onMarkAsRead = { notification ->
-                // Update in Firebase
-                if (notification.id.isNotEmpty()) {
-                    db.collection("notifications").document(notification.id)
-                        .update("read", true)
-                        .addOnSuccessListener {
-                            notifications = notifications.map { 
-                                if (it == notification) it.copy(read = true) else it 
+                try {
+                    if (notification.id.isNotEmpty() && !notification.id.startsWith("sample_")) {
+                        // Update in Firebase with error handling
+                        db.collection("notifications").document(notification.id)
+                            .update("read", true)
+                            .addOnSuccessListener {
+                                notifications = notifications.map {
+                                    if (it == notification) it.copy(read = true) else it
+                                }
+                                Log.d("HomeInboxScreen", "Successfully marked notification ${notification.id} as read")
                             }
+                            .addOnFailureListener { e ->
+                                Log.w("HomeInboxScreen", "Error updating document ${notification.id}", e)
+                                // Still update UI as optimistic update
+                                notifications = notifications.map {
+                                    if (it == notification) it.copy(read = true) else it
+                                }
+                            }
+                    } else {
+                        // For sample data or empty ID
+                        notifications = notifications.map {
+                            if (it == notification) it.copy(read = true) else it
                         }
-                        .addOnFailureListener { e ->
-                            Log.w("HomeInboxScreen", "Error updating document", e)
-                        }
-                } else {
-                    // For sample data
-                    notifications = notifications.map { 
-                        if (it == notification) it.copy(read = true) else it 
+                    }
+                } catch (e: Exception) {
+                    Log.e("HomeInboxScreen", "Critical error in mark as read operation", e)
+                    // Still update UI to prevent stuck state
+                    notifications = notifications.map {
+                        if (it == notification) it.copy(read = true) else it
                     }
                 }
             },
@@ -405,16 +449,19 @@ fun SwipeableNotificationItem(
 
 @Composable
 fun NotificationItem(notification: Notification) {
+    // Safe timestamp formatting with fallback
     val formattedDate = SimpleDateFormat("MMM dd, HH:mm", Locale.getDefault())
         .format(notification.timestamp.toDate())
-    
+
+    // Safe icon and color selection
     val (icon, iconColor) = when (notification.type) {
         "update" -> Icons.Default.SystemUpdate to MaterialTheme.colorScheme.primary
         "feature" -> Icons.Default.NewReleases to MaterialTheme.colorScheme.tertiary
         "maintenance" -> Icons.Default.Build to MaterialTheme.colorScheme.secondary
         else -> Icons.Default.Info to MaterialTheme.colorScheme.outline
     }
-    
+
+    // Safe priority color selection
     val priorityColor = when (notification.priority) {
         "high" -> MaterialTheme.colorScheme.error
         "medium" -> MaterialTheme.colorScheme.primary
@@ -573,15 +620,87 @@ fun InboxTabWithBadge(
 
 class HomeInbox : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
         try {
-            super.onCreate(savedInstanceState)
             Log.d("HomeInbox", "HomeInbox activity created successfully")
+
+            // Set up error boundary for Compose
             setContent {
-                HomeInboxScreen()
+                CompositionLocalProvider(
+                    LocalErrorBoundary provides ErrorBoundary()
+                ) {
+                    HomeInboxScreen()
+                }
             }
         } catch (e: Exception) {
-            Log.e("HomeInbox", "Error creating HomeInbox activity", e)
-            throw e
+            Log.e("HomeInbox", "Critical error creating HomeInbox activity", e)
+            // Show error activity or fallback
+            showErrorFallback()
+        }
+    }
+
+    private fun showErrorFallback() {
+        try {
+            setContent {
+                ErrorFallbackScreen(this@HomeInbox)
+            }
+        } catch (e: Exception) {
+            Log.e("HomeInbox", "Failed to show error fallback", e)
+            // Last resort - just finish the activity
+            finish()
+        }
+    }
+}
+
+// Error boundary composition local
+val LocalErrorBoundary = compositionLocalOf<ErrorBoundary> {
+    ErrorBoundary()
+}
+
+class ErrorBoundary {
+    fun handleError(error: Throwable) {
+        Log.e("HomeInbox", "Composition error caught by boundary", error)
+    }
+}
+
+@Composable
+fun ErrorFallbackScreen(activity: ComponentActivity) {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+            modifier = Modifier.padding(32.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Default.Error,
+                contentDescription = null,
+                modifier = Modifier.size(64.dp),
+                tint = MaterialTheme.colorScheme.error
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                text = "Something went wrong",
+                style = MaterialTheme.typography.headlineSmall,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "Unable to load notifications. Please try again later.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center
+            )
+            Spacer(modifier = Modifier.height(24.dp))
+            Button(onClick = {
+                // Try to restart the activity
+                activity.recreate()
+            }) {
+                Text("Retry")
+            }
         }
     }
 }

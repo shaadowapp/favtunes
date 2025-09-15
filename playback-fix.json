@@ -1,0 +1,118 @@
+{
+  "version": "1.0.0",
+  "lastUpdated": "2025-01-28T20:30:00Z",
+  "description": "Remote configuration for Shaadow Tunes - Emergency fixes and optimizations",
+  
+  "errorHandling": {
+    "videoIdMismatchEnabled": true,
+    "videoIdMismatchMaxRetries": 3,
+    "videoIdMismatchRetryDelayMs": 2000,
+    "videoIdMismatchSkipOnFailure": false,
+    "videoIdMismatchUseAlternativeApi": true,
+    
+    "playableFormatNotFoundEnabled": true,
+    "playableFormatMaxRetries": 3,
+    "playableFormatRetryDelayMs": 1500,
+    "playableFormatSkipOnFailure": true,
+    
+    "unplayableExceptionEnabled": true,
+    "unplayableMaxRetries": 2,
+    "unplayableRetryDelayMs": 1000,
+    "unplayableSkipOnFailure": true,
+    
+    "loginRequiredEnabled": true,
+    "loginRequiredMaxRetries": 2,
+    "loginRequiredRetryDelayMs": 3000,
+    "loginRequiredSkipOnFailure": false,
+    
+    "genericErrorEnabled": true,
+    "genericErrorMaxRetries": 3,
+    "genericErrorRetryDelayMs": 2000,
+    "genericErrorSkipOnFailure": false
+  },
+  
+  "playerService": {
+    "cacheEnabled": true,
+    "cacheMaxSizeMB": 1024,
+    "connectTimeoutMs": 20000,
+    "readTimeoutMs": 15000,
+    "chunkSizeKB": 1024,
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; rv:91.0) Gecko/20100101 Firefox/91.0",
+    "maxConcurrentRequests": 4,
+    "enablePreloading": true,
+    "preloadNextSongs": 3
+  },
+  
+  "apiEndpoints": {
+    "primaryYouTubeApi": "https://www.youtube.com",
+    "alternativeEndpoints": ["https://music.youtube.com"],
+    "fallbackTimeout": 10000,
+    "useAlternativeFirst": false,
+    "rotateEndpoints": true
+  },
+  
+  "debugging": {
+    "enableDetailedLogging": false,
+    "logNetworkRequests": false,
+    "logErrorDetails": true,
+    "logPerformanceMetrics": false,
+    "enableCrashReporting": true,
+    "logLevel": "INFO"
+  },
+  
+  "emergency": {
+    "disablePlayback": false,
+    "disableSpecificFeatures": [],
+    "forceSkipProblematicSongs": false,
+    "emergencyMessage": "",
+    "redirectToAlternativePlayer": false,
+    "maintenanceMode": false,
+    "forceAppUpdate": false,
+    "minimumRequiredVersion": "2.2.0"
+  },
+  
+  "performance": {
+    "enableAudioOffload": true,
+    "bufferSizeMs": 60000,
+    "minBufferMs": 5000,
+    "maxBufferMs": 60000,
+    "enableSilenceSkipping": false,
+    "silenceThresholdDb": -50.0,
+    "enableVolumeNormalization": true
+  },
+  
+  "customErrorMessages": {
+    "VideoIdMismatch": "🎵 Finding alternative source for this song...",
+    "PlayableFormatNotFound": "🎵 Skipping to next compatible song...",
+    "Unplayable": "🎵 This song is temporarily unavailable, skipping...",
+    "LoginRequired": "🎵 Please check your account settings...",
+    "NetworkError": "🎵 Network issue detected. Retrying...",
+    "RateLimited": "🎵 Please wait a moment before trying again."
+  },
+  
+  "featureFlags": {
+    "enableExperimentalPlayer": false,
+    "useNewAudioEngine": true,
+    "enableAdvancedCaching": true,
+    "allowBackgroundDownloads": true,
+    "enableLyricsSync": true,
+    "enableSocialFeatures": true,
+    "enableCrossfade": true,
+    "enableEqualizer": true,
+    "enableSleepTimer": true
+  },
+  
+  "limits": {
+    "maxPlaylistSize": 2000,
+    "maxCacheSize": 4096,
+    "maxConcurrentStreams": 1,
+    "maxSearchResults": 100
+  },
+  
+  "updates": {
+    "checkForUpdatesOnStartup": true,
+    "enableAutoUpdates": false,
+    "updateCheckIntervalHours": 24,
+    "forceUpdateAfterDays": 30
+  }
+}

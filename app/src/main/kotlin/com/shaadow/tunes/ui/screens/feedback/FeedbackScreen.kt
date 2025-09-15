@@ -22,6 +22,7 @@ import com.shaadow.tunes.models.FeedbackCategory
 import com.shaadow.tunes.utils.NetworkMonitor
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.platform.LocalContext
+import com.shaadow.tunes.ui.components.ScreenIdentifier
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -44,6 +45,12 @@ fun FeedbackScreen(
             onNavigateBack()
         }
     }
+    
+    // Screen identifier for accurate screen detection
+    ScreenIdentifier(
+        screenId = "feedback",
+        screenName = "Feedback Screen"
+    )
     
     Scaffold(
         topBar = {

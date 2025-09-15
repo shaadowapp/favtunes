@@ -35,6 +35,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.shaadow.tunes.LocalPlayerPadding
 import com.shaadow.tunes.R
+import com.shaadow.tunes.ui.components.ScreenIdentifier
 import com.shaadow.tunes.service.PlayerMediaBrowserService
 import com.shaadow.tunes.ui.styling.Dimensions
 import com.shaadow.tunes.utils.isAtLeastAndroid12
@@ -43,11 +44,18 @@ import com.shaadow.tunes.utils.isIgnoringBatteryOptimizations
 import com.shaadow.tunes.utils.isInvincibilityEnabledKey
 import com.shaadow.tunes.utils.rememberPreference
 import com.shaadow.tunes.utils.toast
+import androidx.core.net.toUri
 
 @SuppressLint("BatteryLife")
 @ExperimentalAnimationApi
 @Composable
 fun OtherSettings() {
+    // Screen identifier for accurate screen detection
+    ScreenIdentifier(
+        screenId = "other_settings",
+        screenName = "Other Settings"
+    )
+    
     val context = LocalContext.current
     val playerPadding = LocalPlayerPadding.current
 
@@ -82,8 +90,15 @@ fun OtherSettings() {
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .padding(bottom = 16.dp + playerPadding)
+            .padding(
+                top = 64.dp,
+                bottom = 32.dp + playerPadding,
+                start = 8.dp,
+                end = 8.dp
+            )
     ) {
+        Spacer(modifier = Modifier.height(52.dp))
+
         SwitchSettingEntry(
             title = stringResource(id = R.string.android_auto),
             text = stringResource(id = R.string.android_auto_description),
@@ -92,7 +107,10 @@ fun OtherSettings() {
             onCheckedChange = { isAndroidAutoEnabled = it }
         )
 
-        InfoInformation(text = stringResource(id = R.string.android_auto_information))
+        InfoInformation(
+            text = stringResource(id = R.string.android_auto_information),
+            modifier = Modifier.padding(horizontal = 0.dp)
+        )
 
         Spacer(modifier = Modifier.height(Dimensions.spacer))
 
@@ -119,7 +137,7 @@ fun OtherSettings() {
                 try {
                     activityResultLauncher.launch(
                         Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS).apply {
-                            data = Uri.parse("package:${context.packageName}")
+                            data = "package:${context.packageName}".toUri()
                         }
                     )
                 } catch (_: ActivityNotFoundException) {
@@ -145,7 +163,8 @@ fun OtherSettings() {
 
         InfoInformation(
             text = stringResource(id = R.string.service_lifetime_information) +
-                    if (isAtLeastAndroid12) "\n" + stringResource(id = R.string.service_lifetime_information_plus) else ""
+                    if (isAtLeastAndroid12) "\n" + stringResource(id = R.string.service_lifetime_information_plus) else "",
+            modifier = Modifier.padding(horizontal = 0.dp)
         )
     }
 }

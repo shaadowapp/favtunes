@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.shaadow.tunes.ui.components.CategoryCard
+import com.shaadow.tunes.ui.components.ScreenIdentifier
 
 data class MusicCategory(
     val name: String,
@@ -32,6 +33,12 @@ data class MusicCategory(
 
 @Composable
 fun ExploreSearch(navController: NavController) {
+    // Screen identifier for accurate screen detection
+    ScreenIdentifier(
+        screenId = "explore",
+        screenName = "Explore Screen"
+    )
+    
     // Get screen height
     val configuration = LocalConfiguration.current
     val screenHeight = configuration.screenHeightDp.dp

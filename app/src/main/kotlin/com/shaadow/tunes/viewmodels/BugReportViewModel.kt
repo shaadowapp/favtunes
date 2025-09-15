@@ -86,6 +86,13 @@ class BugReportViewModel(application: Application) : AndroidViewModel(applicatio
     }
     
     /**
+     * Set screen context for the bug report
+     */
+    fun setScreenContext(screenContext: BugReportScreenContext?) {
+        _uiState.value = _uiState.value.copy(screenContext = screenContext)
+    }
+    
+    /**
      * Add a reproduction step
      */
     fun addReproductionStep(step: String) {
@@ -174,9 +181,14 @@ class BugReportViewModel(application: Application) : AndroidViewModel(applicatio
                 _uiState.value = _uiState.value.copy(isLoading = true, error = null)
                 
                 val currentState = _uiState.value
+                // Add screen context to description if available
+                val enhancedDescription = currentState.screenContext?.let { screenContext ->
+                    "Screen: ${screenContext.screenName}\n\n${currentState.description}"
+                } ?: currentState.description
+                
                 val bugReport = BugReport(
                     title = currentState.title,
-                    description = currentState.description,
+                    description = enhancedDescription,
                     severity = currentState.severity,
                     category = currentState.category,
                     deviceInfo = currentState.deviceInfo,
@@ -283,6 +295,7 @@ data class BugReportUiState(
     val reproductionSteps: List<String> = emptyList(),
     val attachments: List<String> = emptyList(),
     val deviceInfo: DeviceInfo = DeviceInfo("", "", "", "", "", 0, ""),
+    val screenContext: BugReportScreenContext? = null,
     val isLoading: Boolean = false,
     val isSubmitted: Boolean = false,
     val submissionId: String? = null,

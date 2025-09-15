@@ -1,0 +1,207 @@
+{
+  "version": "2.0",
+  "lastUpdated": "2025-01-28T15:30:00Z",
+  "description": "Advanced remote configuration for Shaadow Tunes - YouTube Music Player",
+  
+  "errorHandling": {
+    "videoIdMismatchEnabled": true,
+    "videoIdMismatchMaxRetries": 3,
+    "videoIdMismatchRetryDelayMs": 2000,
+    "videoIdMismatchSkipOnFailure": false,
+    "videoIdMismatchUseAlternativeApi": false,
+    
+    "playableFormatNotFoundEnabled": true,
+    "playableFormatMaxRetries": 2,
+    "playableFormatRetryDelayMs": 1500,
+    "playableFormatSkipOnFailure": true,
+    
+    "unplayableExceptionEnabled": true,
+    "unplayableMaxRetries": 1,
+    "unplayableRetryDelayMs": 1000,
+    "unplayableSkipOnFailure": true,
+    
+    "loginRequiredEnabled": true,
+    "loginRequiredMaxRetries": 2,
+    "loginRequiredRetryDelayMs": 3000,
+    "loginRequiredSkipOnFailure": false,
+    
+    "genericErrorEnabled": true,
+    "genericErrorMaxRetries": 2,
+    "genericErrorRetryDelayMs": 2000,
+    "genericErrorSkipOnFailure": false
+  },
+  
+  "playerService": {
+    "cacheEnabled": true,
+    "cacheMaxSizeMB": 512,
+    "connectTimeoutMs": 16000,
+    "readTimeoutMs": 8000,
+    "chunkSizeKB": 512,
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; rv:91.0) Gecko/20100101 Firefox/91.0",
+    "maxConcurrentRequests": 3,
+    "enablePreloading": true,
+    "preloadNextSongs": 2,
+    "enableGaplessPlayback": true,
+    "crossfadeDurationMs": 500
+  },
+  
+  "apiEndpoints": {
+    "primaryYouTubeApi": "https://www.youtube.com",
+    "alternativeEndpoints": [],
+    "fallbackTimeout": 5000,
+    "useAlternativeFirst": false,
+    "rotateEndpoints": false,
+    "rateLimitPerMinute": 60,
+    "enableApiThrottling": false
+  },
+  
+  "debugging": {
+    "enableDetailedLogging": false,
+    "logNetworkRequests": false,
+    "logErrorDetails": false,
+    "logPerformanceMetrics": false,
+    "enableCrashReporting": true,
+    "logLevel": "ERROR",
+    "enableDebugMode": false,
+    "logRetentionDays": 7
+  },
+  
+  "emergency": {
+    "disablePlayback": false,
+    "disableSpecificFeatures": [],
+    "forceSkipProblematicSongs": false,
+    "emergencyMessage": "",
+    "redirectToAlternativePlayer": false,
+    "maintenanceMode": false,
+    "maintenanceMessage": "App is under maintenance. Please try again later.",
+    "forceAppUpdate": false,
+    "minimumRequiredVersion": "2.2.0"
+  },
+  
+  "performance": {
+    "enableAudioOffload": true,
+    "bufferSizeMs": 50000,
+    "minBufferMs": 2500,
+    "maxBufferMs": 50000,
+    "enableSilenceSkipping": false,
+    "silenceThresholdDb": -50.0,
+    "enableVolumeNormalization": false,
+    "audioQuality": "high",
+    "enableHardwareAcceleration": true,
+    "memoryOptimizationLevel": "balanced"
+  },
+  
+  "customErrorMessages": {
+    "VideoIdMismatch": "Song temporarily unavailable, trying alternative source...",
+    "PlayableFormatNotFound": "Audio format not supported, skipping to next song...",
+    "Unplayable": "This song cannot be played right now, skipping...",
+    "LoginRequired": "Authentication needed, please check your account...",
+    "NetworkError": "Network connection issue. Please check your internet connection.",
+    "RateLimited": "Too many requests. Please wait a moment and try again.",
+    "ServerError": "Server temporarily unavailable. Trying again..."
+  },
+  
+  "featureFlags": {
+    "enableExperimentalPlayer": false,
+    "useNewAudioEngine": false,
+    "enableAdvancedCaching": true,
+    "allowBackgroundDownloads": false,
+    "enableLyricsSync": true,
+    "enableVisualization": false,
+    "enableSocialFeatures": true,
+    "enableOfflineMode": false,
+    "enableCrossfade": true,
+    "enableEqualizer": true,
+    "enableSleepTimer": true,
+    "enableSmartShuffle": true
+  },
+  
+  "ui": {
+    "enableDarkMode": true,
+    "enableDynamicColors": true,
+    "showNowPlayingBar": true,
+    "enableSwipeGestures": true,
+    "animationDuration": 300,
+    "enableHapticFeedback": true,
+    "showAlbumArt": true,
+    "enableFullscreenPlayer": true
+  },
+  
+  "notifications": {
+    "enablePlaybackNotifications": true,
+    "enableProgressUpdates": true,
+    "showAlbumArtInNotification": true,
+    "enableMediaControls": true,
+    "notificationPriority": "high",
+    "enableLockScreenControls": true
+  },
+  
+  "analytics": {
+    "enableUsageTracking": true,
+    "enableCrashReporting": true,
+    "enablePerformanceMonitoring": true,
+    "trackPlaybackEvents": true,
+    "trackUserInteractions": false,
+    "anonymizeData": true,
+    "dataSharingOptOut": false
+  },
+  
+  "security": {
+    "enableSSLPinning": true,
+    "validateCertificates": true,
+    "enableEncryption": true,
+    "secureStorageEnabled": true,
+    "biometricAuthRequired": false,
+    "sessionTimeoutMinutes": 60
+  },
+  
+  "limits": {
+    "maxPlaylistSize": 1000,
+    "maxCacheSize": 2048,
+    "maxDownloadSize": 5120,
+    "maxConcurrentStreams": 1,
+    "dailyStreamingLimitMB": 0,
+    "maxSearchResults": 50
+  },
+  
+  "experimental": {
+    "enableBetaFeatures": false,
+    "allowExperimentalCodecs": false,
+    "enableAdvancedEqualizer": false,
+    "enableSpatialAudio": false,
+    "enableAIRecommendations": false,
+    "enableVoiceControl": false
+  },
+  
+  "regional": {
+    "enableRegionalContent": true,
+    "defaultRegion": "US",
+    "enableContentFiltering": false,
+    "respectRegionalRestrictions": true,
+    "enableLocalizedUI": true
+  },
+  
+  "backup": {
+    "enableCloudBackup": false,
+    "backupFrequencyHours": 24,
+    "enablePlaylistSync": false,
+    "enableSettingsSync": false,
+    "maxBackupRetentionDays": 30
+  },
+  
+  "updates": {
+    "checkForUpdatesOnStartup": true,
+    "enableAutoUpdates": false,
+    "updateCheckIntervalHours": 24,
+    "enableBetaUpdates": false,
+    "forceUpdateAfterDays": 30
+  },
+  
+  "compatibility": {
+    "minAndroidVersion": 24,
+    "targetAndroidVersion": 34,
+    "supportedArchitectures": ["arm64-v8a", "armeabi-v7a", "x86_64"],
+    "requiresGooglePlayServices": false,
+    "enableLegacySupport": true
+  }
+}

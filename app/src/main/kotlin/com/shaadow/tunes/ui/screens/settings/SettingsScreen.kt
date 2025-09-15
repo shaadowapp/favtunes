@@ -51,6 +51,7 @@ import com.shaadow.tunes.LocalPlayerPadding
 import com.shaadow.tunes.R
 import com.shaadow.tunes.enums.SettingsSection
 import com.shaadow.tunes.ui.components.themed.ValueSelectorDialog
+import com.shaadow.tunes.ui.components.ScreenIdentifier
 import com.shaadow.tunes.ui.styling.Dimensions
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -87,6 +88,12 @@ fun SettingsScreen(
             )
         }
     ) { paddingValues ->
+        // Screen identifier for accurate screen detection
+        ScreenIdentifier(
+            screenId = "settings",
+            screenName = "Settings Screen"
+        )
+        
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -288,11 +295,12 @@ fun SettingsEntry(
 @Composable
 fun InfoInformation(
     text: String,
+    modifier: Modifier = Modifier
 ) {
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp),
+            .padding(vertical = 8.dp, horizontal = 16.dp),
         verticalAlignment = Alignment.Top
     ) {
         Icon(
