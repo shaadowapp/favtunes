@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.QueueMusic
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -44,7 +46,22 @@ fun PlaylistThumbnail(
             .clip(MaterialTheme.shapes.large)
             .size(thumbnailSizeDp)
 
-        if (thumbnails.toSet().size == 1) {
+        if (thumbnails.isEmpty()) {
+            // Empty playlist - show a nice icon
+            Box(
+                modifier = modifier
+                    .clip(MaterialTheme.shapes.large)
+                    .background(MaterialTheme.colorScheme.surfaceVariant),
+                contentAlignment = Alignment.Center
+            ) {
+                androidx.compose.material3.Icon(
+                    imageVector = Icons.Outlined.QueueMusic,
+                    contentDescription = null,
+                    modifier = Modifier.size(48.dp),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        } else if (thumbnails.toSet().size == 1) {
             AsyncImage(
                 model = thumbnails.first().thumbnail(thumbnailSizePx),
                 contentDescription = null,

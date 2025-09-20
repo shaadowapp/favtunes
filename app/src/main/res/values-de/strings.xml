@@ -196,4 +196,8 @@
     <string name="list_gestures_description">Enable gestures to enqueue or delete songs</string>
     <string name="copy">Copy</string>
     <string name="error_log">Error log</string>
+    <string name="bug_report">Fehlerbericht</string>
+    <string name="recommended_for_you">Für Sie empfohlen</string>
+    <string name="delete">Löschen</string>
+    <string name="my_tunes">Meine Musik</string>
 </resources>

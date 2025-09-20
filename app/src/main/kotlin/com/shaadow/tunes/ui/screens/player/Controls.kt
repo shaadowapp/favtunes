@@ -22,9 +22,12 @@ import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Replay
 import androidx.compose.material.icons.outlined.FavoriteBorder
+import androidx.compose.material.icons.outlined.Forward5
+import androidx.compose.material.icons.outlined.Replay5
 import androidx.compose.material.icons.outlined.RepeatOne
 import androidx.compose.material.icons.outlined.SkipNext
 import androidx.compose.material.icons.outlined.SkipPrevious
+
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -53,6 +56,8 @@ import com.shaadow.tunes.ui.components.SeekBar
 import com.shaadow.tunes.ui.styling.Dimensions
 import com.shaadow.tunes.utils.forceSeekToNext
 import com.shaadow.tunes.utils.forceSeekToPrevious
+import com.shaadow.tunes.utils.seekBackward5Seconds
+import com.shaadow.tunes.utils.seekForward5Seconds
 import com.shaadow.tunes.utils.formatAsDuration
 import com.shaadow.tunes.utils.rememberPreference
 import com.shaadow.tunes.utils.trackLoopEnabledKey
@@ -90,7 +95,7 @@ fun Controls(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 32.dp)
+            .padding(horizontal = 16.dp)
     ) {
         Spacer(
             modifier = Modifier.weight(1f)
@@ -120,28 +125,56 @@ fun Controls(
             modifier = Modifier.weight(0.5f)
         )
 
-        SeekBar(
-            value = scrubbingPosition ?: position,
-            minimumValue = 0,
-            maximumValue = duration,
-            onDragStart = {
-                scrubbingPosition = it
-            },
-            onDrag = { delta ->
-                scrubbingPosition = if (duration != C.TIME_UNSET) {
-                    scrubbingPosition?.plus(delta)?.coerceIn(0, duration)
-                } else {
-                    null
-                }
-            },
-            onDragEnd = {
-                scrubbingPosition?.let(binder.player::seekTo)
-                scrubbingPosition = null
-            },
-            color = MaterialTheme.colorScheme.primary,
-            backgroundColor = MaterialTheme.colorScheme.primaryContainer,
-            shape = RoundedCornerShape(8.dp)
-        )
+        // Progress bar row with previous/next song buttons
+        Row(
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            IconButton(
+                onClick = binder.player::forceSeekToPrevious
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.SkipPrevious,
+                    contentDescription = "Previous song",
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+
+            SeekBar(
+                value = scrubbingPosition ?: position,
+                minimumValue = 0,
+                maximumValue = duration,
+                onDragStart = {
+                    scrubbingPosition = it
+                },
+                onDrag = { delta ->
+                    scrubbingPosition = if (duration != C.TIME_UNSET) {
+                        scrubbingPosition?.plus(delta)?.coerceIn(0, duration)
+                    } else {
+                        null
+                    }
+                },
+                onDragEnd = {
+                    scrubbingPosition?.let(binder.player::seekTo)
+                    scrubbingPosition = null
+                },
+                color = MaterialTheme.colorScheme.primary,
+                backgroundColor = MaterialTheme.colorScheme.primaryContainer,
+                shape = RoundedCornerShape(8.dp),
+                modifier = Modifier.weight(1f).padding(horizontal = 8.dp)
+            )
+
+            IconButton(
+                onClick = binder.player::forceSeekToNext
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.SkipNext,
+                    contentDescription = "Next song",
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+        }
 
         Spacer(
             modifier = Modifier.height(8.dp)
@@ -150,7 +183,7 @@ fun Controls(
         Row(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp)
         ) {
             Text(
                 text = formatAsDuration(scrubbingPosition ?: position),
@@ -173,8 +206,9 @@ fun Controls(
             modifier = Modifier.weight(1f)
         )
 
+        // Main playback controls row: favorite | 5s backward | play/pause | 5s forward | queue
         Row(
-            horizontalArrangement = Arrangement.Center,
+            horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.fillMaxWidth()
         ) {
@@ -194,31 +228,25 @@ fun Controls(
                                 }
                         }
                     }
-                },
-                modifier = Modifier.weight(1F)
+                }
             ) {
                 Icon(
                     imageVector = if (likedAt == null) Icons.Outlined.FavoriteBorder else Icons.Filled.Favorite,
-                    contentDescription = null,
+                    contentDescription = "Toggle favorite",
                     modifier = Modifier.size(28.dp),
                     tint = Color.Red
                 )
             }
 
             IconButton(
-                onClick = binder.player::forceSeekToPrevious,
-                modifier = Modifier.weight(1F)
+                onClick = binder.player::seekBackward5Seconds
             ) {
                 Icon(
-                    imageVector = Icons.Outlined.SkipPrevious,
-                    contentDescription = null,
+                    imageVector = Icons.Outlined.Replay5,
+                    contentDescription = "Seek backward 5 seconds",
                     modifier = Modifier.size(28.dp)
                 )
             }
-
-            Spacer(
-                modifier = Modifier.width(8.dp)
-            )
 
             FilledIconButton(
                 onClick = {
@@ -246,28 +274,22 @@ fun Controls(
                 )
             }
 
-            Spacer(
-                modifier = Modifier.width(8.dp)
-            )
-
             IconButton(
-                onClick = binder.player::forceSeekToNext,
-                modifier = Modifier.weight(1F)
+                onClick = binder.player::seekForward5Seconds
             ) {
                 Icon(
-                    imageVector = Icons.Outlined.SkipNext,
-                    contentDescription = null,
+                    imageVector = Icons.Outlined.Forward5,
+                    contentDescription = "Seek forward 5 seconds",
                     modifier = Modifier.size(28.dp)
                 )
             }
 
             IconButton(
-                onClick = { trackLoopEnabled = !trackLoopEnabled },
-                modifier = Modifier.weight(1F)
+                onClick = { trackLoopEnabled = !trackLoopEnabled }
             ) {
                 Icon(
                     imageVector = Icons.Outlined.RepeatOne,
-                    contentDescription = null,
+                    contentDescription = "Toggle repeat",
                     modifier = Modifier
                         .alpha(if (trackLoopEnabled) 1F else Dimensions.lowOpacity)
                         .size(28.dp)

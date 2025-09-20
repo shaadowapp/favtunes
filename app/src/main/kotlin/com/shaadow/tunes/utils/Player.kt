@@ -97,3 +97,13 @@ fun Player.findNextMediaItemById(mediaId: String): MediaItem? {
     }
     return null
 }
+
+fun Player.seekForward5Seconds() {
+    val newPosition = (currentPosition + 5000).coerceAtMost(duration.takeIf { it != C.TIME_UNSET } ?: Long.MAX_VALUE)
+    seekTo(newPosition)
+}
+
+fun Player.seekBackward5Seconds() {
+    val newPosition = (currentPosition - 5000).coerceAtLeast(0)
+    seekTo(newPosition)
+}

@@ -125,6 +125,7 @@ fun Player(
     var isShowingStatsForNerds by rememberSaveable { mutableStateOf(false) }
     var isQueueOpen by rememberSaveable { mutableStateOf(false) }
     var isShowingSleepTimerDialog by rememberSaveable { mutableStateOf(false) }
+    var isShowingBugReportSheet by rememberSaveable { mutableStateOf(false) }
     val sleepTimerMillisLeft by (binder.sleepTimerMillisLeft
         ?: flowOf(null))
         .collectAsState(initial = null)
@@ -166,6 +167,12 @@ fun Player(
             modifier = modifier
         )
     }
+
+    // Screen identifier for accurate screen detection
+    ScreenIdentifier(
+        screenId = "player",
+        screenName = "Player Screen"
+    )
 
     Column(
         verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -266,13 +273,9 @@ fun Player(
                         BaseMediaItemMenu(
                             onDismiss = menuState::hide,
                             mediaItem = mediaItem,
-                            onStartRadio = {
-                                binder.stopRadio()
-                                binder.player.seamlessPlay(mediaItem)
-                                binder.setupRadio(com.shaadow.innertube.models.NavigationEndpoint.Endpoint.Watch(videoId = mediaItem.mediaId))
-                            },
                             onGoToAlbum = onGoToAlbum,
-                            onGoToArtist = onGoToArtist
+                            onGoToArtist = onGoToArtist,
+                            onShowBugReport = { isShowingBugReportSheet = true }
                         )
                     }
                 }
@@ -288,6 +291,12 @@ fun Player(
             SleepTimer(
                 sleepTimerMillisLeft = sleepTimerMillisLeft,
                 onDismiss = { isShowingSleepTimerDialog = false }
+            )
+        }
+
+        if (isShowingBugReportSheet) {
+            com.shaadow.tunes.ui.components.BugReportBottomSheet(
+                onDismiss = { isShowingBugReportSheet = false }
             )
         }
 

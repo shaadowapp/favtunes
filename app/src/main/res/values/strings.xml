@@ -96,10 +96,6 @@
     <string name="provided_by_kugou">Provided by kugou.com</string>
     <string name="edit_lyrics">Edit lyrics</string>
     <string name="search_lyrics_online">Search lyrics online</string>
-    <plurals name="number_of_songs" translatable="false">
-        <item quantity="one">%d song</item>
-        <item quantity="other">%d songs</item>
-    </plurals>
     <plurals name="number_of_artists" translatable="false">
         <item quantity="one">%d artist</item>
         <item quantity="other">%d artists</item>
@@ -211,5 +207,6 @@
     <string name="open_in_github" translatable="false">Open in GitHub</string>
     <string name="go_back" translatable="false">Go back</string>
     <string name="clear" translatable="false">Clear</string>
+    <string name="delete">Delete</string>
     <string name="my_tunes">My Tunes</string>
 </resources>

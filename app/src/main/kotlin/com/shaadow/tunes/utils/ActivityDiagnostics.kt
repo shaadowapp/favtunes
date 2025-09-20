@@ -4,7 +4,7 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.util.Log
 import com.shaadow.tunes.MainActivity
-import com.shaadow.tunes.ui.screens.inbox.HomeInbox
+
 
 /**
  * Utility class to diagnose activity-related issues during app updates
@@ -28,17 +28,8 @@ object ActivityDiagnostics {
             )
             Log.d(TAG, "MainActivity found: ${mainActivityInfo.name}")
             
-            // Check HomeInbox
-            val homeInboxName = "${packageName}.ui.screens.inbox.HomeInbox"
-            val homeInboxInfo = packageManager.getActivityInfo(
-                android.content.ComponentName(context, HomeInbox::class.java),
-                PackageManager.GET_META_DATA
-            )
-            Log.d(TAG, "HomeInbox found: ${homeInboxInfo.name}")
-            
             // Try to instantiate activities (basic class loading test)
             val mainActivityClass = Class.forName("com.shaadow.tunes.MainActivity")
-            val homeInboxClass = Class.forName("com.shaadow.tunes.ui.screens.inbox.HomeInbox")
             
             Log.d(TAG, "All activities verified successfully")
             true

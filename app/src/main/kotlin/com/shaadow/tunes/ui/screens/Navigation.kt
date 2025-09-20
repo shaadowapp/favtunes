@@ -25,8 +25,7 @@ import com.shaadow.tunes.ui.screens.album.AlbumScreen
 import com.shaadow.tunes.ui.screens.artist.ArtistScreen
 import com.shaadow.tunes.ui.screens.builtinplaylist.BuiltInPlaylistScreen
 import com.shaadow.tunes.ui.screens.home.HomeScreen
-import com.shaadow.tunes.ui.screens.inbox.HomeInbox
-import com.shaadow.tunes.ui.screens.inbox.HomeInboxScreen
+
 import com.shaadow.tunes.ui.screens.localplaylist.LocalPlaylistScreen
 import com.shaadow.tunes.ui.screens.playlist.PlaylistScreen
 import com.shaadow.tunes.ui.screens.search.SearchScreen
@@ -221,9 +220,7 @@ fun Navigation(
             ProfileScreen()
         }
 
-        playerComposable(route = "inbox") {
-            HomeInboxScreen()
-        }
+
 
 
         playerComposable(route = "settings") {
@@ -343,6 +340,22 @@ fun Navigation(
         playerComposable(route = "feedback") {
             FeedbackScreen(
                 onNavigateBack = popDestination
+            )
+        }
+
+        playerComposable(route = "recently_played") {
+            com.shaadow.tunes.ui.screens.mytunes.RecentlyPlayedScreen(
+                onGoToAlbum = navigateToAlbum,
+                onGoToArtist = navigateToArtist,
+                onBack = popDestination
+            )
+        }
+
+        playerComposable(route = "liked_songs") {
+            com.shaadow.tunes.ui.screens.mytunes.LikedSongsScreen(
+                onGoToAlbum = navigateToAlbum,
+                onGoToArtist = navigateToArtist,
+                onBack = popDestination
             )
         }
     }

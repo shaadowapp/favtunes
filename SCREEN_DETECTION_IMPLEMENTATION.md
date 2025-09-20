@@ -42,7 +42,7 @@
 - ✅ **BugReportScreen**
 - ✅ **FeedbackScreen**
 - ✅ **ProfileScreen**
-- ✅ **HomeInboxScreen**
+
 - ✅ **SettingsPage**
 - ✅ **PlayerScreen** (Song Player)
 - ✅ **QueueScreen** (Player Queue)
@@ -78,7 +78,7 @@ The system now accurately detects:
 - `search` → "Search Screen"
 - `settings` → "Settings Screen"
 - `profile` → "Profile Screen"
-- `inbox` → "Inbox Screen"
+
 - `bugreport` → "Bug Report Screen"
 - `feedback` → "Feedback Screen"
 - `player` → "Player Screen"

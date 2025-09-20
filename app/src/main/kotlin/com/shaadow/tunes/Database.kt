@@ -55,6 +55,8 @@ import com.shaadow.tunes.models.SongWithContentLength
 import com.shaadow.tunes.models.SortedSongPlaylistMap
 import com.shaadow.tunes.models.PendingBugReportEntity
 import com.shaadow.tunes.models.PendingFeedbackEntity
+import com.shaadow.tunes.models.UserPreference
+import com.shaadow.tunes.models.SongKeywords
 import com.shaadow.tunes.database.BugReportDao
 import kotlinx.coroutines.flow.Flow
 
@@ -170,6 +172,15 @@ interface Database {
         
         // Bug report and feedback methods
         fun bugReportDao() = instance.bugReportDao()
+        
+        // User preference methods
+        fun getUserPreferences(songId: String) = instance.getUserPreferences(songId)
+        fun getPreferencesBySentiment(isInterested: Boolean) = instance.getPreferencesBySentiment(isInterested)
+        fun insertUserPreference(userPreference: UserPreference) = instance.insertUserPreference(userPreference)
+        fun deleteUserPreferences(songId: String) = instance.deleteUserPreferences(songId)
+        fun insertSongKeywords(songKeywords: SongKeywords) = instance.insertSongKeywords(songKeywords)
+        fun getSongKeywords(songId: String) = instance.getSongKeywords(songId)
+        fun getKeywordsForSong(songId: String) = instance.getKeywordsForSong(songId)
         
         // Internal access for utility functions
         internal val roomDatabase: RoomDatabase
@@ -585,6 +596,28 @@ interface Database {
     fun bugReportDao(): BugReportDao {
         return DatabaseProvider.getRoomDatabase(context).bugReportDao()
     }
+
+    // User preference functions
+    @Query("SELECT * FROM user_preferences WHERE songId = :songId")
+    fun getUserPreferences(songId: String): Flow<List<UserPreference>>
+
+    @Query("SELECT * FROM user_preferences WHERE isInterested = :isInterested")
+    fun getPreferencesBySentiment(isInterested: Boolean): Flow<List<UserPreference>>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun insertUserPreference(userPreference: UserPreference)
+
+    @Query("DELETE FROM user_preferences WHERE songId = :songId")
+    fun deleteUserPreferences(songId: String)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun insertSongKeywords(songKeywords: SongKeywords)
+
+    @Query("SELECT * FROM song_keywords WHERE songId = :songId")
+    fun getSongKeywords(songId: String): Flow<SongKeywords?>
+
+    @Query("SELECT keywords FROM song_keywords WHERE songId = :songId")
+    fun getKeywordsForSong(songId: String): String?
 }
 
 @androidx.room.Database(
@@ -603,11 +636,13 @@ interface Database {
         Lyrics::class,
         PendingBugReportEntity::class,
         PendingFeedbackEntity::class,
+        UserPreference::class,
+        SongKeywords::class,
     ],
     views = [
         SortedSongPlaylistMap::class
     ],
-    version = 25,
+    version = 26,
     exportSchema = true,
     autoMigrations = [
         AutoMigration(from = 1, to = 2),
@@ -630,6 +665,7 @@ interface Database {
         AutoMigration(from = 21, to = 22, spec = DatabaseInitializer.From21To22Migration::class),
         AutoMigration(from = 23, to = 24),
         AutoMigration(from = 24, to = 25, spec = DatabaseInitializer.PerformanceOptimizationMigration::class),
+        AutoMigration(from = 25, to = 26),
     ],
 )
 @TypeConverters(Converters::class)

@@ -22,7 +22,11 @@ import androidx.compose.material.icons.outlined.Album
 import androidx.compose.material.icons.outlined.ChevronRight
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.FavoriteBorder
-import androidx.compose.material.icons.outlined.Feedback
+import androidx.compose.material.icons.outlined.BugReport
+import androidx.compose.material.icons.outlined.ThumbDown
+import androidx.compose.material.icons.outlined.ThumbUp
+import androidx.compose.material.icons.filled.ThumbDown
+import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.PlaylistRemove
 import androidx.compose.material.icons.outlined.Podcasts
@@ -60,6 +64,8 @@ import com.shaadow.tunes.models.Info
 import com.shaadow.tunes.models.Playlist
 import com.shaadow.tunes.models.Song
 import com.shaadow.tunes.models.SongPlaylistMap
+import com.shaadow.tunes.models.UserPreference
+import com.shaadow.tunes.models.SongKeywords
 import com.shaadow.tunes.query
 import com.shaadow.tunes.transaction
 import com.shaadow.tunes.ui.items.MediaSongItem
@@ -71,6 +77,7 @@ import com.shaadow.tunes.utils.playlistSortByKey
 import com.shaadow.tunes.utils.playlistSortOrderKey
 import com.shaadow.tunes.utils.rememberPreference
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withContext
 
 @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
@@ -214,7 +221,8 @@ fun BaseMediaItemMenu(
     onHideFromDatabase: (() -> Unit)? = null,
     onRemoveFromQuickPicks: (() -> Unit)? = null,
     onGoToAlbum: ((String) -> Unit)? = null,
-    onGoToArtist: ((String) -> Unit)? = null
+    onGoToArtist: ((String) -> Unit)? = null,
+    onShowBugReport: (() -> Unit)? = null
 ) {
     val context = LocalContext.current
 
@@ -242,7 +250,8 @@ fun BaseMediaItemMenu(
         },
         onGoToAlbum = onGoToAlbum,
         onGoToArtist = onGoToArtist,
-        onRemoveFromQuickPicks = onRemoveFromQuickPicks
+        onRemoveFromQuickPicks = onRemoveFromQuickPicks,
+        onShowBugReport = onShowBugReport
     ) {
         val sendIntent = Intent().apply {
             action = Intent.ACTION_SEND
@@ -273,6 +282,7 @@ fun MediaItemMenu(
     onGoToAlbum: ((String) -> Unit)? = null,
     onGoToArtist: ((String) -> Unit)? = null,
     onRemoveFromQuickPicks: (() -> Unit)? = null,
+    onShowBugReport: (() -> Unit)? = null,
     onShare: () -> Unit
 ) {
     val density = LocalDensity.current
@@ -449,16 +459,7 @@ fun MediaItemMenu(
 
                 HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
 
-                onStartRadio?.let { onStartRadio ->
-                    MenuEntry(
-                        icon = Icons.Outlined.Podcasts,
-                        text = stringResource(id = R.string.start_radio),
-                        onClick = {
-                            onDismiss()
-                            onStartRadio()
-                        }
-                    )
-                }
+
 
                 onPlayNext?.let { onPlayNext ->
                     MenuEntry(
@@ -563,15 +564,143 @@ fun MediaItemMenu(
                     )
                 }
                 
+                // User preference section
+                HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+                
+                // Get user preference from Room database
+                var userPreference by remember { mutableStateOf<Boolean?>(null) }
+                
+                LaunchedEffect(mediaItem.mediaId) {
+                    withContext(Dispatchers.IO) {
+                        Database.getUserPreferences(mediaItem.mediaId).collect { preferences ->
+                            userPreference = preferences.firstOrNull()?.isInterested
+                        }
+                    }
+                }
+                
                 MenuEntry(
-                    icon = Icons.Outlined.Feedback,
-                    text = stringResource(id = R.string.feedback),
+                    icon = if (userPreference == true) Icons.Filled.ThumbUp else Icons.Outlined.ThumbUp,
+                    text = "Interested",
+                    onClick = {
+                        val newPreference = if (userPreference == true) null else true
+                        userPreference = newPreference
+                        
+                        query {
+                            // Remove existing preferences for this song
+                            Database.deleteUserPreferences(mediaItem.mediaId)
+                            
+                            if (newPreference != null) {
+                                // Get or create keywords for this song
+                                val keywords = extractKeywordsFromSong(mediaItem)
+                                
+                                // Store song keywords if not already stored
+                                Database.insertSongKeywords(
+                                    SongKeywords(
+                                        songId = mediaItem.mediaId,
+                                        keywords = keywords,
+                                        title = mediaItem.mediaMetadata.title?.toString() ?: "",
+                                        artist = mediaItem.mediaMetadata.artist?.toString() ?: ""
+                                    )
+                                )
+                                
+                                // Store user preference
+                                Database.insertUserPreference(
+                                    UserPreference(
+                                        id = "${mediaItem.mediaId}_${if (newPreference) "interested" else "not_interested"}",
+                                        songId = mediaItem.mediaId,
+                                        keywords = keywords,
+                                        isInterested = newPreference
+                                    )
+                                )
+                            }
+                        }
+                        onDismiss()
+                    }
+                )
+                
+                MenuEntry(
+                    icon = if (userPreference == false) Icons.Filled.ThumbDown else Icons.Outlined.ThumbDown,
+                    text = "Not Interested",
+                    onClick = {
+                        val newPreference = if (userPreference == false) null else false
+                        userPreference = newPreference
+                        
+                        query {
+                            // Remove existing preferences for this song
+                            Database.deleteUserPreferences(mediaItem.mediaId)
+                            
+                            if (newPreference != null) {
+                                // Get or create keywords for this song
+                                val keywords = extractKeywordsFromSong(mediaItem)
+                                
+                                // Store song keywords if not already stored
+                                Database.insertSongKeywords(
+                                    SongKeywords(
+                                        songId = mediaItem.mediaId,
+                                        keywords = keywords,
+                                        title = mediaItem.mediaMetadata.title?.toString() ?: "",
+                                        artist = mediaItem.mediaMetadata.artist?.toString() ?: ""
+                                    )
+                                )
+                                
+                                // Store user preference
+                                Database.insertUserPreference(
+                                    UserPreference(
+                                        id = "${mediaItem.mediaId}_${if (newPreference) "interested" else "not_interested"}",
+                                        songId = mediaItem.mediaId,
+                                        keywords = keywords,
+                                        isInterested = newPreference
+                                    )
+                                )
+                            }
+                        }
+                        onDismiss()
+                    }
+                )
+
+                MenuEntry(
+                    icon = Icons.Outlined.BugReport,
+                    text = stringResource(id = R.string.bug_report),
                     onClick = {
                         onDismiss()
-                        // TODO: Show feedback bottom sheet
+                        onShowBugReport?.invoke()
                     }
                 )
             }
         }
     }
+}
+
+/**
+ * Extract keywords from song metadata for user preference analysis
+ */
+private fun extractKeywordsFromSong(mediaItem: MediaItem): String {
+    val title = mediaItem.mediaMetadata.title?.toString()?.lowercase() ?: ""
+    val artist = mediaItem.mediaMetadata.artist?.toString()?.lowercase() ?: ""
+    val album = mediaItem.mediaMetadata.albumTitle?.toString()?.lowercase() ?: ""
+    
+    // Extract meaningful keywords from title, artist, and album
+    val keywords = mutableSetOf<String>()
+    
+    // Add artist name as keyword
+    if (artist.isNotBlank()) {
+        keywords.add(artist)
+    }
+    
+    // Extract keywords from title (remove common words)
+    val commonWords = setOf("the", "a", "an", "and", "or", "but", "in", "on", "at", "to", "for", "of", "with", "by", "from", "up", "about", "into", "through", "during", "before", "after", "above", "below", "between", "among", "is", "are", "was", "were", "be", "been", "being", "have", "has", "had", "do", "does", "did", "will", "would", "could", "should", "may", "might", "must", "can", "feat", "ft")
+    
+    title.split(Regex("[\\s\\-_.,;:!?()\\[\\]{}\"']+"))
+        .filter { it.length > 2 && !commonWords.contains(it) }
+        .forEach { keywords.add(it) }
+    
+    // Add album keywords if available
+    if (album.isNotBlank()) {
+        album.split(Regex("[\\s\\-_.,;:!?()\\[\\]{}\"']+"))
+            .filter { it.length > 2 && !commonWords.contains(it) }
+            .forEach { keywords.add(it) }
+    }
+    
+    // Convert to JSON string for storage
+    return keywords.joinToString(",")
 }

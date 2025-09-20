@@ -15,7 +15,7 @@ import androidx.compose.material.icons.outlined.Apps
 import androidx.compose.material.icons.outlined.BugReport
 import androidx.compose.material.icons.outlined.Feedback
 import androidx.compose.material.icons.outlined.MoreVert
-import androidx.compose.material.icons.outlined.Notifications
+
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.DropdownMenu
@@ -171,20 +171,7 @@ fun HomeScreen(
                                 },
                                 contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
                             )
-                            DropdownMenuItem(
-                                text = { 
-                                    Row(verticalAlignment = Alignment.CenterVertically) {
-                                        Icon(Icons.Outlined.Notifications, contentDescription = null, modifier = Modifier.size(18.dp))
-                                        Spacer(Modifier.width(12.dp))
-                                        Text("Inbox", style = MaterialTheme.typography.bodyLarge)
-                                    }
-                                },
-                                onClick = {
-                                    showDropdownMenu = false
-                                    navController.navigate("inbox")
-                                },
-                                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
-                            )
+
                         }
                     }
                 },
@@ -240,7 +227,22 @@ fun HomeScreen(
                     onYouTubePlaylistClick = { browseId -> navController.navigate(route = "playlist/$browseId") }
                 )
 
-                4 -> com.shaadow.tunes.ui.screens.mytunes.MyTunesScreen()
+                4 -> com.shaadow.tunes.ui.screens.mytunes.MyTunesScreen(
+                    onGoToAlbum = { browseId -> navController.navigate(route = "album/$browseId") },
+                    onGoToArtist = { browseId -> navController.navigate(route = "artist/$browseId") },
+                    onBuiltInPlaylist = { index -> navController.navigate(route = "builtInPlaylist/$index") },
+                    onPlaylistClick = { playlist -> navController.navigate(route = "localPlaylist/${playlist.id}") },
+                    onSeeAllSongs = { screenTitle, sectionType -> 
+                        // Navigate to appropriate screen based on section type
+                        when (sectionType) {
+                            "recent" -> navController.navigate("recently_played")
+                            "favorites" -> navController.navigate("liked_songs")
+                            "playlists" -> navController.navigate("playlists")
+                            "songs" -> navController.navigate("songs")
+                            else -> navController.navigate("songs")
+                        }
+                    }
+                )
             }
         }
     }

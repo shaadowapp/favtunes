@@ -5,6 +5,8 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -16,7 +18,6 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.ui.Alignment
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -28,19 +29,12 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.shaadow.tunes.Database
 import com.shaadow.tunes.R
 import com.shaadow.tunes.enums.BuiltInPlaylist
-import com.shaadow.tunes.enums.PlaylistSortBy
-import com.shaadow.tunes.enums.SortOrder
 import com.shaadow.tunes.models.Playlist
 import com.shaadow.tunes.query
-import com.shaadow.tunes.ui.components.SortingHeader
 import com.shaadow.tunes.ui.components.themed.TextFieldDialog
 import com.shaadow.tunes.ui.items.BuiltInPlaylistItem
 import com.shaadow.tunes.ui.items.LocalPlaylistItem
-import com.shaadow.tunes.ui.items.PlaylistItem
 import com.shaadow.tunes.utils.PlaylistTracker
-import com.shaadow.tunes.utils.playlistSortByKey
-import com.shaadow.tunes.utils.playlistSortOrderKey
-import com.shaadow.tunes.utils.rememberPreference
 import com.shaadow.tunes.viewmodels.HomePlaylistsViewModel
 
 @ExperimentalAnimationApi
@@ -52,14 +46,7 @@ fun HomePlaylists(
     onYouTubePlaylistClick: (String) -> Unit = {}
 ) {
     var isCreatingANewPlaylist by rememberSaveable { mutableStateOf(false) }
-    var sortBy by rememberPreference(playlistSortByKey, PlaylistSortBy.Name)
-    var sortOrder by rememberPreference(playlistSortOrderKey, SortOrder.Ascending)
-
     val viewModel: HomePlaylistsViewModel = viewModel()
-
-    LaunchedEffect(sortBy, sortOrder) {
-        viewModel.loadArtists(sortBy, sortOrder)
-    }
 
     if (isCreatingANewPlaylist) {
         TextFieldDialog(
@@ -93,28 +80,38 @@ fun HomePlaylists(
             modifier = Modifier.fillMaxSize()
         ) {
         item(span = { GridItemSpan(2) }) {
-            SortingHeader(
-                sortBy = sortBy,
-                changeSortBy = { sortBy = it },
-                sortByEntries = PlaylistSortBy.entries,
-                sortOrder = sortOrder,
-                toggleSortOrder = { sortOrder = it },
-                size = viewModel.items.size + 2, // +2 for built-in playlists
-                itemCountText = R.plurals.number_of_playlists
-            )
-        }
-
-        // Create new playlist button
-        item {
-            BuiltInPlaylistItem(
-                modifier = Modifier.animateItem(),
-                icon = Icons.Filled.Add,
-                name = stringResource(R.string.new_playlist),
-                onClick = {
-                    isCreatingANewPlaylist = true
-                    PlaylistTracker.trackCreatePlaylistButtonClicked()
+            androidx.compose.foundation.layout.Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Playlists label on the left
+                androidx.compose.material3.Text(
+                    text = "Playlists",
+                    style = androidx.compose.material3.MaterialTheme.typography.headlineSmall,
+                    modifier = Modifier.weight(1f)
+                )
+                
+                // + icon and See all on the right
+                androidx.compose.material3.IconButton(
+                    onClick = {
+                        isCreatingANewPlaylist = true
+                        PlaylistTracker.trackCreatePlaylistButtonClicked()
+                    }
+                ) {
+                    androidx.compose.material3.Icon(
+                        imageVector = Icons.Filled.Add,
+                        contentDescription = stringResource(R.string.new_playlist)
+                    )
                 }
-            )
+                
+                androidx.compose.material3.TextButton(
+                    onClick = { /* TODO: Navigate to all playlists screen */ }
+                ) {
+                    androidx.compose.material3.Text(text = "See all")
+                }
+            }
         }
 
         // Built-in playlists

@@ -12,6 +12,13 @@ import kotlinx.coroutines.flow.first
 
 class HomeSongsViewModel : ViewModel() {
     var items: List<Song> by mutableStateOf(emptyList())
+    var isLoading: Boolean by mutableStateOf(false)
+    var hasMoreItems: Boolean by mutableStateOf(true)
+    
+    private var currentPage = 0
+    private val pageSize = 10
+    private var currentSortBy: SongSortBy = SongSortBy.Title
+    private var currentSortOrder: SortOrder = SortOrder.Ascending
 
     private val defaultSongs = listOf(
         Song(
@@ -53,10 +60,22 @@ class HomeSongsViewModel : ViewModel() {
 
     suspend fun loadSongs(
         sortBy: SongSortBy,
-        sortOrder: SortOrder
+        sortOrder: SortOrder,
+        reset: Boolean = true
     ) {
         try {
-            // Use more efficient query with LIMIT to reduce memory usage
+            if (reset) {
+                currentPage = 0
+                items = emptyList()
+                hasMoreItems = true
+                currentSortBy = sortBy
+                currentSortOrder = sortOrder
+            }
+            
+            if (!hasMoreItems) return
+            
+            isLoading = true
+
             val songsFlow = when (sortBy) {
                 SongSortBy.PlayTime -> when (sortOrder) {
                     SortOrder.Ascending -> Database.songsByPlayTimeAsc()
@@ -76,17 +95,41 @@ class HomeSongsViewModel : ViewModel() {
                 }
             }
 
-            // Collect only the first emission and limit results
-            val recentSongs = songsFlow.first().take(50) // Increased limit but still reasonable
-
-            items = if (recentSongs.isEmpty()) {
-                defaultSongs.take(5)
-            } else {
-                recentSongs
+            val allSongs = songsFlow.first()
+            val startIndex = currentPage * pageSize
+            val endIndex = minOf(startIndex + pageSize, allSongs.size)
+            
+            if (startIndex >= allSongs.size) {
+                hasMoreItems = false
+                isLoading = false
+                return
             }
+            
+            val newSongs = allSongs.subList(startIndex, endIndex)
+            
+            items = if (reset) {
+                if (newSongs.isEmpty()) defaultSongs.take(5) else newSongs
+            } else {
+                items + newSongs
+            }
+            
+            hasMoreItems = endIndex < allSongs.size
+            currentPage++
+            isLoading = false
+            
         } catch (e: Exception) {
             android.util.Log.e("HomeSongsViewModel", "Error loading songs", e)
-            items = defaultSongs.take(5)
+            if (reset) {
+                items = defaultSongs.take(5)
+            }
+            isLoading = false
+            hasMoreItems = false
+        }
+    }
+    
+    suspend fun loadMoreSongs() {
+        if (!isLoading && hasMoreItems) {
+            loadSongs(currentSortBy, currentSortOrder, reset = false)
         }
     }
 }

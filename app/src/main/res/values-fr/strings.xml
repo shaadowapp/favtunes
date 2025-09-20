@@ -206,4 +206,8 @@
     <string name="list_gestures_description">Activer les gestes pour mettre en file d\'attente ou supprimer des titres</string>
     <string name="copy">Copier</string>
     <string name="error_log">Journal des erreurs</string>
+    <string name="bug_report">Rapport de bug</string>
+    <string name="recommended_for_you">Recommandé pour vous</string>
+    <string name="delete">Supprimer</string>
+    <string name="my_tunes">Mes morceaux</string>
 </resources>

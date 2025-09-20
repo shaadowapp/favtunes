@@ -2,11 +2,18 @@ package com.shaadow.tunes.ui.screens.localplaylist
 
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -50,6 +57,7 @@ import com.shaadow.tunes.ui.components.themed.InPlaylistMediaItemMenu
 import com.shaadow.tunes.ui.items.LocalSongItem
 import com.shaadow.tunes.utils.asMediaItem
 import com.shaadow.tunes.utils.enqueue
+import com.shaadow.tunes.utils.forcePlay
 import com.shaadow.tunes.utils.forcePlayAtIndex
 import com.shaadow.tunes.utils.forcePlayFromBeginning
 import kotlinx.coroutines.flow.filterNotNull
@@ -144,6 +152,36 @@ fun LocalPlaylistSongs(
 
             item(key = "spacer") {
                 Spacer(modifier = Modifier.height(16.dp))
+            }
+
+            if (playlistSongs.isEmpty()) {
+                item(key = "empty_message") {
+                    androidx.compose.foundation.layout.Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        androidx.compose.material3.Text(
+                            text = "This playlist is empty",
+                            style = androidx.compose.material3.MaterialTheme.typography.headlineSmall,
+                            color = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(16.dp)
+                        )
+                        androidx.compose.material3.Text(
+                            text = "Discover some music to add to your playlist",
+                            style = androidx.compose.material3.MaterialTheme.typography.bodyMedium,
+                            color = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(bottom = 24.dp)
+                        )
+                    }
+                }
+                
+                item(key = "recommended_songs") {
+                    RecommendedSongsForEmptyPlaylist(
+                        playlistId = playlistId,
+                        onGoToAlbum = onGoToAlbum,
+                        onGoToArtist = onGoToArtist
+                    )
+                }
             }
 
             itemsIndexed(
@@ -247,6 +285,85 @@ fun LocalPlaylistSongs(
                                 }
                             }
                         )
+                    }
+                }
+            }
+        }
+    }
+}
+@ExperimentalAnimationApi
+@ExperimentalFoundationApi
+@Composable
+private fun RecommendedSongsForEmptyPlaylist(
+    playlistId: Long,
+    onGoToAlbum: (String) -> Unit,
+    onGoToArtist: (String) -> Unit
+) {
+    val binder = LocalPlayerServiceBinder.current
+    val menuState = LocalMenuState.current
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val quickPicksViewModel: com.shaadow.tunes.viewmodels.QuickPicksViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+    
+    androidx.compose.runtime.LaunchedEffect(Unit) {
+        quickPicksViewModel.initialize(context)
+    }
+    
+    Column(
+        modifier = Modifier.padding(horizontal = 16.dp)
+    ) {
+        Text(
+            text = "Recommended for You",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold,
+            modifier = Modifier.padding(bottom = 12.dp)
+        )
+        
+        quickPicksViewModel.relatedPageResult?.getOrNull()?.let { related ->
+            LazyRow(
+                horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(12.dp)
+            ) {
+                items(related.songs?.take(10) ?: emptyList()) { song ->
+                    com.shaadow.tunes.ui.items.SongItem(
+                        song = song,
+                        modifier = Modifier.width(250.dp),
+                        onClick = {
+                            binder?.stopRadio()
+                            binder?.player?.forcePlay(song.asMediaItem)
+                        },
+                        onLongClick = {
+                            menuState.display {
+                                com.shaadow.tunes.ui.components.themed.NonQueuedMediaItemMenu(
+                                    mediaItem = song.asMediaItem,
+                                    onDismiss = menuState::hide,
+                                    onGoToAlbum = onGoToAlbum,
+                                    onGoToArtist = onGoToArtist
+                                )
+                            }
+                        }
+                    )
+                }
+            }
+        } ?: run {
+            // Loading state
+            LazyRow(
+                horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(12.dp)
+            ) {
+                items(5) {
+                    androidx.compose.material3.Card(
+                        modifier = Modifier
+                            .width(250.dp)
+                            .height(64.dp)
+                    ) {
+                        androidx.compose.foundation.layout.Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = androidx.compose.ui.Alignment.Center
+                        ) {
+                            Text(
+                                text = "Loading recommendations...",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                     }
                 }
             }

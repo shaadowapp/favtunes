@@ -200,4 +200,8 @@
     <string name="list_gestures_description">Activa gestos para añadir a la cola o eliminar las canciones</string>
     <string name="copy">Copiar</string>
     <string name="error_log">Registro de errores</string>
+    <string name="bug_report">Reporte de errores</string>
+    <string name="recommended_for_you">Recomendado para ti</string>
+    <string name="delete">Eliminar</string>
+    <string name="my_tunes">Mis melodías</string>
 </resources>
