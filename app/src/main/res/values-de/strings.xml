@@ -200,4 +200,6 @@
     <string name="recommended_for_you">Für Sie empfohlen</string>
     <string name="delete">Löschen</string>
     <string name="my_tunes">Meine Musik</string>
+    <string name="shake_detection">Schütteln für Fehlerbericht</string>
+    <string name="shake_detection_description">Schütteln Sie Ihr Gerät, um schnell Fehler oder Probleme zu melden</string>
 </resources>

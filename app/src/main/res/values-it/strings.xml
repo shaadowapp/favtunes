@@ -203,4 +203,6 @@
     <string name="recommended_for_you">Consigliato per te</string>
     <string name="delete">Elimina</string>
     <string name="my_tunes">Le mie melodie</string>
+    <string name="shake_detection">Scuoti per segnalare bug</string>
+    <string name="shake_detection_description">Scuoti il dispositivo per segnalare rapidamente bug o problemi</string>
 </resources>

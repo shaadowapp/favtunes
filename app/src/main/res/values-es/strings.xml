@@ -204,4 +204,6 @@
     <string name="recommended_for_you">Recomendado para ti</string>
     <string name="delete">Eliminar</string>
     <string name="my_tunes">Mis melodías</string>
+    <string name="shake_detection">Agitar para reportar error</string>
+    <string name="shake_detection_description">Agita tu dispositivo para reportar rápidamente errores o problemas</string>
 </resources>

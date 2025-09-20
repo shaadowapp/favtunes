@@ -209,4 +209,6 @@
     <string name="clear" translatable="false">Clear</string>
     <string name="delete">Delete</string>
     <string name="my_tunes">My Tunes</string>
+    <string name="shake_detection">Shake to Report Bug</string>
+    <string name="shake_detection_description">Shake your device to quickly report bugs or issues</string>
 </resources>

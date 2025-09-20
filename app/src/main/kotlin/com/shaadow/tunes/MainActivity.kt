@@ -20,12 +20,15 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.CompositionLocalProvider
@@ -72,6 +75,8 @@ import com.shaadow.tunes.utils.asMediaItem
 import com.shaadow.tunes.utils.forcePlay
 import com.shaadow.tunes.utils.intent
 import com.shaadow.tunes.utils.rememberShakeDetector
+import com.shaadow.tunes.utils.rememberPreference
+import com.shaadow.tunes.utils.shakeDetectionEnabledKey
 import com.shaadow.tunes.ui.components.BugReportBottomSheet
 import com.shaadow.tunes.suggestion.SimpleSuggestionIntegration
 import com.shaadow.tunes.Database
@@ -113,6 +118,7 @@ class MainActivity : ComponentActivity() {
     private var data by mutableStateOf<Uri?>(null)
     private var showOnboarding by mutableStateOf(false)
     private var showGlobalBugReportSheet by mutableStateOf(false)
+    private var showShakeConfirmationDialog by mutableStateOf(false)
     private lateinit var suggestionIntegration: SimpleSuggestionIntegration
 
     override fun onStart() {
@@ -201,9 +207,14 @@ class MainActivity : ComponentActivity() {
                 skipHiddenState = false
             )
             
-            // Global shake detection for bug reporting
-            rememberShakeDetector {
-                showGlobalBugReportSheet = true
+            // Shake detection preference
+            val shakeDetectionEnabled by rememberPreference(shakeDetectionEnabledKey, defaultValue = true)
+            
+            // Global shake detection for bug reporting (only if enabled)
+            if (shakeDetectionEnabled) {
+                rememberShakeDetector {
+                    showShakeConfirmationDialog = true
+                }
             }
 
             AppTheme {
@@ -261,6 +272,32 @@ class MainActivity : ComponentActivity() {
                         }
                         }
                     }
+                }
+                
+                // Shake confirmation dialog
+                if (showShakeConfirmationDialog) {
+                    AlertDialog(
+                        onDismissRequest = { showShakeConfirmationDialog = false },
+                        title = { Text("Report a Bug?") },
+                        text = { Text("Did you shake your device to report a bug? This will open the bug report form.") },
+                        confirmButton = {
+                            TextButton(
+                                onClick = {
+                                    showShakeConfirmationDialog = false
+                                    showGlobalBugReportSheet = true
+                                }
+                            ) {
+                                Text("Yes, Report Bug")
+                            }
+                        },
+                        dismissButton = {
+                            TextButton(
+                                onClick = { showShakeConfirmationDialog = false }
+                            ) {
+                                Text("Cancel")
+                            }
+                        }
+                    )
                 }
                 
                 // Global Bug Report Sheet

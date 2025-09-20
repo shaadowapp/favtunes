@@ -21,6 +21,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Battery0Bar
 import androidx.compose.material.icons.outlined.DirectionsCar
 import androidx.compose.material.icons.outlined.Stars
+import androidx.compose.material.icons.outlined.Vibration
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -43,6 +44,7 @@ import com.shaadow.tunes.utils.isAtLeastAndroid6
 import com.shaadow.tunes.utils.isIgnoringBatteryOptimizations
 import com.shaadow.tunes.utils.isInvincibilityEnabledKey
 import com.shaadow.tunes.utils.rememberPreference
+import com.shaadow.tunes.utils.shakeDetectionEnabledKey
 import com.shaadow.tunes.utils.toast
 import androidx.core.net.toUri
 
@@ -80,6 +82,7 @@ fun OtherSettings() {
     }
 
     var isInvincibilityEnabled by rememberPreference(isInvincibilityEnabledKey, false)
+    var isShakeDetectionEnabled by rememberPreference(shakeDetectionEnabledKey, true)
     var isIgnoringBatteryOptimizations by remember { mutableStateOf(context.isIgnoringBatteryOptimizations) }
     val activityResultLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
@@ -98,6 +101,16 @@ fun OtherSettings() {
             )
     ) {
         Spacer(modifier = Modifier.height(52.dp))
+
+        SwitchSettingEntry(
+            title = stringResource(id = R.string.shake_detection),
+            text = stringResource(id = R.string.shake_detection_description),
+            icon = Icons.Outlined.Vibration,
+            isChecked = isShakeDetectionEnabled,
+            onCheckedChange = { isShakeDetectionEnabled = it }
+        )
+
+        Spacer(modifier = Modifier.height(Dimensions.spacer))
 
         SwitchSettingEntry(
             title = stringResource(id = R.string.android_auto),

@@ -7,6 +7,7 @@ import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
+import kotlin.math.abs
 import kotlin.math.sqrt
 
 class ShakeDetector(
@@ -21,13 +22,20 @@ class ShakeDetector(
     private var lastZ = 0f
     
     companion object {
-        private const val SHAKE_THRESHOLD = 2200
-        private const val UPDATE_THRESHOLD = 40
-        private const val MIN_DIRECTION_CHANGES = 3
+        // Properly balanced thresholds
+        private const val SHAKE_THRESHOLD = 12.0f // Higher threshold to prevent light touches
+        private const val UPDATE_THRESHOLD = 100 // Reasonable update rate
+        private const val MIN_DIRECTION_CHANGES = 3 // Need proper back-and-forth motion
+        private const val COOLDOWN_PERIOD = 3000 // 3 second cooldown between shakes
+        private const val MIN_SHAKE_DURATION = 500 // Minimum 500ms of sustained shaking
+        private const val MIN_CONSECUTIVE_READINGS = 5 // Need sustained motion
     }
     
     private var directionChanges = 0
-    private var lastDirection = 0 // -1 for left, 1 for right, 0 for neutral
+    private var lastDirection = 0 // -1 for negative, 1 for positive, 0 for neutral
+    private var shakeStartTime = 0L
+    private var lastShakeTime = 0L
+    private var consecutiveShakeReadings = 0
     
     fun start(context: Context) {
         sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
@@ -37,6 +45,19 @@ class ShakeDetector(
     
     fun stop() {
         sensorManager?.unregisterListener(this)
+        resetShakeDetection()
+    }
+    
+    private fun resetShakeDetection() {
+        directionChanges = 0
+        lastDirection = 0
+        shakeStartTime = 0L
+        consecutiveShakeReadings = 0
+    }
+    
+    private fun calculateAcceleration(x: Float, y: Float, z: Float): Float {
+        // Calculate total acceleration magnitude
+        return sqrt(x * x + y * y + z * z)
     }
     
     override fun onSensorChanged(event: SensorEvent?) {
@@ -44,41 +65,83 @@ class ShakeDetector(
             val currentTime = System.currentTimeMillis()
             
             if (currentTime - lastUpdate > UPDATE_THRESHOLD) {
-                val diffTime = currentTime - lastUpdate
                 lastUpdate = currentTime
                 
                 val x = event.values[0]
-                val y = event.values[1]
+                val y = event.values[1] 
                 val z = event.values[2]
                 
-                val deltaX = x - lastX
-                val deltaY = y - lastY
-                val deltaZ = z - lastZ
+                // Calculate total acceleration
+                val acceleration = calculateAcceleration(x, y, z)
                 
-                val speed = sqrt((deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ).toDouble()) / diffTime * 10000
+                // Check if we're in cooldown period
+                if (lastShakeTime > 0 && (currentTime - lastShakeTime) < COOLDOWN_PERIOD) {
+                    lastX = x
+                    lastY = y
+                    lastZ = z
+                    return
+                }
                 
-                // Check for horizontal movement pattern (left-right or right-left)
-                if (kotlin.math.abs(deltaX) > kotlin.math.abs(deltaY) && kotlin.math.abs(deltaX) > kotlin.math.abs(deltaZ)) {
-                    val currentDirection = if (deltaX > 0.5f) 1 else if (deltaX < -0.5f) -1 else 0
+                // Detect shake motion
+                if (acceleration > SHAKE_THRESHOLD) {
+                    consecutiveShakeReadings++
                     
-                    if (currentDirection != 0 && currentDirection != lastDirection && lastDirection != 0) {
+                    if (shakeStartTime == 0L) {
+                        shakeStartTime = currentTime
+                    }
+                    
+                    // Detect direction changes for shake pattern
+                    val deltaX = x - lastX
+                    val deltaY = y - lastY
+                    val deltaZ = z - lastZ
+                    
+                    // Focus on horizontal movement (X-axis) as it's most common for shaking
+                    val currentDirection = when {
+                        abs(deltaX) > abs(deltaY) && abs(deltaX) > abs(deltaZ) -> {
+                            if (deltaX > 2.0f) 1 else if (deltaX < -2.0f) -1 else 0
+                        }
+                        abs(deltaY) > abs(deltaZ) -> {
+                            if (deltaY > 2.0f) 2 else if (deltaY < -2.0f) -2 else 0
+                        }
+                        else -> {
+                            if (deltaZ > 2.0f) 3 else if (deltaZ < -2.0f) -3 else 0
+                        }
+                    }
+                    
+                    // Count direction changes (back-and-forth motion)
+                    if (currentDirection != 0 && lastDirection != 0 && 
+                        ((currentDirection > 0 && lastDirection < 0) || (currentDirection < 0 && lastDirection > 0)) &&
+                        abs(currentDirection) == abs(lastDirection)) {
                         directionChanges++
                     }
                     
                     if (currentDirection != 0) {
                         lastDirection = currentDirection
                     }
+                    
+                    // Check if we have a valid shake
+                    val shakeDuration = currentTime - shakeStartTime
+                    if (directionChanges >= MIN_DIRECTION_CHANGES && 
+                        consecutiveShakeReadings >= 3 && 
+                        shakeDuration >= MIN_SHAKE_DURATION) {
+                        onShake()
+                        lastShakeTime = currentTime
+                        resetShakeDetection()
+                    }
+                } else {
+                    // Reset if no shake motion detected for a while
+                    if (consecutiveShakeReadings > 0) {
+                        consecutiveShakeReadings--
+                    }
+                    
+                    if (acceleration < 5.0f) {
+                        resetShakeDetection()
+                    }
                 }
                 
-                if (speed > SHAKE_THRESHOLD && directionChanges >= MIN_DIRECTION_CHANGES) {
-                    onShake()
-                    directionChanges = 0 // Reset after successful shake
-                }
-                
-                // Reset direction changes if no significant movement for a while
-                if (speed < 200) {
-                    directionChanges = 0
-                    lastDirection = 0
+                // Auto-reset if shake attempt takes too long (2 seconds)
+                if (shakeStartTime > 0 && (currentTime - shakeStartTime) > 2000) {
+                    resetShakeDetection()
                 }
                 
                 lastX = x

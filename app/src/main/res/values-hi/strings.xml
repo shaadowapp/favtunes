@@ -184,4 +184,6 @@
     <string name="recommended_for_you">Aapke liye recommend kiye gaye</string>
     <string name="delete">Delete karo</string>
     <string name="my_tunes">Mere Tunes</string>
+    <string name="shake_detection">Bug report ke liye hilao</string>
+    <string name="shake_detection_description">Bugs ya problems report karne ke liye apna device hilao</string>
 </resources>
